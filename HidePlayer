@@ -1,0 +1,139 @@
+-- Hide Player Buat Counter Sky destroyer Dari orang lain! 
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Hidden = {}
+local HideAll = false
+
+-- GUI
+local sg = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+sg.Name = "CleanHide"
+sg.ResetOnSpawn = false
+
+local frame = Instance.new("Frame", sg)
+frame.Size = UDim2.new(0, 260, 0, 360)
+frame.Position = UDim2.new(0, 15, 0.3, 0)
+frame.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+local corner = Instance.new("UICorner", frame)
+corner.CornerRadius = UDim.new(0, 8)
+
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 36)
+title.BackgroundTransparency = 1
+title.Text = "hide player"
+title.TextColor3 = Color3.fromRGB(220, 220, 220)
+title.Font = Enum.Font.GothamMedium
+title.TextSize = 15
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Position = UDim2.new(0, 12, 0, 0)
+
+-- Hide All (simple banget)
+local allbtn = Instance.new("TextButton", frame)
+allbtn.Size = UDim2.new(1, -24, 0, 36)
+allbtn.Position = UDim2.new(0, 12, 1, -48)
+allbtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+allbtn.Text = "hide all: off"
+allbtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+allbtn.Font = Enum.Font.Gotham
+allbtn.TextSize = 14
+
+local allcorner = Instance.new("UICorner", allbtn)
+allcorner.CornerRadius = UDim.new(0, 6)
+
+-- Scroll list
+local scroll = Instance.new("ScrollingFrame", frame)
+scroll.Size = UDim2.new(1, -24, 1, -100)
+scroll.Position = UDim2.new(0, 12, 0, 44)
+scroll.BackgroundTransparency = 1
+scroll.ScrollBarThickness = 3
+scroll.ScrollBarImageColor3 = Color3.fromRGB(80, 80, 80)
+
+local layout = Instance.new("UIListLayout", scroll)
+layout.Padding = UDim.new(0, 4)
+layout.SortOrder = Enum.SortOrder.Name
+
+-- Fungsi hide (same kayak sebelumnya, cuma lebih ringkas)
+local function hide(plr, yes)
+    if not plr.Character then return end
+    for _, v in plr.Character:GetDescendants() do
+        if v:IsA("BasePart") or v:IsA("MeshPart") or v:IsA("Decal") then
+            v.Transparency = yes and 0 or 1
+        elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
+            v.Enabled = yes
+        end
+    end
+    local head = plr.Character:FindFirstChild("Head")
+    if head then
+        for _, g in head:GetChildren() do
+            if g:IsA("BillboardGui") then g.Enabled = yes end
+        end
+    end
+end
+
+-- Tombol
+local function add(plr)
+    if plr == LocalPlayer or scroll:FindFirstChild(plr.Name) then return end
+    
+    local btn = Instance.new("TextButton", scroll)
+    btn.Name = plr.Name
+    btn.Size = UDim2.new(1, 0, 0, 32)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.Text = plr.DisplayName
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.Font = Enum.Font.Gotham
+    btn.TextSize = 14
+    btn.TextXAlignment = Enum.TextXAlignment.Left
+    btn.Position = UDim2.new(0, 8, 0, 0)
+
+    local c = Instance.new("UICorner", btn)
+    c.CornerRadius = UDim.new(0, 5)
+
+    btn.MouseButton1Click:Connect(function()
+        if HideAll then return end
+        Hidden[plr] = not Hidden[plr]
+        hide(plr, not Hidden[plr])
+        btn.BackgroundColor3 = Hidden[plr] and Color3.fromRGB(80, 30, 30) or Color3.fromRGB(35, 35, 35)
+    end)
+end
+
+-- Hide all toggle
+allbtn.MouseButton1Click:Connect(function()
+    HideAll = not HideAll
+    allbtn.Text = "hide all: " .. (HideAll and "on" or "off")
+    allbtn.BackgroundColor3 = HideAll and Color3.fromRGB(100, 30, 30) or Color3.fromRGB(40, 40, 40)
+    
+    for _, plr in Players:GetPlayers() do
+        if plr ~= LocalPlayer then
+            hide(plr, not HideAll)
+            local b = scroll:FindFirstChild(plr.Name)
+            if b then
+                b.BackgroundColor3 = HideAll and Color3.fromRGB(80, 30, 30) or Color3.fromRGB(35, 35, 35)
+            end
+        end
+    end
+end)
+
+-- Event
+Players.PlayerAdded:Connect(function(p)
+    p.CharacterAdded:Wait()
+    task.wait(1)
+    add(p)
+    if HideAll or Hidden[p] then hide(p, false) end
+end)
+
+Players.PlayerRemoving:Connect(function(p)
+    if scroll:FindFirstChild(p.Name) then
+        scroll[p.Name]:Destroy()
+    end
+end)
+
+-- Init
+for _, p in Players:GetPlayers() do
+    if p ~= LocalPlayer then add(p) end
+end
+
+print("Larutan Cap Kaki 3")
