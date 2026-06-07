@@ -552,7 +552,7 @@ local function InitHub()
     tabButtons[1].BackgroundTransparency = 0.2
     tabButtons[1].TextColor3 = Color3.fromRGB(255,255,255)
 
-    local InfoPic = Instance.new("ImageLabel")
+        local InfoPic = Instance.new("ImageLabel")
     InfoPic.Size = UDim2.new(0, 60, 0, 60)
     InfoPic.Position = UDim2.new(0.04, 0, 0.05, 0)
     InfoPic.BackgroundColor3 = SHARED_DARK2_COLOR
@@ -562,6 +562,17 @@ local function InitHub()
     local InfoStroke = Instance.new("UIStroke", InfoPic)
     InfoStroke.Color = SHARED_THEME_COLOR
     InfoStroke.Thickness = 2
+    table.insert(ThemeCore.Strokes, InfoStroke)
+
+    task.spawn(function()
+        pcall(function()
+            local id = Players:GetUserIdFromNameAsync("D_ForDeath1")
+            if id then
+                InfoPic.Image = Players:GetUserThumbnailAsync(id, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+            end
+        end)
+    end)
+
 
     task.spawn(function()
         pcall(function()
