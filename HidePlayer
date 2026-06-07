@@ -1417,7 +1417,7 @@ local function InitHub()
                     local b = PlayerScroll:FindFirstChild(plr.Name)
                     if b then
                         b.BackgroundColor3 = HideAll and SHARED_THEME_COLOR or SHARED_DARK_COLOR
-                        b.TextColor3 = HideAll and Color3.new(1,1,1) or Color3.fromRGB(220, 220, 220)
+                        b.TextColor3 = HideAll honey Color3.new(1,1,1) or Color3.fromRGB(220, 220, 220)
                     end
                 end
             end
@@ -1487,6 +1487,94 @@ local function InitHub()
     end
 
     do
+        local antiFlingBtn = Instance.new("TextButton")
+        antiFlingBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiFlingBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
+        antiFlingBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiFlingBtn.Text = "Anti Fling (OFF)"
+        antiFlingBtn.TextColor3 = Color3.new(1,1,1)
+        antiFlingBtn.Font = Enum.Font.Gotham
+        antiFlingBtn.TextSize = 15
+        antiFlingBtn.Parent = tabProtect
+        Instance.new("UICorner", antiFlingBtn).CornerRadius = UDim.new(0,8)
+
+        local antiFlingActive = false
+        table.insert(ThemeCore.Toggles, {Btn = antiFlingBtn, GetState = function() return antiFlingActive end})
+        
+        local antiFlingConnection
+
+        antiFlingBtn.MouseButton1Click:Connect(function()
+            antiFlingActive = not antiFlingActive
+            antiFlingBtn.Text = "Anti Fling (" .. (antiFlingActive and "ON" or "OFF") .. ")"
+            antiFlingBtn.BackgroundColor3 = antiFlingActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+
+            if antiFlingActive then
+                antiFlingConnection = RS.Stepped:Connect(function()
+                    if lp.Character then
+                        for _, player in ipairs(Players:GetPlayers()) do
+                            if player ~= lp and player.Character then
+                                for _, part in ipairs(player.Character:GetDescendants()) do
+                                    if part:IsA("BasePart") then part.CanCollide = false end
+                                end
+                            end
+                        end
+                    end
+                end)
+            else
+                if antiFlingConnection then antiFlingConnection:Disconnect(); antiFlingConnection = nil end
+            end
+        end)
+    end
+
+    do
+        local killbrickBtn = Instance.new("TextButton")
+        killbrickBtn.Size = UDim2.new(0, 165, 0, 35)
+        killbrickBtn.Position = UDim2.new(0.52, 0, 0.28, 0)
+        killbrickBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        killbrickBtn.Text = "Killbrick Toggle (OFF)"
+        killbrickBtn.TextColor3 = Color3.new(1,1,1)
+        killbrickBtn.Font = Enum.Font.Gotham
+        killbrickBtn.TextSize = 15
+        killbrickBtn.Parent = tabProtect
+        Instance.new("UICorner", killbrickBtn).CornerRadius = UDim.new(0,8)
+
+        local laserNote = Instance.new("TextLabel")
+        laserNote.Size = UDim2.new(0, 165, 0, 20)
+        laserNote.Position = UDim2.new(0.52, 0, 0.28, 40)
+        laserNote.BackgroundTransparency = 1
+        laserNote.Text = "Note:only laser"
+        laserNote.TextColor3 = Color3.fromRGB(200, 200, 200)
+        laserNote.Font = Enum.Font.Gotham
+        laserNote.TextSize = 12
+        laserNote.TextXAlignment = Enum.TextXAlignment.Center
+        laserNote.Parent = tabProtect
+
+        local killbrickActive = false
+        table.insert(ThemeCore.Toggles, {Btn = killbrickBtn, GetState = function() return killbrickActive end})
+
+        killbrickBtn.MouseButton1Click:Connect(function()
+            killbrickActive = not killbrickActive
+            killbrickBtn.Text = "Killbrick Toggle (" .. (killbrickActive and "ON" or "OFF") .. ")"
+            killbrickBtn.BackgroundColor3 = killbrickActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        task.spawn(function()
+            while true do
+                task.wait()
+                if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                    local hrp = lp.Character.HumanoidRootPart
+                    local parts = workspace:GetPartBoundsInRadius(hrp.Position, 10)
+                    for _, part in ipairs(parts) do
+                        if part:IsA("BasePart") then
+                            part.CanTouch = not killbrickActive
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    do
         local antiVoidBtn = Instance.new("TextButton")
         antiVoidBtn.Size = UDim2.new(0, 165, 0, 35)
         antiVoidBtn.Position = UDim2.new(0.04, 0, 0.28, 0) 
@@ -1525,46 +1613,6 @@ local function InitHub()
             else
                 if antiVoidConnection then antiVoidConnection:Disconnect(); antiVoidConnection = nil end
                 positions = {}
-            end
-        end)
-    end
-
-    do
-        local antiFlingBtn = Instance.new("TextButton")
-        antiFlingBtn.Size = UDim2.new(0, 165, 0, 35)
-        antiFlingBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
-        antiFlingBtn.BackgroundColor3 = SHARED_DARK_COLOR
-        antiFlingBtn.Text = "Anti Fling (OFF)"
-        antiFlingBtn.TextColor3 = Color3.new(1,1,1)
-        antiFlingBtn.Font = Enum.Font.Gotham
-        antiFlingBtn.TextSize = 15
-        antiFlingBtn.Parent = tabProtect
-        Instance.new("UICorner", antiFlingBtn).CornerRadius = UDim.new(0,8)
-
-        local antiFlingActive = false
-        table.insert(ThemeCore.Toggles, {Btn = antiFlingBtn, GetState = function() return antiFlingActive end})
-        
-        local antiFlingConnection
-
-        antiFlingBtn.MouseButton1Click:Connect(function()
-            antiFlingActive = not antiFlingActive
-            antiFlingBtn.Text = "Anti Fling (" .. (antiFlingActive and "ON" or "OFF") .. ")"
-            antiFlingBtn.BackgroundColor3 = antiFlingActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
-
-            if antiFlingActive then
-                antiFlingConnection = RS.Stepped:Connect(function()
-                    if lp.Character then
-                        for _, player in ipairs(Players:GetPlayers()) do
-                            if player ~= lp and player.Character then
-                                for _, part in ipairs(player.Character:GetDescendants()) do
-                                    if part:IsA("BasePart") then part.CanCollide = false end
-                                end
-                            end
-                        end
-                    end
-                end)
-            else
-                if antiFlingConnection then antiFlingConnection:Disconnect(); antiFlingConnection = nil end
             end
         end)
     end
