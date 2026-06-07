@@ -1,3 +1,21 @@
+local function detectExecutor()
+    if identifyexecutor then
+        return identifyexecutor()
+    elseif syn then
+        return "Synapse X"
+    elseif KRNL_LOADED then
+        return "KRNL"
+    elseif is_sirhurt_closure then
+        return "SirHurt"
+    elseif pebc_execute then
+        return "ProtoSmasher"
+    elseif getexecutorname then
+        return getexecutorname()
+    else
+        return "Executor Desconhecido"
+    end
+end
+
 local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 local Debris = game:GetService("Debris")
@@ -225,9 +243,9 @@ local function InitHub()
     end)
 
     local Nick = Instance.new("TextLabel")
-    Nick.Size = UDim2.new(0.4,0,0.05,0)
-    Nick.Position = UDim2.new(0.5,0,0.53,0)
-    Nick.AnchorPoint = Vector2.new(0.5,0)
+    Nick.Size = UDim2.new(0.4, 0, 0.05, 0)
+    Nick.Position = UDim2.new(0.5, 0, 0.53, 0) -- Posisi User
+    Nick.AnchorPoint = Vector2.new(0.5, 0)
     Nick.BackgroundTransparency = 1
     Nick.Text = "User: "..lp.Name
     Nick.Font = Enum.Font.GothamBold
@@ -235,12 +253,24 @@ local function InitHub()
     Nick.TextColor3 = RED_MAIN
     Nick.Parent = Frame
 
+    -- Tambahkan kode ini untuk Age di bawah User
+    local AgeLabel = Instance.new("TextLabel")
+    AgeLabel.Size = UDim2.new(0.4, 0, 0.04, 0)
+    AgeLabel.Position = UDim2.new(0.5, 0, 0.58, 0) -- Ditaruh di bawah Nick (0.53 + 0.05)
+    AgeLabel.AnchorPoint = Vector2.new(0.5, 0)
+    AgeLabel.BackgroundTransparency = 1
+    AgeLabel.Text = "Age: "..tostring(lp.AccountAge).." Days"
+    AgeLabel.Font = Enum.Font.Gotham
+    AgeLabel.TextScaled = true
+    AgeLabel.TextColor3 = RED_MAIN -- Warna merah sesuai permintaan
+    AgeLabel.Parent = Frame
+
     local Sub = Instance.new("TextLabel")
-    Sub.Size = UDim2.new(0.6,0,0.05,0)
-    Sub.Position = UDim2.new(0.5,0,0.6,0)
-    Sub.AnchorPoint = Vector2.new(0.5,0)
+    Sub.Size = UDim2.new(0.6, 0, 0.05, 0)
+    Sub.Position = UDim2.new(0.5, 0, 0.63, 0) -- Diubah posisinya agar tidak bertumpuk
+    Sub.AnchorPoint = Vector2.new(0.5, 0)
     Sub.BackgroundTransparency = 1
-    Sub.Text = "Memuat Fitur..."
+    Sub.Text = "Loading..."
     Sub.Font = Enum.Font.Gotham
     Sub.TextScaled = true
     Sub.TextColor3 = RED_MID
@@ -576,6 +606,27 @@ local function InitHub()
     InfoName.TextXAlignment = Enum.TextXAlignment.Left
     InfoName.Parent = tabInfo
     table.insert(ThemeCore.Texts, InfoName)
+
+    local InfoLine = Instance.new("Frame")
+    InfoLine.Size = UDim2.new(0.92, 0, 0, 2)
+    InfoLine.Position = UDim2.new(0.04, 0, 0.05, 75)
+    InfoLine.BackgroundColor3 = SHARED_THEME_COLOR
+    InfoLine.BorderSizePixel = 0
+    InfoLine.Parent = tabInfo
+    table.insert(ThemeCore.Lines, InfoLine)
+
+    local executorName = detectExecutor()
+
+    local ExecLabel = Instance.new("TextLabel")
+    ExecLabel.Size = UDim2.new(0.92, 0, 0, 20)
+    ExecLabel.Position = UDim2.new(0.04, 0, 0.05, 85)
+    ExecLabel.BackgroundTransparency = 1
+    ExecLabel.Text = "Executor: " .. tostring(executorName)
+    ExecLabel.TextColor3 = Color3.new(1, 1, 1)
+    ExecLabel.Font = Enum.Font.GothamBold
+    ExecLabel.TextSize = 14
+    ExecLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ExecLabel.Parent = tabInfo
 
     local ToggleGui = Instance.new("ScreenGui")
     ToggleGui.Name = "IndoHubXToggle"
