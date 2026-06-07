@@ -243,9 +243,9 @@ local function InitHub()
     end)
 
     local Nick = Instance.new("TextLabel")
-    Nick.Size = UDim2.new(0.4, 0, 0.05, 0)
-    Nick.Position = UDim2.new(0.5, 0, 0.53, 0) -- Posisi User
-    Nick.AnchorPoint = Vector2.new(0.5, 0)
+    Nick.Size = UDim2.new(0.4,0,0.05,0)
+    Nick.Position = UDim2.new(0.5,0,0.53,0)
+    Nick.AnchorPoint = Vector2.new(0.5,0)
     Nick.BackgroundTransparency = 1
     Nick.Text = "User: "..lp.Name
     Nick.Font = Enum.Font.GothamBold
@@ -253,24 +253,12 @@ local function InitHub()
     Nick.TextColor3 = RED_MAIN
     Nick.Parent = Frame
 
-    -- Tambahkan kode ini untuk Age di bawah User
-    local AgeLabel = Instance.new("TextLabel")
-    AgeLabel.Size = UDim2.new(0.4, 0, 0.04, 0)
-    AgeLabel.Position = UDim2.new(0.5, 0, 0.58, 0) -- Ditaruh di bawah Nick (0.53 + 0.05)
-    AgeLabel.AnchorPoint = Vector2.new(0.5, 0)
-    AgeLabel.BackgroundTransparency = 1
-    AgeLabel.Text = "Age: "..tostring(lp.AccountAge).." Days"
-    AgeLabel.Font = Enum.Font.Gotham
-    AgeLabel.TextScaled = true
-    AgeLabel.TextColor3 = RED_MAIN -- Warna merah sesuai permintaan
-    AgeLabel.Parent = Frame
-
     local Sub = Instance.new("TextLabel")
-    Sub.Size = UDim2.new(0.6, 0, 0.05, 0)
-    Sub.Position = UDim2.new(0.5, 0, 0.63, 0) -- Diubah posisinya agar tidak bertumpuk
-    Sub.AnchorPoint = Vector2.new(0.5, 0)
+    Sub.Size = UDim2.new(0.6,0,0.05,0)
+    Sub.Position = UDim2.new(0.5,0,0.6,0)
+    Sub.AnchorPoint = Vector2.new(0.5,0)
     Sub.BackgroundTransparency = 1
-    Sub.Text = "Loading..."
+    Sub.Text = "Memuat Fitur..."
     Sub.Font = Enum.Font.Gotham
     Sub.TextScaled = true
     Sub.TextColor3 = RED_MID
@@ -622,11 +610,54 @@ local function InitHub()
     ExecLabel.Position = UDim2.new(0.04, 0, 0.05, 85)
     ExecLabel.BackgroundTransparency = 1
     ExecLabel.Text = "Executor: " .. tostring(executorName)
-    ExecLabel.TextColor3 = Color3.new(1, 1, 1)
+    ExecLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
     ExecLabel.Font = Enum.Font.GothamBold
     ExecLabel.TextSize = 14
     ExecLabel.TextXAlignment = Enum.TextXAlignment.Left
     ExecLabel.Parent = tabInfo
+
+    local ExecLine = Instance.new("Frame")
+    ExecLine.Size = UDim2.new(0.92, 0, 0, 1)
+    ExecLine.Position = UDim2.new(0.04, 0, 0.05, 107)
+    ExecLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ExecLine.BorderSizePixel = 0
+    ExecLine.Parent = tabInfo
+
+    local UserLabel = Instance.new("TextLabel")
+    UserLabel.Size = UDim2.new(0.92, 0, 0, 20)
+    UserLabel.Position = UDim2.new(0.04, 0, 0.05, 113)
+    UserLabel.BackgroundTransparency = 1
+    UserLabel.Text = "User: " .. lp.Name
+    UserLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    UserLabel.Font = Enum.Font.GothamBold
+    UserLabel.TextSize = 14
+    UserLabel.TextXAlignment = Enum.TextXAlignment.Left
+    UserLabel.Parent = tabInfo
+
+    local UserLine = Instance.new("Frame")
+    UserLine.Size = UDim2.new(0.92, 0, 0, 1)
+    UserLine.Position = UDim2.new(0.04, 0, 0.05, 135)
+    UserLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    UserLine.BorderSizePixel = 0
+    UserLine.Parent = tabInfo
+
+    local AgeLabel = Instance.new("TextLabel")
+    AgeLabel.Size = UDim2.new(0.92, 0, 0, 20)
+    AgeLabel.Position = UDim2.new(0.04, 0, 0.05, 141)
+    AgeLabel.BackgroundTransparency = 1
+    AgeLabel.Text = "Account Age: " .. lp.AccountAge .. " days"
+    AgeLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    AgeLabel.Font = Enum.Font.GothamBold
+    AgeLabel.TextSize = 14
+    AgeLabel.TextXAlignment = Enum.TextXAlignment.Left
+    AgeLabel.Parent = tabInfo
+
+    local AgeLine = Instance.new("Frame")
+    AgeLine.Size = UDim2.new(0.92, 0, 0, 1)
+    AgeLine.Position = UDim2.new(0.04, 0, 0.05, 163)
+    AgeLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    AgeLine.BorderSizePixel = 0
+    AgeLine.Parent = tabInfo
 
     local ToggleGui = Instance.new("ScreenGui")
     ToggleGui.Name = "IndoHubXToggle"
@@ -1892,7 +1923,7 @@ local function InitHub()
             end
         end)
 
-        localTime = 5
+        totalTime = 5
 
         ViewBtn.MouseButton1Click:Connect(function()
             if isViewing then
