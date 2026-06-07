@@ -616,12 +616,13 @@ local function InitHub()
     ExecLabel.TextXAlignment = Enum.TextXAlignment.Left
     ExecLabel.Parent = tabInfo
 
-    local ExecLine = Instance.new("Frame")
+        local ExecLine = Instance.new("Frame")
     ExecLine.Size = UDim2.new(0.92, 0, 0, 1)
     ExecLine.Position = UDim2.new(0.04, 0, 0.05, 107)
     ExecLine.BackgroundColor3 = SHARED_THEME_COLOR
     ExecLine.BorderSizePixel = 0
     ExecLine.Parent = tabInfo
+    table.insert(ThemeCore.Lines, ExecLine)
 
     local UserLabel = Instance.new("TextLabel")
     UserLabel.Size = UDim2.new(0.92, 0, 0, 20)
@@ -634,12 +635,13 @@ local function InitHub()
     UserLabel.TextXAlignment = Enum.TextXAlignment.Left
     UserLabel.Parent = tabInfo
 
-    local UserLine = Instance.new("Frame")
+        local UserLine = Instance.new("Frame")
     UserLine.Size = UDim2.new(0.92, 0, 0, 1)
     UserLine.Position = UDim2.new(0.04, 0, 0.05, 135)
     UserLine.BackgroundColor3 = SHARED_THEME_COLOR
     UserLine.BorderSizePixel = 0
     UserLine.Parent = tabInfo
+    table.insert(ThemeCore.Lines, UserLine)
 
     local AgeLabel = Instance.new("TextLabel")
     AgeLabel.Size = UDim2.new(0.92, 0, 0, 20)
@@ -652,12 +654,13 @@ local function InitHub()
     AgeLabel.TextXAlignment = Enum.TextXAlignment.Left
     AgeLabel.Parent = tabInfo
 
-    local AgeLine = Instance.new("Frame")
+        local AgeLine = Instance.new("Frame")
     AgeLine.Size = UDim2.new(0.92, 0, 0, 1)
     AgeLine.Position = UDim2.new(0.04, 0, 0.05, 163)
     AgeLine.BackgroundColor3 = SHARED_THEME_COLOR
     AgeLine.BorderSizePixel = 0
     AgeLine.Parent = tabInfo
+    table.insert(ThemeCore.Lines, AgeLine)
 
     local ToggleGui = Instance.new("ScreenGui")
     ToggleGui.Name = "IndoHubXToggle"
