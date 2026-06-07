@@ -2,1856 +2,2415 @@ local TS = game:GetService("TweenService")
 local RS = game:GetService("RunService")
 local Debris = game:GetService("Debris")
 local Players = game:GetService("Players")
-local lp = Players.LocalPlayer
+local Lighting = game:GetService("Lighting")
 local UIS = game:GetService("UserInputService")
-
--- =============================================
---                  SUPER EPIC INTRO (tetap)
--- =============================================
-
-local function CreateEpicIntro()
-    print("🚀 IndoHub Compact - INSANE INTRO 2026 🔥")
-
-    local IntroGui = Instance.new("ScreenGui")
-    IntroGui.Name = "IndoHubEpicIntro"
-    IntroGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    IntroGui.DisplayOrder = 10000
-    IntroGui.IgnoreGuiInset = true
-    IntroGui.Parent = gethui and gethui() or game.CoreGui
-
-    local IntroFrame = Instance.new("Frame")
-    IntroFrame.Size = UDim2.new(1,0,1,0)
-    IntroFrame.BackgroundColor3 = Color3.fromRGB(10,6,6)
-    IntroFrame.BackgroundTransparency = 0.3
-    IntroFrame.Parent = IntroGui
-
-    -- Vignette
-    local Vignette = Instance.new("ImageLabel")
-    Vignette.Size = UDim2.new(1,0,1,0)
-    Vignette.BackgroundTransparency = 1
-    Vignette.Image = "rbxassetid://6014261993"
-    Vignette.ImageTransparency = 0.4
-    Vignette.Parent = IntroFrame
-
-    -- Matrix rain (sedikit lebih ringan)
-    local MatrixContainer = Instance.new("Frame")
-    MatrixContainer.Size = UDim2.new(1,0,1,0)
-    MatrixContainer.BackgroundTransparency = 1
-    MatrixContainer.Parent = IntroFrame
-
-    local matrixChars = {}
-    for i = 1, 100 do
-        local char = Instance.new("TextLabel")
-        char.Size = UDim2.new(0,14,0,20)
-        char.Position = UDim2.new(math.random(),0,-0.3,math.random(-400,0))
-        char.BackgroundTransparency = 1
-        char.Text = string.char(math.random(33,126))
-        char.TextColor3 = Color3.fromRGB(math.random(140,255), 0, math.random(80,220))
-        char.Font = Enum.Font.Code
-        char.TextSize = math.random(10,20)
-        char.TextTransparency = 0.3
-        char.Parent = MatrixContainer
-        table.insert(matrixChars, {obj = char, speed = math.random(4,14)})
-    end
-
-    RS:BindToRenderStep("MatrixRain", 200, function(dt)
-        for _, v in ipairs(matrixChars) do
-            local pos = v.obj.Position
-            local newY = pos.Y.Scale + (dt * v.speed * 0.7)
-            v.obj.Position = UDim2.new(pos.X.Scale, pos.X.Offset, newY, pos.Y.Offset)
-            if newY > 1.3 then
-                v.obj.Position = UDim2.new(math.random(),0,-0.25,math.random(-300,0))
-            end
-        end
-    end)
-
-    -- Rotating cube (ukuran sedikit dikecilkan)
-    local CubeFrame = Instance.new("Frame")
-    CubeFrame.Size = UDim2.new(0,260,0,260)
-    CubeFrame.Position = UDim2.new(0.5,-130,0.5,-130)
-    CubeFrame.BackgroundTransparency = 1
-    CubeFrame.Parent = IntroFrame
-
-    for i = 1, 12 do
-        local edge = Instance.new("Frame")
-        edge.BackgroundColor3 = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-        edge.BorderSizePixel = 0
-        edge.Size = UDim2.new(0,2.5,0, math.random(160,240))
-        edge.Position = UDim2.new(0.5,0,0.5,0)
-        edge.AnchorPoint = Vector2.new(0.5,0.5)
-        edge.Rotation = i * 30
-        edge.Parent = CubeFrame
-
-        TS:Create(edge, TweenInfo.new(6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-            Rotation = (i * 30) + 360,
-            BackgroundTransparency = 0.4
-        }):Play()
-    end
-
-    -- Logo glitch (ukuran teks sedikit dikurangi)
-    local LogoText = Instance.new("TextLabel")
-    LogoText.Size = UDim2.new(0,0,0,90)
-    LogoText.Position = UDim2.new(0.5,0,0.42,0)
-    LogoText.AnchorPoint = Vector2.new(0.5,0.5)
-    LogoText.BackgroundTransparency = 1
-    LogoText.Text = ""
-    LogoText.TextColor3 = Color3.fromRGB(255,255,255)
-    LogoText.Font = Enum.Font.GothamBlack
-    LogoText.TextSize = 80
-    LogoText.TextStrokeTransparency = 0.65
-    LogoText.TextStrokeColor3 = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    LogoText.Parent = IntroFrame
-
-    local glitchStroke = Instance.new("UIStroke")
-    glitchStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    glitchStroke.Thickness = 3.5
-    glitchStroke.Transparency = 0.45
-    glitchStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    glitchStroke.Parent = LogoText
-
-    local fullText = "IndoHub X Executor"
-    local currentText = ""
-
-    spawn(function()
-        for i = 1, #fullText do
-            currentText = currentText .. fullText:sub(i,i)
-            LogoText.Text = currentText
-            LogoText.Size = UDim2.new(0, #currentText * 52, 0, 90)
-
-            for _ = 1, math.random(2,4) do
-                LogoText.TextTransparency = math.random(0.25,0.75)
-                glitchStroke.Color = Color3.fromRGB(math.random(200,255), math.random(0,50), math.random(0,50))  -- Variasi merah menyala
-                task.wait(0.03)
-            end
-            LogoText.TextTransparency = 0
-            glitchStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-            task.wait(0.08)
-        end
-
-        spawn(function()
-            while LogoText.Parent do
-                TS:Create(LogoText, TweenInfo.new(1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-                    TextStrokeTransparency = 0.3
-                }):Play()
-                TS:Create(glitchStroke, TweenInfo.new(1.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-                    Thickness = 6,
-                    Transparency = 0.2
-                }):Play()
-                task.wait(2.6)
-            end
-        end)
-    end)
-
-    -- Subtitle lebih kecil
-    local SubText = Instance.new("TextLabel")
-    SubText.Size = UDim2.new(0,420,0,50)
-    SubText.Position = UDim2.new(0.5,0,0.58,0)
-    SubText.AnchorPoint = Vector2.new(0.5,0.5)
-    SubText.BackgroundTransparency = 1
-    SubText.Text = "IndoHub X Executor • By Death"
-    SubText.TextColor3 = Color3.fromRGB(255,100,100)  -- Ubah ke merah menyala lebih gelap
-    SubText.Font = Enum.Font.Gotham
-    SubText.TextSize = 28
-    SubText.TextTransparency = 1
-    SubText.Parent = IntroFrame
-
-    -- Shockwave + particle (sedikit dikurangi jumlah)
-    local Shockwave = Instance.new("Frame")
-    Shockwave.Size = UDim2.new(0,0,0,0)
-    Shockwave.Position = UDim2.new(0.5,0,0.5,0)
-    Shockwave.AnchorPoint = Vector2.new(0.5,0.5)
-    Shockwave.BackgroundTransparency = 1
-    Shockwave.Parent = IntroFrame
-
-    local shockCorner = Instance.new("UICorner")
-    shockCorner.CornerRadius = UDim.new(1,0)
-    shockCorner.Parent = Shockwave
-
-    local shockStroke = Instance.new("UIStroke")
-    shockStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    shockStroke.Thickness = 4.5
-    shockStroke.Transparency = 0.3
-    shockStroke.Parent = Shockwave
-
-    spawn(function()
-        task.wait(1.5)
-        for i = 1, 35 do
-            local p = Instance.new("Frame")
-            p.Size = UDim2.new(0, math.random(4,12), 0, math.random(4,12))
-            p.Position = UDim2.new(0.5,0,0.5,0)
-            p.BackgroundColor3 = Color3.fromHSV(math.random(), 0.85, 1)
-            p.BackgroundTransparency = 0
-            p.AnchorPoint = Vector2.new(0.5,0.5)
-            p.Parent = IntroFrame
-
-            local angle = math.rad(math.random(0,360))
-            local dist = math.random(140,380)
-
-            TS:Create(p, TweenInfo.new(1.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-                Position = UDim2.new(0.5, math.cos(angle)*dist, 0.5, math.sin(angle)*dist),
-                BackgroundTransparency = 1,
-                Rotation = math.random(-600,600)
-            }):Play()
-
-            Debris:AddItem(p, 1.4)
-        end
-
-        TS:Create(Shockwave, TweenInfo.new(1.7, Enum.EasingStyle.Quint), {
-            Size = UDim2.new(0,1200,0,1200),
-            UIStroke = {Transparency = 1}
-        }):Play()
-    end)
-
-    -- Screen shake
-    spawn(function()
-        task.wait(1.7)
-        for i = 1, 12 do
-            local offset = UDim2.new(math.random(-0.01,0.01), math.random(-12,12), math.random(-0.01,0.01), math.random(-12,12))
-            TS:Create(IntroFrame, TweenInfo.new(0.08, Enum.EasingStyle.Bounce), {Position = offset}):Play()
-            task.wait(0.085)
-        end
-        TS:Create(IntroFrame, TweenInfo.new(0.35), {Position = UDim2.new(0,0,0,0)}):Play()
-    end)
-
-    task.wait(2.6)
-    TS:Create(SubText, TweenInfo.new(1.3, Enum.EasingStyle.Quint), {TextTransparency = 0}):Play()
-
-    task.wait(3.8)
-    TS:Create(IntroFrame, TweenInfo.new(2, Enum.EasingStyle.Quint), {BackgroundTransparency = 1}):Play()
-    TS:Create(LogoText, TweenInfo.new(1.5), {TextTransparency = 1}):Play()
-    TS:Create(SubText, TweenInfo.new(1.5), {TextTransparency = 1}):Play()
-    task.wait(2.1)
-    IntroGui:Destroy()
-    RS:UnbindFromRenderStep("MatrixRain")
-
-    print("✅ Intro selesai – DarkBird Compact Hub ready")
-end
-
--- =============================================
---                  MAIN HUB - COMPACT
--- =============================================
-
-local MainGui = Instance.new("ScreenGui")
-MainGui.Name = "DarkBirdCompact"
-MainGui.ResetOnSpawn = false
-MainGui.DisplayOrder = 9998
-MainGui.IgnoreGuiInset = true
-MainGui.Parent = gethui and gethui() or game.CoreGui
-
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 460, 0, 340)          -- ukuran compact
-MainFrame.Position = UDim2.new(0.5, -230, 0.5, -170)
-MainFrame.BackgroundColor3 = Color3.fromRGB(16,10,10)
-MainFrame.BackgroundTransparency = 0.2
-MainFrame.BorderSizePixel = 0
-MainFrame.ClipsDescendants = true
-MainFrame.Visible = false
-MainFrame.Parent = MainGui
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
-
-local UIGradient = Instance.new("UIGradient")
-UIGradient.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(55,0,0)),  -- Ubah ke merah menyala gelap
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20,0,0))   -- Ubah ke merah menyala gelap
-}
-UIGradient.Rotation = 90
-UIGradient.Parent = MainFrame
-
-local NeonBorder = Instance.new("UIStroke")
-NeonBorder.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-NeonBorder.Thickness = 2
-NeonBorder.Transparency = 0.4
-NeonBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-NeonBorder.Parent = MainFrame
-
--- Header ramping
-local Header = Instance.new("Frame")
-Header.Size = UDim2.new(1,0,0,40)
-Header.BackgroundColor3 = Color3.fromRGB(32,0,0)  -- Ubah ke merah menyala gelap
-Header.BorderSizePixel = 0
-Header.Parent = MainFrame
-
-local HeaderCorner = Instance.new("UICorner")
-HeaderCorner.CornerRadius = UDim.new(0,10)
-HeaderCorner.Parent = Header
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(0.7,0,1,0)
-Title.Position = UDim2.new(0,14,0,0)
-Title.BackgroundTransparency = 1
-Title.Text = "IndoHub X Executor"
-Title.TextColor3 = Color3.fromRGB(255,225,225)  -- Tetap, tapi bisa diubah jika perlu
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 22
-Title.TextXAlignment = Enum.TextXAlignment.Left
-Title.Parent = Header
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0,30,0,30)
-CloseBtn.Position = UDim2.new(1,-38,0.5,-15)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(190,0,0)  -- Ubah ke merah menyala gelap
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.new(1,1,1)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 18
-CloseBtn.Parent = Header
-
-local CloseCorner = Instance.new("UICorner")
-CloseCorner.CornerRadius = UDim.new(0,7)
-CloseCorner.Parent = CloseBtn
-
--- Tab bar compact
-local TabFrame = Instance.new("Frame")
-TabFrame.Size = UDim2.new(1,0,0,34)
-TabFrame.Position = UDim2.new(0,0,0,40)
-TabFrame.BackgroundTransparency = 1
-TabFrame.Parent = MainFrame
-
-local tabButtons = {}
-local tabContents = {}
-
-local function CreateTab(name, index)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0,90,1,-4)
-    btn.Position = UDim2.new(0, 10 + (index-1)*98, 0, 2)
-    btn.BackgroundColor3 = Color3.fromRGB(55,0,0)  -- Ubah ke merah menyala gelap
-    btn.BackgroundTransparency = 0.5
-    btn.Text = name
-    btn.TextColor3 = Color3.fromRGB(255,210,210)  -- Tetap
-    btn.Font = Enum.Font.GothamSemibold
-    btn.TextSize = 15
-    btn.Parent = TabFrame
-
-    local corner = Instance.new("UICorner", btn)
-    corner.CornerRadius = UDim.new(0,7)
-
-    local content = Instance.new("Frame")
-    content.Size = UDim2.new(1,-16,1,-90)
-    content.Position = UDim2.new(0,8,0,80)
-    content.BackgroundTransparency = 1
-    content.Visible = false
-    content.Parent = MainFrame
-
-    table.insert(tabButtons, btn)
-    table.insert(tabContents, content)
-
-    btn.MouseButton1Click:Connect(function()
-        for _, c in ipairs(tabContents) do c.Visible = false end
-        content.Visible = true
-        for _, b in ipairs(tabButtons) do
-            TS:Create(b, TweenInfo.new(0.2), {BackgroundTransparency = 0.5, TextColor3 = Color3.fromRGB(255,210,210)}):Play()
-        end
-        TS:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(255,255,255)}):Play()
-    end)
-
-    return content
-end
-
-local tabMain    = CreateTab("Main", 1)
-local tabPlayer  = CreateTab("Player", 2)
-local tabVisual  = CreateTab("Visual", 3)
-local tabMisc    = CreateTab("Misc", 4)
-
-tabMain.Visible = true
-tabButtons[1].BackgroundTransparency = 0.2
-tabButtons[1].TextColor3 = Color3.fromRGB(255,255,255)
-
--- (Infinite Jump sudah dihapus dari sini)
-
--- Speed Hack di tab Player (dengan adjustable speed via TextBox)
-do
-    local speedHackBtn = Instance.new("TextButton")
-    speedHackBtn.Size = UDim2.new(0,170,0,38)
-    speedHackBtn.Position = UDim2.new(0.06,0,0.08,0)
-    speedHackBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    speedHackBtn.Text = "Speed Hack (OFF)"
-    speedHackBtn.TextColor3 = Color3.new(1,1,1)
-    speedHackBtn.Font = Enum.Font.Gotham
-    speedHackBtn.TextSize = 16
-    speedHackBtn.Parent = tabPlayer
-
-    local c = Instance.new("UICorner", speedHackBtn); c.CornerRadius = UDim.new(0,8)
-
-    local speedEnabled = false
-    local originalSpeed = 16           -- Default Roblox WalkSpeed
-    local hackSpeed = 50               -- Default nilai awal (bisa diubah)
-
-    -- Fungsi untuk apply speed
-    local function applySpeed()
-        if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-            lp.Character.Humanoid.WalkSpeed = speedEnabled and hackSpeed or originalSpeed
-        end
-    end
-
-    local function enableSpeedHack()
-        speedEnabled = true
-        speedHackBtn.Text = "Speed Hack (ON)"
-        speedHackBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-        applySpeed()
-    end
-
-    local function disableSpeedHack()
-        speedEnabled = false
-        speedHackBtn.Text = "Speed Hack (OFF)"
-        speedHackBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-        applySpeed()
-    end
-
-    speedHackBtn.MouseButton1Click:Connect(function()
-        if speedEnabled then
-            disableSpeedHack()
-        else
-            enableSpeedHack()
-        end
-    end)
-
-    -- Label & TextBox untuk atur speed (bisa diketik & Enter)
-    local speedLabel = Instance.new("TextLabel")
-    speedLabel.Size = UDim2.new(0,120,0,30)
-    speedLabel.Position = UDim2.new(0.06,0,0.22,0)
-    speedLabel.BackgroundTransparency = 1
-    speedLabel.Text = "Speed Value:"
-    speedLabel.TextColor3 = Color3.fromRGB(255,200,200)
-    speedLabel.Font = Enum.Font.Gotham
-    speedLabel.TextSize = 15
-    speedLabel.TextXAlignment = Enum.TextXAlignment.Left
-    speedLabel.Parent = tabPlayer
-
-    local speedBox = Instance.new("TextBox")
-    speedBox.Size = UDim2.new(0,100,0,30)
-    speedBox.Position = UDim2.new(0.06,130,0.22,0)
-    speedBox.BackgroundColor3 = Color3.fromRGB(60,0,0)  -- Ubah ke merah menyala gelap
-    speedBox.BorderSizePixel = 0
-    speedBox.Text = tostring(hackSpeed)
-    speedBox.TextColor3 = Color3.new(1,1,1)
-    speedBox.Font = Enum.Font.Gotham
-    speedBox.TextSize = 15
-    speedBox.ClearTextOnFocus = false
-    speedBox.Parent = tabPlayer
-
-    local cornerSpeed = Instance.new("UICorner", speedBox)
-    cornerSpeed.CornerRadius = UDim.new(0,6)
-
-    -- Saat tekan Enter di TextBox → update speed & apply langsung jika aktif
-    speedBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local newSpeed = tonumber(speedBox.Text)
-            if newSpeed and newSpeed >= 0 then
-                hackSpeed = newSpeed
-                print("Speed hack diubah menjadi: " .. hackSpeed)
-
-                -- Apply langsung jika speed hack sedang aktif
-                if speedEnabled then
-                    applySpeed()
-                end
-            else
-                -- Kembalikan ke nilai sebelumnya jika input salah
-                speedBox.Text = tostring(hackSpeed)
-            end
-        end
-    end)
-
-    -- Handle character respawn / reset
-    lp.CharacterAdded:Connect(function(char)
-        char:WaitForChild("Humanoid")
-        originalSpeed = char.Humanoid.WalkSpeed  -- simpan nilai asli
-        if speedEnabled then
-            char.Humanoid.WalkSpeed = hackSpeed
-        end
-    end)
-
-    -- Jika humanoid mati/respawn, pastikan speed tetap apply
-    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        originalSpeed = lp.Character.Humanoid.WalkSpeed
-        if speedEnabled then
-            lp.Character.Humanoid.WalkSpeed = hackSpeed
-        end
-    end
-end
-
--- =============================================
---                  TOGGLE BUTTON - SMALL
--- =============================================
-
-local ToggleGui = Instance.new("ScreenGui")
-ToggleGui.Name = "DarkBirdToggle"
-ToggleGui.ResetOnSpawn = false
-ToggleGui.DisplayOrder = 9999
-ToggleGui.IgnoreGuiInset = true
-ToggleGui.Parent = gethui and gethui() or game.CoreGui
-
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Size = UDim2.new(0,60,0,60)
-ToggleBtn.Position = UDim2.new(0,25,0.5,0)
-ToggleBtn.AnchorPoint = Vector2.new(0,0.5)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(32,0,0)  -- Ubah ke merah menyala gelap
-ToggleBtn.BackgroundTransparency = 0.4
-ToggleBtn.Text = "¤"
-ToggleBtn.TextColor3 = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-ToggleBtn.Font = Enum.Font.GothamBlack
-ToggleBtn.TextSize = 32
-ToggleBtn.AutoButtonColor = false
-ToggleBtn.Parent = ToggleGui
-
-local tc = Instance.new("UICorner", ToggleBtn); tc.CornerRadius = UDim.new(1,0)
-
-local tg = Instance.new("UIGradient", ToggleBtn)
-tg.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(140,0,0)),  -- Ubah ke merah menyala
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))   -- Ubah ke merah menyala
-}
-tg.Rotation = 45
-
-local ts = Instance.new("UIStroke", ToggleBtn)
-ts.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-ts.Thickness = 3
-ts.Transparency = 0.3
-
-spawn(function()
-    while ToggleBtn.Parent do
-        TS:Create(ts, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-            Thickness = 5.5,
-            Transparency = 0.08
-        }):Play()
-        task.wait(4)
-    end
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local lp = Players.LocalPlayer
+
+local SHARED_THEME_COLOR = Color3.fromRGB(255, 40, 40)
+local SHARED_DARK_COLOR = Color3.fromRGB(85, 0, 0)
+local SHARED_DARK2_COLOR = Color3.fromRGB(30, 0, 0) 
+
+local HAS_DRAWING_API = pcall(function() 
+    local t = Drawing.new("Text") 
+    t:Remove() 
 end)
 
-ToggleBtn.MouseEnter:Connect(function()
-    TS:Create(ToggleBtn, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
-    TS:Create(ts, TweenInfo.new(0.25), {Transparency = 0, Color = Color3.fromRGB(255,50,50)}):Play()  -- Variasi merah menyala
-end)
+local function InitHub()
+    local ThemeCore = {
+        Strokes = {},
+        Texts = {},
+        Lines = {},         
+        DarkBGs = {},       
+        DarkToggles = {},   
+        MainGrad = nil,
+        SideGrad = nil,
+        ToggleGrad = nil,
+        ToggleBtn = nil,
+        Toggles = {},       
+        SolidButtons = {},  
+    }
+    local CurrentThemeColor = Color3.fromRGB(255, 0, 0)
 
-ToggleBtn.MouseLeave:Connect(function()
-    TS:Create(ToggleBtn, TweenInfo.new(0.25), {BackgroundTransparency = 0.4}):Play()
-    TS:Create(ts, TweenInfo.new(0.25), {Transparency = 0.3, Color = Color3.fromRGB(255,0,0)}):Play()  -- Ubah ke merah menyala
-end)
+    local function ChangeTheme(primary)
+        CurrentThemeColor = primary
+        SHARED_THEME_COLOR = primary
+        
+        local h, s, v = primary:ToHSV()
+        local dark1 = Color3.fromHSV(h, s, math.clamp(v * 0.4, 0, 1))
+        local dark2 = Color3.fromHSV(h, s, math.clamp(v * 0.15, 0, 1))
+        local mid = Color3.fromHSV(h, s, math.clamp(v * 0.6, 0, 1))
+        
+        SHARED_DARK_COLOR = dark1
+        SHARED_DARK2_COLOR = dark2
 
--- Drag toggle
-local tDragging, tDragInput, tStartPos, dragStartPos
-ToggleBtn.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        tDragging = true
-        tStartPos = ToggleBtn.Position
-        dragStartPos = input.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then tDragging = false end
-        end)
-    end
-end)
-
-ToggleBtn.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        tDragInput = input
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input == tDragInput and tDragging then
-        local delta = input.Position - dragStartPos
-        ToggleBtn.Position = UDim2.new(tStartPos.X.Scale, tStartPos.X.Offset + delta.X, tStartPos.Y.Scale, tStartPos.Y.Offset + delta.Y)
-    end
-end)
-
--- =============================================
---                  TOGGLE & DRAG HUB
--- =============================================
-
-local HubVisible = false
-
-local function ToggleHub()
-    HubVisible = not HubVisible
-    
-    if HubVisible then
-        MainFrame.Visible = true
-        TS:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(0.5, -230, 0.5, -170),
-            BackgroundTransparency = 0.2
-        }):Play()
-        ToggleBtn.Text = "X"
-    else
-        TS:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-            Position = UDim2.new(0.5, -230, 1.2, 0),
-            BackgroundTransparency = 1
-        }):Play()
-        task.delay(0.38, function()
-            if not HubVisible then MainFrame.Visible = false end
-        end)
-        ToggleBtn.Text = "¤"
-    end
-end
-
-ToggleBtn.MouseButton1Click:Connect(ToggleHub)
-
--- Drag MainFrame
-local dragging, dragInput, dragStart, startPos
-Header.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        dragging = true
-        dragStart = input.Position
-        startPos = MainFrame.Position
-        input.Changed:Connect(function()
-            if input.UserInputState == Enum.UserInputState.End then dragging = false end
-        end)
-    end
-end)
-
-Header.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-        dragInput = input
-    end
-end)
-
-UIS.InputChanged:Connect(function(input)
-    if input == dragInput and dragging then
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-end)
-
--- Close button
-CloseBtn.MouseButton1Click:Connect(function()
-    ToggleHub()  -- pakai fungsi toggle biar animasi konsisten
-end)
-
--- Hotkey
-UIS.InputBegan:Connect(function(input, gp)
-    if gp then return end
-    if input.KeyCode == Enum.KeyCode.Insert or input.KeyCode == Enum.KeyCode.RightShift then
-        ToggleHub()
-    end
-end)
-
--- Jalankan
-pcall(CreateEpicIntro)
-
-print("🌌 DARKBIRD Compact v5.3 Loaded – Insert / klik DB")
-
--- =============================================
---                  ESP PLAYER (Visual Tab) - FIXED
--- =============================================
-
-do
-    local ESP_ENABLED = false
-    local ESP_OBJECTS = {}   -- [player] = {box, name, dist, hpBg, hp, connection}
-
-    local ESP_BUTTON = Instance.new("TextButton")
-    ESP_BUTTON.Size = UDim2.new(0, 170, 0, 38)
-    ESP_BUTTON.Position = UDim2.new(0.06, 0, 0.08, 0)
-    ESP_BUTTON.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    ESP_BUTTON.Text = "Player ESP (OFF)"
-    ESP_BUTTON.TextColor3 = Color3.new(1,1,1)
-    ESP_BUTTON.Font = Enum.Font.Gotham
-    ESP_BUTTON.TextSize = 16
-    ESP_BUTTON.Parent = tabVisual
-
-    local cornerEsp = Instance.new("UICorner", ESP_BUTTON)
-    cornerEsp.CornerRadius = UDim.new(0,8)
-
-    -- Warna
-    local COLOR_ENEMY = Color3.fromRGB(255, 0, 0)  -- Ubah ke merah menyala
-    local COLOR_ALLY  = Color3.fromRGB(255, 160, 80)
-    local COLOR_TEXT  = Color3.fromRGB(255, 255, 255)
-
-    local function getPlayerColor(player)
-        if player.Team and lp.Team and player.Team == lp.Team then
-            return COLOR_ALLY
+        for _, stroke in ipairs(ThemeCore.Strokes) do stroke.Color = primary end
+        for _, txt in ipairs(ThemeCore.Texts) do txt.TextColor3 = primary end
+        for _, line in ipairs(ThemeCore.Lines) do if line.Parent then line.BackgroundColor3 = primary end end
+        for _, bg in ipairs(ThemeCore.DarkBGs) do if bg.Parent then bg.BackgroundColor3 = dark2 end end
+        for _, dtog in ipairs(ThemeCore.DarkToggles) do
+            if dtog.Btn.Parent then dtog.Btn.BackgroundColor3 = dtog.GetState() and primary or dark2 end
         end
-        return COLOR_ENEMY
-    end
 
-    local function createOrUpdateESP(player)
-        if player == lp then return end
-
-        local entry = ESP_OBJECTS[player]
-        if not entry then
-            -- Buat baru jika belum ada
-            local box = Drawing.new("Square")
-            box.Thickness = 2
-            box.Filled = false
-            box.Transparency = 1
-            box.Visible = false
-
-            local nameTag = Drawing.new("Text")
-            nameTag.Size = 14
-            nameTag.Center = true
-            nameTag.Outline = true
-            nameTag.Font = Drawing.Fonts.UI  -- lebih aman di beberapa executor
-            nameTag.Visible = false
-
-            local distTag = Drawing.new("Text")
-            distTag.Size = 12
-            distTag.Center = true
-            distTag.Outline = true
-            distTag.Font = Drawing.Fonts.UI
-            distTag.Visible = false
-
-            local hpBg = Drawing.new("Line")
-            hpBg.Thickness = 3
-            hpBg.Color = Color3.fromRGB(40,40,40)
-            hpBg.Transparency = 0.7
-            hpBg.Visible = false
-
-            local hpBar = Drawing.new("Line")
-            hpBar.Thickness = 3
-            hpBar.Transparency = 1
-            hpBar.Visible = false
-
-            entry = {
-                box = box,
-                name = nameTag,
-                dist = distTag,
-                hpBg = hpBg,
-                hp = hpBar,
-                connection = nil
+        if ThemeCore.MainGrad then
+            ThemeCore.MainGrad.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, dark1),
+                ColorSequenceKeypoint.new(1, dark2)
             }
-            ESP_OBJECTS[player] = entry
         end
-
-        -- Cleanup koneksi lama jika ada
-        if entry.connection then
-            entry.connection:Disconnect()
-            entry.connection = nil
+        if ThemeCore.SideGrad then
+            ThemeCore.SideGrad.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, dark1),
+                ColorSequenceKeypoint.new(1, dark2)
+            }
         end
-
-        -- Buat koneksi baru
-        entry.connection = RS.RenderStepped:Connect(function()
-            if not ESP_ENABLED then return end
-
-            local char = player.Character
-            if not char or not char.Parent then
-                -- Sembunyikan jika karakter hilang
-                for _, obj in pairs({entry.box, entry.name, entry.dist, entry.hpBg, entry.hp}) do
-                    obj.Visible = false
-                end
-                return
-            end
-
-            local humanoid = char:FindFirstChildWhichIsA("Humanoid")
-            local root = char:FindFirstChild("HumanoidRootPart")
-            local head = char:FindFirstChild("Head")
-
-            if not (humanoid and root and head and humanoid.Health > 0) then
-                for _, obj in pairs({entry.box, entry.name, entry.dist, entry.hpBg, entry.hp}) do
-                    obj.Visible = false
-                end
-                return
-            end
-
-            local cam = workspace.CurrentCamera
-            local rootPos, onScreen = cam:WorldToViewportPoint(root.Position)
-            if not onScreen then
-                for _, obj in pairs({entry.box, entry.name, entry.dist, entry.hpBg, entry.hp}) do
-                    obj.Visible = false
-                end
-                return
-            end
-
-            local headPos = cam:WorldToViewportPoint(head.Position + Vector3.new(0, 0.6, 0))
-            local feetPos = cam:WorldToViewportPoint(root.Position - Vector3.new(0, 2.8, 0))
-
-            local boxHeight = math.abs(headPos.Y - feetPos.Y) * 1.05
-            local boxWidth = boxHeight * 0.55
-
-            local color = getPlayerColor(player)
-
-            -- Box
-            entry.box.Size = Vector2.new(boxWidth, boxHeight)
-            entry.box.Position = Vector2.new(rootPos.X - boxWidth/2, rootPos.Y - boxHeight/2)
-            entry.box.Color = color
-            entry.box.Visible = true
-
-            -- Name
-            entry.name.Text = player.Name
-            entry.name.Position = Vector2.new(rootPos.X, rootPos.Y - boxHeight/2 - 16)
-            entry.name.Color = color
-            entry.name.Visible = true
-
-            -- Distance
-            local myRoot = lp.Character and lp.Character:FindFirstChild("HumanoidRootPart")
-            local dist = myRoot and (root.Position - myRoot.Position).Magnitude or 0
-            entry.dist.Text = string.format("%.0f studs", dist)
-            entry.dist.Position = Vector2.new(rootPos.X, rootPos.Y + boxHeight/2 + 2)
-            entry.dist.Color = Color3.fromRGB(220,220,220)
-            entry.dist.Visible = true
-
-            -- Health bar (di kiri box)
-            local hpRatio = math.clamp(humanoid.Health/humanoid.MaxHealth, 0, 1)
-            local hpLength = boxHeight * hpRatio
-
-            entry.hpBg.From = Vector2.new(rootPos.X - boxWidth/2 - 6, rootPos.Y - boxHeight/2)
-            entry.hpBg.To   = Vector2.new(rootPos.X - boxWidth/2 - 6, rootPos.Y + boxHeight/2)
-            entry.hpBg.Visible = true
-
-            entry.hp.From = Vector2.new(rootPos.X - boxWidth/2 - 6, rootPos.Y + boxHeight/2 - hpLength)
-            entry.hp.To   = Vector2.new(rootPos.X - boxWidth/2 - 6, rootPos.Y + boxHeight/2)
-            entry.hp.Color = Color3.fromHSV(hpRatio * 0.33, 0.9, 1)  -- hijau ke merah
-            entry.hp.Visible = true
-        end)
-    end
-
-    local function removeESP(player)
-        local entry = ESP_OBJECTS[player]
-        if entry then
-            if entry.connection then
-                entry.connection:Disconnect()
-            end
-            for _, obj in pairs({entry.box, entry.name, entry.dist, entry.hpBg, entry.hp}) do
-                pcall(function() obj:Remove() end)
-            end
-            ESP_OBJECTS[player] = nil
+        if ThemeCore.ToggleGrad then
+            ThemeCore.ToggleGrad.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, mid),
+                ColorSequenceKeypoint.new(1, primary)
+            }
         end
-    end
-
-    local function refreshAllESP()
-        if not ESP_ENABLED then return end
-        for _, player in ipairs(Players:GetPlayers()) do
-            createOrUpdateESP(player)
-        end
-    end
-
-    local function toggleESP(enable)
-        ESP_ENABLED = enable
-        ESP_BUTTON.Text = "Player ESP (" .. (enable and "ON" or "OFF") .. ")"
-        ESP_BUTTON.BackgroundColor3 = enable and Color3.fromRGB(60,140,80) or Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-
-        if enable then
-            refreshAllESP()
-        else
-            for player, _ in pairs(ESP_OBJECTS) do
-                removeESP(player)
-            end
-            ESP_OBJECTS = {}
-        end
-    end
-
-    ESP_BUTTON.MouseButton1Click:Connect(function()
-        toggleESP(not ESP_ENABLED)
-    end)
-
-    -- Player baru join → langsung tambah ESP jika toggle sudah ON
-    Players.PlayerAdded:Connect(function(player)
-        player.CharacterAdded:Connect(function()
-            if ESP_ENABLED then
-                createOrUpdateESP(player)
-            end
-        end)
-        -- Juga cek jika karakter sudah ada saat join
-        if player.Character and ESP_ENABLED then
-            createOrUpdateESP(player)
-        end
-    end)
-
-    -- Handle existing players saat toggle pertama kali ON
-    -- (sudah ditangani di refreshAllESP)
-
-    -- Cleanup saat player keluar
-    Players.PlayerRemoving:Connect(removeESP)
-
-    -- Optional: refresh saat character respawn sendiri (untuk distance akurat)
-    if lp.Character then
-        lp.CharacterAdded:Connect(function()
-            task.wait(0.5) -- tunggu spawn
-            if ESP_ENABLED then
-                refreshAllESP()
-            end
-        end)
-    end
-
-    print("ESP Player FIXED - support player join anytime")
-end
-
--- =============================================
---            INFINITE YIELD LOADER (Tab Main) - Warna kembali normal setelah load
--- =============================================
-
-do
-    local IY_BUTTON = Instance.new("TextButton")
-    IY_BUTTON.Size = UDim2.new(0, 220, 0, 45)
-    IY_BUTTON.Position = UDim2.new(0.5, -110, 0.15, 0)  -- tengah atas tab Main
-    IY_BUTTON.BackgroundColor3 = Color3.fromRGB(85, 0, 0)  -- Ubah ke merah menyala gelap
-    IY_BUTTON.Text = "Load Infinite Yield"
-    IY_BUTTON.TextColor3 = Color3.new(1,1,1)
-    IY_BUTTON.Font = Enum.Font.GothamSemibold
-    IY_BUTTON.TextSize = 18
-    IY_BUTTON.Parent = tabMain
-
-    local cornerIY = Instance.new("UICorner", IY_BUTTON)
-    cornerIY.CornerRadius = UDim.new(0, 9)
-
-    local strokeIY = Instance.new("UIStroke", IY_BUTTON)
-    strokeIY.Color = Color3.fromRGB(255, 0, 0)  -- Ubah ke merah menyala
-    strokeIY.Thickness = 1.5
-    strokeIY.Transparency = 0.6
-
-    local loaded = false
-
-    local ORIGINAL_BG = Color3.fromRGB(85, 0, 0)  -- Ubah ke merah menyala gelap
-    local ORIGINAL_TEXT = Color3.new(1,1,1)
-    local ORIGINAL_STROKE = Color3.fromRGB(255, 0, 0)  -- Ubah ke merah menyala
-
-    local function loadInfiniteYield()
-        if loaded then return end
-
-        local success, err = pcall(function()
-            loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-        end)
-
-        if success then
-            loaded = true
-            -- Tampilkan sukses sementara (misal 4 detik)
-            IY_BUTTON.Text = "Infinite Yield Loaded ✓"
-            IY_BUTTON.BackgroundColor3 = Color3.fromRGB(60, 140, 80)
-            IY_BUTTON.TextColor3 = Color3.fromRGB(220, 255, 220)
-            strokeIY.Color = Color3.fromRGB(100, 255, 150)
-
-            print("✅ Infinite Yield berhasil diload via DARKBIRD")
-
-            -- Kembalikan warna asli setelah 4 detik
-            task.delay(4, function()
-                if IY_BUTTON and IY_BUTTON.Parent then
-                    IY_BUTTON.Text = "Load Infinite Yield (Done)"
-                    IY_BUTTON.BackgroundColor3 = ORIGINAL_BG
-                    IY_BUTTON.TextColor3 = ORIGINAL_TEXT
-                    strokeIY.Color = ORIGINAL_STROKE
-                end
-            end)
-        else
-            -- Gagal: merah sementara, lalu kembali normal
-            IY_BUTTON.Text = "Load Failed - Check Console"
-            IY_BUTTON.BackgroundColor3 = Color3.fromRGB(140, 0, 0)  -- Ubah ke merah menyala gelap
-            strokeIY.Color = Color3.fromRGB(255, 0, 0)  -- Ubah ke merah menyala
-
-            warn("❌ Gagal load Infinite Yield: " .. tostring(err))
-
-            task.delay(4, function()
-                if IY_BUTTON and IY_BUTTON.Parent then
-                    IY_BUTTON.Text = "Load Infinite Yield"
-                    IY_BUTTON.BackgroundColor3 = ORIGINAL_BG
-                    IY_BUTTON.TextColor3 = ORIGINAL_TEXT
-                    strokeIY.Color = ORIGINAL_STROKE
-                end
-            end)
-        end
-    end
-
-    IY_BUTTON.MouseButton1Click:Connect(loadInfiniteYield)
-
-    -- Hover effect (hanya aktif jika belum loaded)
-    IY_BUTTON.MouseEnter:Connect(function()
-        if not loaded then
-            TS:Create(IY_BUTTON, TweenInfo.new(0.2), {
-                BackgroundColor3 = Color3.fromRGB(105, 0, 0),  -- Ubah ke merah menyala gelap
-                TextColor3 = Color3.fromRGB(255, 255, 180)
-            }):Play()
-        end
-    end)
-
-    IY_BUTTON.MouseLeave:Connect(function()
-        if not loaded then
-            TS:Create(IY_BUTTON, TweenInfo.new(0.2), {
-                BackgroundColor3 = ORIGINAL_BG,
-                TextColor3 = ORIGINAL_TEXT
-            }):Play()
-        end
-    end)
-
-    print("Infinite Yield Loader siap di tab Main - warna kembali normal setelah load")
-end
-
--- =============================================
---            FLY TOGGLE + SPEED ADJUST (Tab Main, bawah Infinite Yield)
--- =============================================
-
-do
-    local flyBtn = Instance.new("TextButton")
-    flyBtn.Size = UDim2.new(0, 220, 0, 45)
-    flyBtn.Position = UDim2.new(0.5, -110, 0.32, 0)  -- Bawah IY (~0.15 + 0.17 margin, adjust kalau overlap)
-    flyBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)
-    flyBtn.Text = "Fly (OFF)"
-    flyBtn.TextColor3 = Color3.new(1,1,1)
-    flyBtn.Font = Enum.Font.GothamSemibold
-    flyBtn.TextSize = 18
-    flyBtn.Parent = tabMain
-
-    local cornerFly = Instance.new("UICorner", flyBtn)
-    cornerFly.CornerRadius = UDim.new(0,9)
-
-    local strokeFly = Instance.new("UIStroke", flyBtn)
-    strokeFly.Color = Color3.fromRGB(255,0,0)
-    strokeFly.Thickness = 1.5
-    strokeFly.Transparency = 0.6
-
-    local flyEnabled = false
-    local flySpeed = 50  -- Default speed
-    local bodyVel, bodyGyro
-
-    local function startFly()
-        local char = lp.Character
-        if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-        local root = char.HumanoidRootPart
-
-        bodyVel = Instance.new("BodyVelocity")
-        bodyVel.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bodyVel.Velocity = Vector3.new(0,0,0)
-        bodyVel.Parent = root
-
-        bodyGyro = Instance.new("BodyGyro")
-        bodyGyro.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-        bodyGyro.CFrame = root.CFrame
-        bodyGyro.P = 20000
-        bodyGyro.Parent = root
-
-        local cam = workspace.CurrentCamera
-        local moving = {forward = 0, right = 0, up = 0}
-
-        local conn
-        conn = RS.RenderStepped:Connect(function()
-            if not flyEnabled or not root.Parent then
-                conn:Disconnect()
-                if bodyVel then bodyVel:Destroy() end
-                if bodyGyro then bodyGyro:Destroy() end
-                return
-            end
-
-            local moveDir = Vector3.new(moving.right, moving.up, moving.forward)
-            if moveDir.Magnitude > 0 then
-                moveDir = moveDir.Unit
-            end
-
-            local worldMove = (cam.CFrame.LookVector * moveDir.Z + cam.CFrame.RightVector * moveDir.X + Vector3.new(0, moveDir.Y, 0)) * flySpeed
-            bodyVel.Velocity = worldMove
-            bodyGyro.CFrame = cam.CFrame
-        end)
-    end
-
-    local function stopFly()
-        if bodyVel then bodyVel:Destroy() bodyVel = nil end
-        if bodyGyro then bodyGyro:Destroy() bodyGyro = nil end
-    end
-
-    local function toggleFly()
-        flyEnabled = not flyEnabled
+        if ThemeCore.ToggleBtn then ThemeCore.ToggleBtn.TextColor3 = primary end
         
-        if flyEnabled then
-            flyBtn.Text = "Fly (ON)"
-            flyBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-            strokeFly.Color = Color3.fromRGB(100,255,150)
-            startFly()
-        else
-            flyBtn.Text = "Fly (OFF)"
-            flyBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)
-            strokeFly.Color = Color3.fromRGB(255,0,0)
-            stopFly()
+        for _, toggle in ipairs(ThemeCore.Toggles) do
+            if toggle.Btn.Parent then
+                toggle.Btn.BackgroundColor3 = toggle.GetState() and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+            end
+        end
+        
+        for _, btn in ipairs(ThemeCore.SolidButtons) do
+            if btn.Parent then btn.BackgroundColor3 = SHARED_DARK_COLOR end
         end
     end
 
-    flyBtn.MouseButton1Click:Connect(toggleFly)
+    local RED_MAIN = Color3.fromRGB(255, 0, 0)
+    local RED_MID = Color3.fromRGB(150, 0, 0)
+    local RED_DARK = Color3.fromRGB(50, 0, 0)
 
-    -- Kontrol gerakan (WASD + Space/Ctrl)
-    local inputConn = UIS.InputBegan:Connect(function(input, gp)
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "IndoHubXLoading"
+    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.DisplayOrder = 20000
+    ScreenGui.Parent = gethui and gethui() or game:GetService("CoreGui")
+
+    local Sound = Instance.new("Sound")
+    Sound.SoundId = "rbxassetid://1848354536"
+    Sound.Volume = 1
+    Sound.Looped = true
+    Sound.Parent = ScreenGui
+    Sound:Play()
+
+    local Frame = Instance.new("Frame")
+    Frame.Size = UDim2.new(1,0,1,0)
+    Frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+    Frame.Parent = ScreenGui
+
+    local Gradient = Instance.new("UIGradient")
+    Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, RED_MAIN),
+        ColorSequenceKeypoint.new(0.5, RED_MID),
+        ColorSequenceKeypoint.new(1, RED_DARK)
+    }
+    Gradient.Rotation = 90
+    Gradient.Parent = Frame
+
+    for i = 1, 35 do
+        local ponto = Instance.new("Frame")
+        ponto.Size = UDim2.new(0, math.random(4,7), 0, math.random(4,7))
+        ponto.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        ponto.AnchorPoint = Vector2.new(0.5,0.5)
+        ponto.BackgroundColor3 = RED_MAIN
+        ponto.BackgroundTransparency = 0.25
+        ponto.Parent = Frame
+
+        Instance.new("UICorner", ponto).CornerRadius = UDim.new(1,0)
+
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = RED_MAIN
+        stroke.Thickness = 1
+        stroke.Transparency = 0.4
+        stroke.Parent = ponto
+
+        task.spawn(function()
+            while ScreenGui.Parent do
+                TS:Create(
+                    ponto,
+                    TweenInfo.new(math.random(2,4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {Size = UDim2.new(0,9,0,9), BackgroundTransparency = 0.05}
+                ):Play()
+                task.wait(2)
+                if not ScreenGui.Parent then break end
+                TS:Create(
+                    ponto,
+                    TweenInfo.new(math.random(2,4), Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {Size = UDim2.new(0,5,0,5), BackgroundTransparency = 0.35}
+                ):Play()
+                task.wait(2)
+            end
+        end)
+    end
+
+    for i=1,20 do
+        local line = Instance.new("Frame")
+        line.Size = UDim2.new(0, math.random(60,220), 0, 2)
+        line.Position = UDim2.new(-0.3,0, math.random(),0)
+        line.AnchorPoint = Vector2.new(0,0.5)
+        line.BackgroundColor3 = RED_MAIN
+        line.BackgroundTransparency = 0.4
+        line.Parent = Frame
+        Instance.new("UICorner", line).CornerRadius = UDim.new(1,0)
+
+        task.spawn(function()
+            while ScreenGui.Parent do
+                local tween = TS:Create(
+                    line,
+                    TweenInfo.new(math.random(2,4), Enum.EasingStyle.Linear),
+                    {Position = UDim2.new(1.3,0, math.random(),0)}
+                )
+                tween:Play()
+                tween.Completed:Wait()
+                if ScreenGui.Parent then
+                    line.Position = UDim2.new(-0.3,0, math.random(),0)
+                end
+            end
+        end)
+    end
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(0.7,0,0.12,0)
+    Title.Position = UDim2.new(0.5,0,0.1,0)
+    Title.AnchorPoint = Vector2.new(0.5,0)
+    Title.BackgroundTransparency = 1
+    Title.Text = "INDOHUB X"
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextScaled = true
+    Title.TextColor3 = RED_MAIN
+    Title.Parent = Frame
+
+    local LogoFrame = Instance.new("Frame")
+    LogoFrame.Size = UDim2.new(0,110,0,110)
+    LogoFrame.Position = UDim2.new(0.5,0,0.35,0)
+    LogoFrame.AnchorPoint = Vector2.new(0.5,0.5)
+    LogoFrame.BackgroundTransparency = 1
+    LogoFrame.Parent = Frame
+
+    local thumb = Players:GetUserThumbnailAsync(
+        lp.UserId,
+        Enum.ThumbnailType.AvatarBust,
+        Enum.ThumbnailSize.Size420x420
+    )
+
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Size = UDim2.new(1,0,1,0)
+    Avatar.BackgroundTransparency = 1
+    Avatar.Image = thumb
+    Avatar.Parent = LogoFrame
+
+    Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1,0)
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Thickness = 3
+    Stroke.Color = RED_MAIN
+    Stroke.Parent = Avatar
+
+    local angle = 0
+    local rotConnection
+    rotConnection = RS.RenderStepped:Connect(function(dt)
+        angle += dt * 45
+        if LogoFrame.Parent then
+            LogoFrame.Rotation = angle % 360
+        else
+            rotConnection:Disconnect()
+        end
+    end)
+
+    local Nick = Instance.new("TextLabel")
+    Nick.Size = UDim2.new(0.4,0,0.05,0)
+    Nick.Position = UDim2.new(0.5,0,0.53,0)
+    Nick.AnchorPoint = Vector2.new(0.5,0)
+    Nick.BackgroundTransparency = 1
+    Nick.Text = "User: "..lp.Name
+    Nick.Font = Enum.Font.GothamBold
+    Nick.TextScaled = true
+    Nick.TextColor3 = RED_MAIN
+    Nick.Parent = Frame
+
+    local Sub = Instance.new("TextLabel")
+    Sub.Size = UDim2.new(0.6,0,0.05,0)
+    Sub.Position = UDim2.new(0.5,0,0.6,0)
+    Sub.AnchorPoint = Vector2.new(0.5,0)
+    Sub.BackgroundTransparency = 1
+    Sub.Text = "Memuat Fitur..."
+    Sub.Font = Enum.Font.Gotham
+    Sub.TextScaled = true
+    Sub.TextColor3 = RED_MID
+    Sub.Parent = Frame
+
+    local BarBG = Instance.new("Frame")
+    BarBG.Size = UDim2.new(0.6,0,0.05,0)
+    BarBG.Position = UDim2.new(0.2,0,0.8,0)
+    BarBG.BackgroundColor3 = RED_DARK
+    BarBG.Parent = Frame
+    Instance.new("UICorner", BarBG).CornerRadius = UDim.new(0.3,0)
+
+    local Bar = Instance.new("Frame")
+    Bar.Size = UDim2.new(0,0,1,0)
+    Bar.BackgroundColor3 = RED_MAIN
+    Bar.Parent = BarBG
+    Instance.new("UICorner", Bar).CornerRadius = UDim.new(0.3,0)
+
+    local Percent = Instance.new("TextLabel")
+    Percent.Size = UDim2.new(0.6,0,0.05,0)
+    Percent.Position = UDim2.new(0.2,0,0.87,0)
+    Percent.BackgroundTransparency = 1
+    Percent.Text = "0%"
+    Percent.Font = Enum.Font.GothamBold
+    Percent.TextScaled = true
+    Percent.TextColor3 = Color3.new(1,1,1)
+    Percent.Parent = Frame
+
+    local totalTime = 5
+    for i=1,100 do
+        Bar.Size = UDim2.new(i/100,0,1,0)
+        Percent.Text = i.."%"
+        task.wait(totalTime/100)
+    end
+
+    task.wait(0.5)
+    Sound:Stop()
+    ScreenGui:Destroy()
+        
+    local MainGui = Instance.new("ScreenGui")
+    MainGui.Name = "IndoHubX"
+    MainGui.ResetOnSpawn = false
+    MainGui.DisplayOrder = 9998
+    MainGui.IgnoreGuiInset = true
+    MainGui.Parent = gethui and gethui() or game.CoreGui
+
+    local HubContainer = Instance.new("Frame")
+    HubContainer.Name = "HubContainer"
+    HubContainer.Size = UDim2.new(0, 500, 0, 310) 
+    HubContainer.Position = UDim2.new(0.5, -250, 0.5, -155)
+    HubContainer.BackgroundTransparency = 1
+    HubContainer.Visible = false
+    HubContainer.Parent = MainGui
+
+    local MainFrame = Instance.new("Frame")
+    MainFrame.Name = "MainFrame"
+    MainFrame.Size = UDim2.new(1, 0, 1, 0)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(16,10,10)
+    MainFrame.BackgroundTransparency = 0.2
+    MainFrame.BorderSizePixel = 0
+    MainFrame.ClipsDescendants = true
+    MainFrame.Parent = HubContainer
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 10)
+    UICorner.Parent = MainFrame
+
+    local UIGradient = Instance.new("UIGradient")
+    UIGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(55,0,0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20,0,0))
+    }
+    UIGradient.Rotation = 90
+    UIGradient.Parent = MainFrame
+    ThemeCore.MainGrad = UIGradient
+
+    local NeonBorder = Instance.new("UIStroke")
+    NeonBorder.Color = Color3.fromRGB(255,0,0)
+    NeonBorder.Thickness = 2
+    NeonBorder.Transparency = 0.4
+    NeonBorder.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    NeonBorder.Parent = MainFrame
+    table.insert(ThemeCore.Strokes, NeonBorder)
+
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1,0,0,40)
+    Header.BackgroundColor3 = Color3.fromRGB(32,0,0)
+    Header.BorderSizePixel = 0
+    Header.Parent = MainFrame
+
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0,10)
+    HeaderCorner.Parent = Header
+
+    local MainTitle = Instance.new("TextLabel")
+    MainTitle.Size = UDim2.new(0.7,0,1,0)
+    MainTitle.Position = UDim2.new(0,14,0,0)
+    MainTitle.BackgroundTransparency = 1
+    MainTitle.Text = "IndoHub X"
+    MainTitle.TextColor3 = Color3.fromRGB(255,225,225)
+    MainTitle.Font = Enum.Font.GothamBlack
+    MainTitle.TextSize = 22
+    MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+    MainTitle.Parent = Header
+    table.insert(ThemeCore.Texts, MainTitle)
+
+    local CloseBtn = Instance.new("TextButton")
+    CloseBtn.Size = UDim2.new(0,30,0,30)
+    CloseBtn.Position = UDim2.new(1,-38,0.5,-15)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(190,0,0)
+    CloseBtn.Text = "X"
+    CloseBtn.TextColor3 = Color3.new(1,1,1)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 18
+    CloseBtn.Parent = Header
+    Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0,7)
+
+    local SidePanel = Instance.new("Frame")
+    SidePanel.Name = "SidePanel"
+    SidePanel.Size = UDim2.new(0, 160, 1, 0)
+    SidePanel.Position = UDim2.new(1, 8, 0, 0)
+    SidePanel.BackgroundColor3 = Color3.fromRGB(16,10,10)
+    SidePanel.BackgroundTransparency = 0.2
+    SidePanel.BorderSizePixel = 0
+    SidePanel.Visible = false
+    SidePanel.Parent = HubContainer
+
+    Instance.new("UICorner", SidePanel).CornerRadius = UDim.new(0, 10)
+    local SideGradient = Instance.new("UIGradient", SidePanel)
+    SideGradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(40,0,0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(15,0,0))
+    }
+    SideGradient.Rotation = 90
+    ThemeCore.SideGrad = SideGradient
+    
+    local SideStroke = Instance.new("UIStroke", SidePanel)
+    SideStroke.Color = Color3.fromRGB(255,0,0)
+    SideStroke.Thickness = 2
+    SideStroke.Transparency = 0.4
+    SideStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    table.insert(ThemeCore.Strokes, SideStroke)
+
+    local SideHeader = Instance.new("Frame")
+    SideHeader.Size = UDim2.new(1,0,0,40)
+    SideHeader.BackgroundColor3 = Color3.fromRGB(32,0,0)
+    SideHeader.BorderSizePixel = 0
+    SideHeader.Parent = SidePanel
+    Instance.new("UICorner", SideHeader).CornerRadius = UDim.new(0,10)
+
+    local SideTitle = Instance.new("TextLabel")
+    SideTitle.Size = UDim2.new(1,0,1,0)
+    SideTitle.Position = UDim2.new(0,10,0,0)
+    SideTitle.BackgroundTransparency = 1
+    SideTitle.Text = "Player List"
+    SideTitle.TextColor3 = Color3.fromRGB(255,225,225)
+    SideTitle.Font = Enum.Font.GothamBold
+    SideTitle.TextSize = 16
+    SideTitle.TextXAlignment = Enum.TextXAlignment.Left
+    SideTitle.Parent = SideHeader
+    table.insert(ThemeCore.Texts, SideTitle)
+
+    local SideCloseBtn = Instance.new("TextButton")
+    SideCloseBtn.Size = UDim2.new(0,24,0,24)
+    SideCloseBtn.Position = UDim2.new(1,-30,0.5,-12)
+    SideCloseBtn.BackgroundColor3 = Color3.fromRGB(190,0,0)
+    SideCloseBtn.Text = "X"
+    SideCloseBtn.TextColor3 = Color3.new(1,1,1)
+    SideCloseBtn.Font = Enum.Font.GothamBold
+    SideCloseBtn.TextSize = 14
+    SideCloseBtn.Parent = SideHeader
+    Instance.new("UICorner", SideCloseBtn).CornerRadius = UDim.new(0,6)
+
+    SideCloseBtn.MouseButton1Click:Connect(function()
+        SidePanel.Visible = false
+    end)
+
+    local SearchBox = Instance.new("TextBox")
+    SearchBox.Size = UDim2.new(1, -12, 0, 25)
+    SearchBox.Position = UDim2.new(0, 6, 0, 45)
+    SearchBox.BackgroundColor3 = Color3.fromRGB(30, 10, 10)
+    SearchBox.TextColor3 = Color3.fromRGB(255, 225, 225)
+    SearchBox.PlaceholderText = "Search player..."
+    SearchBox.PlaceholderColor3 = Color3.fromRGB(150, 100, 100)
+    SearchBox.Font = Enum.Font.Gotham
+    SearchBox.TextSize = 13
+    SearchBox.Text = "" 
+    SearchBox.ClearTextOnFocus = false
+    SearchBox.Parent = SidePanel
+    Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 6)
+    local SearchStroke = Instance.new("UIStroke", SearchBox)
+    SearchStroke.Color = Color3.fromRGB(255, 0, 0)
+    SearchStroke.Thickness = 1
+    SearchStroke.Transparency = 0.5
+    table.insert(ThemeCore.Strokes, SearchStroke)
+
+    local PlayerScroll = Instance.new("ScrollingFrame")
+    PlayerScroll.Size = UDim2.new(1, -12, 1, -80)
+    PlayerScroll.Position = UDim2.new(0, 6, 0, 75)
+    PlayerScroll.BackgroundTransparency = 1
+    PlayerScroll.ScrollBarThickness = 3
+    PlayerScroll.ScrollBarImageColor3 = Color3.fromRGB(150,50,50)
+    PlayerScroll.Parent = SidePanel
+
+    local PScrollLayout = Instance.new("UIListLayout", PlayerScroll)
+    PScrollLayout.Padding = UDim.new(0, 5)
+    PScrollLayout.SortOrder = Enum.SortOrder.Name
+
+    SearchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        local searchText = string.lower(SearchBox.Text)
+        for _, child in ipairs(PlayerScroll:GetChildren()) do
+            if child:IsA("TextButton") then
+                local plrName = string.lower(child.Name)
+                local dispName = string.lower(child.Text)
+                if searchText == "" or string.find(plrName, searchText) or string.find(dispName, searchText) then
+                    child.Visible = true
+                else
+                    child.Visible = false
+                end
+            end
+        end
+    end)
+
+    local TabFrame = Instance.new("ScrollingFrame")
+    TabFrame.Size = UDim2.new(1, 0, 0, 34)
+    TabFrame.Position = UDim2.new(0, 8, 0, 40)
+    TabFrame.BackgroundTransparency = 1
+    TabFrame.ScrollBarThickness = 0
+    TabFrame.ScrollingDirection = Enum.ScrollingDirection.X
+    TabFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabFrame.Parent = MainFrame
+
+    local TabListLayout = Instance.new("UIListLayout")
+    TabListLayout.FillDirection = Enum.FillDirection.Horizontal
+    TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    TabListLayout.Padding = UDim.new(0, 5)
+    TabListLayout.Parent = TabFrame
+
+    TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        TabFrame.CanvasSize = UDim2.new(0, TabListLayout.AbsoluteContentSize.X, 0, 0)
+    end)
+
+    local tabButtons = {}
+    local tabContents = {}
+
+    local function CreateTab(name, index)
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(0, 77, 1, -4) 
+        btn.BackgroundColor3 = SHARED_DARK_COLOR
+        btn.BackgroundTransparency = 0.5
+        btn.Text = name
+        btn.TextColor3 = Color3.fromRGB(255,210,210)
+        btn.Font = Enum.Font.GothamSemibold
+        btn.TextSize = 13
+        btn.LayoutOrder = index
+        btn.Parent = TabFrame
+        Instance.new("UICorner", btn).CornerRadius = UDim.new(0,7)
+        table.insert(ThemeCore.SolidButtons, btn)
+
+        local content = Instance.new("Frame")
+        content.Size = UDim2.new(1,-16,1,-90)
+        content.Position = UDim2.new(0,8,0,80)
+        content.BackgroundTransparency = 1
+        content.Visible = false
+        content.Parent = MainFrame
+
+        table.insert(tabButtons, btn)
+        table.insert(tabContents, content)
+
+        btn.MouseButton1Click:Connect(function()
+            for _, c in ipairs(tabContents) do c.Visible = false end
+            content.Visible = true
+            for _, b in ipairs(tabButtons) do
+                TS:Create(b, TweenInfo.new(0.2), {BackgroundTransparency = 0.5, TextColor3 = Color3.fromRGB(255,210,210)}):Play()
+            end
+            TS:Create(btn, TweenInfo.new(0.2), {BackgroundTransparency = 0.2, TextColor3 = Color3.fromRGB(255,255,255)}):Play()
+        end)
+
+        return content
+    end
+
+    local tabInfo      = CreateTab("Info", 1)
+    local tabMain      = CreateTab("Main", 2)
+    local tabPlayer    = CreateTab("Player", 3)
+    local tabVisual    = CreateTab("Visual", 4)
+    local tabProtect   = CreateTab("Protect", 5)
+    local tabMisc      = CreateTab("Misc", 6)
+    local tabAimbot    = CreateTab("Aimbot", 7)
+
+    tabInfo.Visible = true
+    tabButtons[1].BackgroundTransparency = 0.2
+    tabButtons[1].TextColor3 = Color3.fromRGB(255,255,255)
+
+    local InfoPic = Instance.new("ImageLabel")
+    InfoPic.Size = UDim2.new(0, 60, 0, 60)
+    InfoPic.Position = UDim2.new(0.04, 0, 0.05, 0)
+    InfoPic.BackgroundColor3 = SHARED_DARK2_COLOR
+    InfoPic.BackgroundTransparency = 0
+    InfoPic.Parent = tabInfo
+    Instance.new("UICorner", InfoPic).CornerRadius = UDim.new(1, 0)
+    local InfoStroke = Instance.new("UIStroke", InfoPic)
+    InfoStroke.Color = SHARED_THEME_COLOR
+    InfoStroke.Thickness = 2
+
+    task.spawn(function()
+        pcall(function()
+            local id = Players:GetUserIdFromNameAsync("D_ForDeath1")
+            if id then
+                InfoPic.Image = Players:GetUserThumbnailAsync(id, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+            end
+        end)
+    end)
+
+    local InfoTitle = Instance.new("TextLabel")
+    InfoTitle.Size = UDim2.new(0, 200, 0, 25)
+    InfoTitle.Position = UDim2.new(0, 90, 0.05, 5)
+    InfoTitle.BackgroundTransparency = 1
+    InfoTitle.Text = "Owner Script"
+    InfoTitle.TextColor3 = Color3.new(1, 1, 1)
+    InfoTitle.Font = Enum.Font.GothamBlack
+    InfoTitle.TextSize = 18
+    InfoTitle.TextXAlignment = Enum.TextXAlignment.Left
+    InfoTitle.Parent = tabInfo
+
+    local InfoName = Instance.new("TextLabel")
+    InfoName.Size = UDim2.new(0, 200, 0, 20)
+    InfoName.Position = UDim2.new(0, 90, 0.05, 30)
+    InfoName.BackgroundTransparency = 1
+    InfoName.Text = "D_ForDeath1"
+    InfoName.TextColor3 = SHARED_THEME_COLOR
+    InfoName.Font = Enum.Font.GothamBold
+    InfoName.TextSize = 15
+    InfoName.TextXAlignment = Enum.TextXAlignment.Left
+    InfoName.Parent = tabInfo
+    table.insert(ThemeCore.Texts, InfoName)
+
+    local ToggleGui = Instance.new("ScreenGui")
+    ToggleGui.Name = "IndoHubXToggle"
+    ToggleGui.ResetOnSpawn = false
+    ToggleGui.DisplayOrder = 9999
+    ToggleGui.IgnoreGuiInset = true
+    ToggleGui.Parent = gethui and gethui() or game.CoreGui
+
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.Size = UDim2.new(0,55,0,55) 
+    ToggleBtn.Position = UDim2.new(1, -65, 0, 15)
+    ToggleBtn.AnchorPoint = Vector2.new(1, 0)
+    ToggleBtn.BackgroundColor3 = Color3.fromRGB(32,0,0)
+    ToggleBtn.BackgroundTransparency = 0.4
+    ToggleBtn.Text = "☆"
+    ToggleBtn.TextColor3 = Color3.fromRGB(255,0,0)
+    ToggleBtn.Font = Enum.Font.GothamBlack
+    ToggleBtn.TextSize = 25 
+    ToggleBtn.AutoButtonColor = false
+    ToggleBtn.Parent = ToggleGui
+    ThemeCore.ToggleBtn = ToggleBtn
+
+    local tc = Instance.new("UICorner", ToggleBtn); tc.CornerRadius = UDim.new(1,0)
+
+    local tg = Instance.new("UIGradient", ToggleBtn)
+    tg.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(140,0,0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(255,0,0))
+    }
+    tg.Rotation = 45
+    ThemeCore.ToggleGrad = tg
+
+    local ts = Instance.new("UIStroke", ToggleBtn)
+    ts.Color = Color3.fromRGB(255,0,0)
+    ts.Thickness = 3
+    ts.Transparency = 0.3
+    table.insert(ThemeCore.Strokes, ts)
+
+    task.spawn(function()
+        while ToggleBtn.Parent do
+            TS:Create(ts, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+                Thickness = 5.5,
+                Transparency = 0.08
+            }):Play()
+            task.wait(4)
+        end
+    end)
+
+    ToggleBtn.MouseEnter:Connect(function()
+        TS:Create(ToggleBtn, TweenInfo.new(0.25), {BackgroundTransparency = 0.15}):Play()
+        TS:Create(ts, TweenInfo.new(0.25), {Transparency = 0, Color = CurrentThemeColor}):Play()
+    end)
+    ToggleBtn.MouseLeave:Connect(function()
+        TS:Create(ToggleBtn, TweenInfo.new(0.25), {BackgroundTransparency = 0.4}):Play()
+        TS:Create(ts, TweenInfo.new(0.25), {Transparency = 0.3, Color = CurrentThemeColor}):Play()
+    end)
+
+    local tDragging, tDragInput, tStartPos, dragStartPos
+    ToggleBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            tDragging = true
+            tStartPos = ToggleBtn.Position
+            dragStartPos = input.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then tDragging = false end
+            end)
+        end
+    end)
+    ToggleBtn.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            tDragInput = input
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == tDragInput and tDragging then
+            local delta = input.Position - dragStartPos
+            ToggleBtn.Position = UDim2.new(tStartPos.X.Scale, tStartPos.X.Offset + delta.X, tStartPos.Y.Scale, tStartPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    local HubVisible = false
+
+    local function ToggleHub()
+        HubVisible = not HubVisible
+        if HubVisible then
+            HubContainer.Visible = true
+            TS:Create(HubContainer, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Position = UDim2.new(0.5, -250, 0.5, -155)
+            }):Play()
+            ToggleBtn.Text = "X"
+        else
+            TS:Create(HubContainer, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
+                Position = UDim2.new(0.5, -250, 1.2, 0)
+            }):Play()
+            task.delay(0.38, function()
+                if not HubVisible then HubContainer.Visible = false end
+            end)
+            ToggleBtn.Text = "☆"
+        end
+    end
+
+    ToggleBtn.MouseButton1Click:Connect(ToggleHub)
+
+    local dragging, dragInput, dragStart, startPos
+    Header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = HubContainer.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+    Header.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UIS.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            HubContainer.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    CloseBtn.MouseButton1Click:Connect(ToggleHub)
+
+    UIS.InputBegan:Connect(function(input, gp)
         if gp then return end
-        if not flyEnabled then return end
-
-        if input.KeyCode == Enum.KeyCode.W then moving.forward = 1
-        elseif input.KeyCode == Enum.KeyCode.S then moving.forward = -1
-        elseif input.KeyCode == Enum.KeyCode.A then moving.right = -1
-        elseif input.KeyCode == Enum.KeyCode.D then moving.right = 1
-        elseif input.KeyCode == Enum.KeyCode.Space then moving.up = 1
-        elseif input.KeyCode == Enum.KeyCode.LeftControl then moving.up = -1 end
+        if input.KeyCode == Enum.KeyCode.Insert or input.KeyCode == Enum.KeyCode.RightShift then
+            ToggleHub()
+        end
     end)
 
-    local inputEnded = UIS.InputEnded:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.W or input.KeyCode == Enum.KeyCode.S then moving.forward = 0
-        elseif input.KeyCode == Enum.KeyCode.A or input.KeyCode == Enum.KeyCode.D then moving.right = 0
-        elseif input.KeyCode == Enum.KeyCode.Space or input.KeyCode == Enum.KeyCode.LeftControl then moving.up = 0 end
-    end)
-
-    -- TextBox adjust speed
-    local speedLabelFly = Instance.new("TextLabel")
-    speedLabelFly.Size = UDim2.new(0,120,0,30)
-    speedLabelFly.Position = UDim2.new(0.5, -110, 0.42, 0)  -- Bawah tombol fly
-    speedLabelFly.BackgroundTransparency = 1
-    speedLabelFly.Text = "Fly Speed:"
-    speedLabelFly.TextColor3 = Color3.fromRGB(255,200,200)
-    speedLabelFly.Font = Enum.Font.Gotham
-    speedLabelFly.TextSize = 15
-    speedLabelFly.Parent = tabMain
-
-    local speedBoxFly = Instance.new("TextBox")
-    speedBoxFly.Size = UDim2.new(0,100,0,30)
-    speedBoxFly.Position = UDim2.new(0.5, 20, 0.42, 0)
-    speedBoxFly.BackgroundColor3 = Color3.fromRGB(60,0,0)
-    speedBoxFly.Text = tostring(flySpeed)
-    speedBoxFly.TextColor3 = Color3.new(1,1,1)
-    speedBoxFly.Font = Enum.Font.Gotham
-    speedBoxFly.TextSize = 15
-    speedBoxFly.ClearTextOnFocus = false
-    speedBoxFly.Parent = tabMain
-
-    local cornerSpeedFly = Instance.new("UICorner", speedBoxFly)
-    cornerSpeedFly.CornerRadius = UDim.new(0,6)
-
-    speedBoxFly.FocusLost:Connect(function(enter)
-        if enter then
-            local val = tonumber(speedBoxFly.Text)
-            if val and val > 0 then
-                flySpeed = val
-                print("Fly speed diubah ke: " .. flySpeed)
-            else
-                speedBoxFly.Text = tostring(flySpeed)
+    local function GetTargetPlayer(str)
+        local searchStr = str:lower()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= lp then
+                if p.Name:lower():sub(1, #searchStr) == searchStr or p.DisplayName:lower():sub(1, #searchStr) == searchStr then
+                    return p
+                end
             end
         end
-    end)
-
-    -- Respawn handler
-    lp.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        stopFly()  -- Stop dulu biar ga bug
-        if flyEnabled then
-            startFly()  -- Restart fly
-        end
-    end)
-
-    -- Cleanup pas unload (opsional)
-    game:BindToClose(function()
-        stopFly()
-    end)
-
-    print("Fly Toggle + Adjustable Speed added below Infinite Yield – terbang mulu bro!")
-end
-
--- =============================================
---            EXECUTE CUSTOM SCRIPT (Tab Misc) + CLEAR BUTTON
--- =============================================
-
-do
-    -- TextBox untuk input script
-    local ScriptBox = Instance.new("TextBox")
-    ScriptBox.Size = UDim2.new(0.9, 0, 0.45, 0)
-    ScriptBox.Position = UDim2.new(0.05, 0, 0.30, 0)
-    ScriptBox.BackgroundColor3 = Color3.fromRGB(35,0,0)  -- Ubah ke merah menyala gelap
-    ScriptBox.BorderSizePixel = 0
-    ScriptBox.TextColor3 = Color3.fromRGB(255,220,220)
-    ScriptBox.Font = Enum.Font.Code
-    ScriptBox.TextSize = 14
-    ScriptBox.MultiLine = true
-    ScriptBox.TextXAlignment = Enum.TextXAlignment.Left
-    ScriptBox.TextYAlignment = Enum.TextYAlignment.Top
-    ScriptBox.ClearTextOnFocus = false
-    ScriptBox.TextWrapped = true
-    ScriptBox.PlaceholderText = "-- Paste script Lua di sini...\n-- Contoh: print('Hello from custom script!')"
-    ScriptBox.Parent = tabMisc
-
-    local ScriptCorner = Instance.new("UICorner", ScriptBox)
-    ScriptCorner.CornerRadius = UDim.new(0, 8)
-
-    local ScriptStroke = Instance.new("UIStroke", ScriptBox)
-    ScriptStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    ScriptStroke.Thickness = 1.2
-    ScriptStroke.Transparency = 0.5
-
-    -- Tombol Execute
-    local ExecButton = Instance.new("TextButton")
-    ExecButton.Size = UDim2.new(0.4, 0, 0.08, 0)
-    ExecButton.Position = UDim2.new(0.05, 0, 0.78, 0)
-    ExecButton.BackgroundColor3 = Color3.fromRGB(140,0,0)  -- Ubah ke merah menyala gelap
-    ExecButton.Text = "Execute Script"
-    ExecButton.TextColor3 = Color3.new(1,1,1)
-    ExecButton.Font = Enum.Font.GothamSemibold
-    ExecButton.TextSize = 17
-    ExecButton.Parent = tabMisc
-
-    local ExecCorner = Instance.new("UICorner", ExecButton)
-    ExecCorner.CornerRadius = UDim.new(0, 8)
-
-    local ExecStroke = Instance.new("UIStroke", ExecButton)
-    ExecStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    ExecStroke.Thickness = 1.5
-    ExecStroke.Transparency = 0.4
-
-    -- Tombol Clear (baru)
-    local ClearButton = Instance.new("TextButton")
-    ClearButton.Size = UDim2.new(0.4, 0, 0.08, 0)
-    ClearButton.Position = UDim2.new(0.55, 0, 0.78, 0)  -- di sebelah kanan Execute
-    ClearButton.BackgroundColor3 = Color3.fromRGB(100, 0, 0)  -- Ubah ke merah menyala gelap
-    ClearButton.Text = "Clear"
-    ClearButton.TextColor3 = Color3.new(1,1,1)
-    ClearButton.Font = Enum.Font.GothamSemibold
-    ClearButton.TextSize = 17
-    ClearButton.Parent = tabMisc
-
-    local ClearCorner = Instance.new("UICorner", ClearButton)
-    ClearCorner.CornerRadius = UDim.new(0, 8)
-
-    local ClearStroke = Instance.new("UIStroke", ClearButton)
-    ClearStroke.Color = Color3.fromRGB(200, 0, 0)  -- Ubah ke merah menyala
-    ClearStroke.Thickness = 1.5
-    ClearStroke.Transparency = 0.4
-
-    -- Status label
-    local StatusLabel = Instance.new("TextLabel")
-    StatusLabel.Size = UDim2.new(0.9, 0, 0.06, 0)
-    StatusLabel.Position = UDim2.new(0.05, 0, 0.87, 0)
-    StatusLabel.BackgroundTransparency = 1
-    StatusLabel.Text = ""
-    StatusLabel.TextColor3 = Color3.fromRGB(255,100,100)  -- Ubah ke merah menyala
-    StatusLabel.Font = Enum.Font.Gotham
-    StatusLabel.TextSize = 14
-    StatusLabel.TextXAlignment = Enum.TextXAlignment.Left
-    StatusLabel.Parent = tabMisc
-
-    local function executeScript()
-        local code = ScriptBox.Text
-        if code == "" or code:match("^%s*$") then
-            StatusLabel.Text = "No script entered"
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Ubah ke merah menyala
-            task.delay(3, function() StatusLabel.Text = "" end)
-            return
-        end
-
-        local success, result = pcall(function()
-            return loadstring(code)()
-        end)
-
-        if success then
-            ExecButton.BackgroundColor3 = Color3.fromRGB(60, 140, 80)
-            ExecButton.Text = "Executed ✓"
-            StatusLabel.Text = "Script executed successfully"
-            StatusLabel.TextColor3 = Color3.fromRGB(180, 255, 180)
-
-            task.delay(3, function()
-                if ExecButton and ExecButton.Parent then
-                    ExecButton.BackgroundColor3 = Color3.fromRGB(140,0,0)  -- Ubah ke merah menyala gelap
-                    ExecButton.Text = "Execute Script"
-                end
-                StatusLabel.Text = ""
-            end)
-        else
-            ExecButton.BackgroundColor3 = Color3.fromRGB(140, 0, 0)  -- Ubah ke merah menyala gelap
-            ExecButton.Text = "Error!"
-            StatusLabel.Text = "Error: " .. tostring(result):sub(1, 60) .. "..."
-            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)  -- Ubah ke merah menyala
-
-            task.delay(5, function()
-                if ExecButton and ExecButton.Parent then
-                    ExecButton.BackgroundColor3 = Color3.fromRGB(140,0,0)  -- Ubah ke merah menyala gelap
-                    ExecButton.Text = "Execute Script"
-                end
-                StatusLabel.Text = ""
-            end)
-
-            warn("Custom script error: " .. tostring(result))
-        end
+        return nil
     end
 
-    local function clearAll()
-        ScriptBox.Text = ""
-        StatusLabel.Text = ""
-        ExecButton.BackgroundColor3 = Color3.fromRGB(140,0,0)  -- Ubah ke merah menyala gelap
-        ExecButton.Text = "Execute Script"
-        print("Executor cleared")
-    end
+    do
+        local speedHackBtn = Instance.new("TextButton")
+        speedHackBtn.Size = UDim2.new(0,165,0,35)
+        speedHackBtn.Position = UDim2.new(0.04,0,0.06,0)
+        speedHackBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        speedHackBtn.Text = "Speed Hack (OFF)"
+        speedHackBtn.TextColor3 = Color3.new(1,1,1)
+        speedHackBtn.Font = Enum.Font.Gotham
+        speedHackBtn.TextSize = 15
+        speedHackBtn.Parent = tabPlayer
+        Instance.new("UICorner", speedHackBtn).CornerRadius = UDim.new(0,8)
 
-    ExecButton.MouseButton1Click:Connect(executeScript)
-    ClearButton.MouseButton1Click:Connect(clearAll)
+        local speedEnabled = false
+        local originalSpeed = 16
+        local hackSpeed = 50
+        
+        table.insert(ThemeCore.Toggles, {Btn = speedHackBtn, GetState = function() return speedEnabled end})
 
-    -- Hover effect untuk Execute
-    ExecButton.MouseEnter:Connect(function()
-        TS:Create(ExecButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(170,0,0)  -- Ubah ke merah menyala gelap
-        }):Play()
-    end)
-    ExecButton.MouseLeave:Connect(function()
-        TS:Create(ExecButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(140,0,0)  -- Ubah ke merah menyala gelap
-        }):Play()
-    end)
-
-    -- Hover effect untuk Clear
-    ClearButton.MouseEnter:Connect(function()
-        TS:Create(ClearButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(140, 0, 0)  -- Ubah ke merah menyala gelap
-        }):Play()
-    end)
-    ClearButton.MouseLeave:Connect(function()
-        TS:Create(ClearButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(100, 0, 0)  -- Ubah ke merah menyala gelap
-        }):Play()
-    end)
-
-    print("Custom Script Executor (with Clear button) ready in tab Misc")
-end
-
--- =============================================
---            JUMP HACK - DI SAMPING SPEED HACK
--- =============================================
-
-do
-    -- Pastikan tidak terpotong
-    tabPlayer.ClipsDescendants = false
-
-    -- Tombol Jump Hack (posisi kanan Speed Hack)
-    local jumpHackBtn = Instance.new("TextButton")
-    jumpHackBtn.Name = "JumpHackBtn"
-    jumpHackBtn.Size = UDim2.new(0, 170, 0, 38)
-    jumpHackBtn.Position = UDim2.new(0.52, 0, 0.08, 0)  -- ~kanan Speed Hack (0.06 + 0.46 ≈ 0.52)
-    jumpHackBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    jumpHackBtn.Text = "Jump Hack (OFF)"
-    jumpHackBtn.TextColor3 = Color3.new(1,1,1)
-    jumpHackBtn.Font = Enum.Font.Gotham
-    jumpHackBtn.TextSize = 16
-    jumpHackBtn.Visible = true
-    jumpHackBtn.ZIndex = 10
-    jumpHackBtn.Parent = tabPlayer
-
-    local cornerJumpBtn = Instance.new("UICorner", jumpHackBtn)
-    cornerJumpBtn.CornerRadius = UDim.new(0,8)
-
-    local jumpEnabled = false
-    local originalJumpPower = 50
-    local hackJumpPower = 100
-
-    local function applyJump()
-        pcall(function()
+        local function applySpeed()
             if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                lp.Character.Humanoid.JumpPower = jumpEnabled and hackJumpPower or originalJumpPower
+                lp.Character.Humanoid.WalkSpeed = speedEnabled and hackSpeed or originalSpeed
             end
+        end
+
+        speedHackBtn.MouseButton1Click:Connect(function()
+            speedEnabled = not speedEnabled
+            speedHackBtn.Text = speedEnabled and "Speed Hack (ON)" or "Speed Hack (OFF)"
+            speedHackBtn.BackgroundColor3 = speedEnabled and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+            applySpeed()
+        end)
+
+        local speedLabel = Instance.new("TextLabel")
+        speedLabel.Size = UDim2.new(0,100,0,25)
+        speedLabel.Position = UDim2.new(0.04,0,0.22,0)
+        speedLabel.BackgroundTransparency = 1
+        speedLabel.Text = "Speed:"
+        speedLabel.TextColor3 = Color3.fromRGB(255,200,200)
+        speedLabel.Font = Enum.Font.Gotham
+        speedLabel.TextSize = 14
+        speedLabel.TextXAlignment = Enum.TextXAlignment.Left
+        speedLabel.Parent = tabPlayer
+
+        local speedBox = Instance.new("TextBox")
+        speedBox.Size = UDim2.new(0,60,0,25)
+        speedBox.Position = UDim2.new(0.04,55,0.22,0)
+        speedBox.BackgroundColor3 = SHARED_DARK2_COLOR
+        speedBox.BorderSizePixel = 0
+        speedBox.Text = tostring(hackSpeed)
+        speedBox.TextColor3 = Color3.new(1,1,1)
+        speedBox.Font = Enum.Font.Gotham
+        speedBox.TextSize = 14
+        speedBox.ClearTextOnFocus = false
+        speedBox.Parent = tabPlayer
+        Instance.new("UICorner", speedBox).CornerRadius = UDim.new(0,6)
+        
+        table.insert(ThemeCore.DarkBGs, speedBox)
+
+        speedBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                local newSpeed = tonumber(speedBox.Text)
+                if newSpeed and newSpeed >= 0 then
+                    hackSpeed = newSpeed
+                    if speedEnabled then applySpeed() end
+                else
+                    speedBox.Text = tostring(hackSpeed)
+                end
+            end
+        end)
+
+        lp.CharacterAdded:Connect(function(char)
+            char:WaitForChild("Humanoid")
+            originalSpeed = char.Humanoid.WalkSpeed
+            if speedEnabled then char.Humanoid.WalkSpeed = hackSpeed end
         end)
     end
 
-    local function enableJump()
-        jumpEnabled = true
-        jumpHackBtn.Text = "Jump Hack (ON)"
-        jumpHackBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-        applyJump()
-    end
-
-    local function disableJump()
-        jumpEnabled = false
+    do
+        local jumpHackBtn = Instance.new("TextButton")
+        jumpHackBtn.Size = UDim2.new(0, 165, 0, 35)
+        jumpHackBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
+        jumpHackBtn.BackgroundColor3 = SHARED_DARK_COLOR
         jumpHackBtn.Text = "Jump Hack (OFF)"
-        jumpHackBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-        applyJump()
-    end
+        jumpHackBtn.TextColor3 = Color3.new(1,1,1)
+        jumpHackBtn.Font = Enum.Font.Gotham
+        jumpHackBtn.TextSize = 15
+        jumpHackBtn.Parent = tabPlayer
+        Instance.new("UICorner", jumpHackBtn).CornerRadius = UDim.new(0,8)
 
-    jumpHackBtn.MouseButton1Click:Connect(function()
-        if jumpEnabled then
-            disableJump()
-        else
-            enableJump()
-        end
-    end)
+        local jumpEnabled = false
+        local originalJumpPower = 50
+        local hackJumpPower = 100
 
-    -- Label Jump Value
-    local jumpLabel = Instance.new("TextLabel")
-    jumpLabel.Size = UDim2.new(0, 120, 0, 30)
-    jumpLabel.Position = UDim2.new(0.52, 0, 0.22, 0)  -- sejajar dengan Speed Value
-    jumpLabel.BackgroundTransparency = 1
-    jumpLabel.Text = "Jump Value:"
-    jumpLabel.TextColor3 = Color3.fromRGB(255,200,200)
-    jumpLabel.Font = Enum.Font.Gotham
-    jumpLabel.TextSize = 15
-    jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
-    jumpLabel.Visible = true
-    jumpLabel.Parent = tabPlayer
+        table.insert(ThemeCore.Toggles, {Btn = jumpHackBtn, GetState = function() return jumpEnabled end})
 
-    -- TextBox Jump Value
-    local jumpBox = Instance.new("TextBox")
-    jumpBox.Size = UDim2.new(0, 100, 0, 30)
-    jumpBox.Position = UDim2.new(0.52, 130, 0.22, 0)  -- di kanan label Jump
-    jumpBox.BackgroundColor3 = Color3.fromRGB(60,0,0)  -- Ubah ke merah menyala gelap
-    jumpBox.BorderSizePixel = 0
-    jumpBox.Text = tostring(hackJumpPower)
-    jumpBox.TextColor3 = Color3.new(1,1,1)
-    jumpBox.Font = Enum.Font.Gotham
-    jumpBox.TextSize = 15
-    jumpBox.ClearTextOnFocus = false
-    jumpBox.Visible = true
-    jumpBox.Parent = tabPlayer
-
-    local cornerJumpBox = Instance.new("UICorner", jumpBox)
-    cornerJumpBox.CornerRadius = UDim.new(0,6)
-
-    jumpBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local newVal = tonumber(jumpBox.Text)
-            if newVal and newVal >= 0 then
-                hackJumpPower = newVal
-                print("Jump Power diubah menjadi: " .. hackJumpPower)
-                if jumpEnabled then applyJump() end
-            else
-                jumpBox.Text = tostring(hackJumpPower)
-            end
-        end
-    end)
-
-    -- Handle respawn
-    lp.CharacterAdded:Connect(function(char)
-        task.wait(0.3)
-        local hum = char:FindFirstChild("Humanoid")
-        if hum then
-            originalJumpPower = hum.JumpPower
-            if jumpEnabled then
-                hum.JumpPower = hackJumpPower
-            end
-        end
-    end)
-
-    -- Apply awal jika karakter sudah ada
-    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-        originalJumpPower = lp.Character.Humanoid.JumpPower
-        if jumpEnabled then applyJump() end
-    end
-
-    -- Force visible setelah load (antisipasi bug)
-    task.delay(0.8, function()
-        jumpHackBtn.Visible = true
-        jumpLabel.Visible = true
-        jumpBox.Visible = true
-    end)
-
-    print("Jump Hack diletakkan di samping Speed Hack")
-end
-
--- =============================================
---            NOCLIP - DI BAWAH SPEED HACK
--- =============================================
-
-do
-    local noclipBtn = Instance.new("TextButton")
-    noclipBtn.Size = UDim2.new(0, 170, 0, 38)
-    noclipBtn.Position = UDim2.new(0.06, 0, 0.36, 0)   -- bawah Speed Hack (~0.08 + 0.14 + margin)
-    noclipBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    noclipBtn.Text = "Noclip (OFF)"
-    noclipBtn.TextColor3 = Color3.new(1,1,1)
-    noclipBtn.Font = Enum.Font.Gotham
-    noclipBtn.TextSize = 16
-    noclipBtn.Parent = tabPlayer
-
-    local cornerNoclip = Instance.new("UICorner", noclipBtn)
-    cornerNoclip.CornerRadius = UDim.new(0,8)
-
-    local noclipConnection
-    local noclipEnabled = false
-
-    local function toggleNoclip()
-        noclipEnabled = not noclipEnabled
-        
-        if noclipEnabled then
-            noclipBtn.Text = "Noclip (ON)"
-            noclipBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-            
-            -- Matikan collision
-            if noclipConnection then noclipConnection:Disconnect() end
-            
-            noclipConnection = RS.Stepped:Connect(function()
-                if not noclipEnabled then return end
-                if not lp.Character then return end
-                
-                for _, part in ipairs(lp.Character:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end)
-        else
-            noclipBtn.Text = "Noclip (OFF)"
-            noclipBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-            if noclipConnection then
-                noclipConnection:Disconnect()
-                noclipConnection = nil
-            end
-            
-            -- Kembalikan collision (opsional - ke default)
-            if lp.Character then
-                for _, part in ipairs(lp.Character:GetDescendants()) do
-                    if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                        part.CanCollide = true
-                    end
-                end
-            end
-        end
-    end
-
-    noclipBtn.MouseButton1Click:Connect(toggleNoclip)
-
-    -- Cleanup saat karakter respawn
-    lp.CharacterAdded:Connect(function(newChar)
-        task.wait(0.4) -- tunggu humanoid & parts load
-        
-        -- Reset status visual button jika noclip mati
-        if not noclipEnabled then
-            noclipBtn.Text = "Noclip (OFF)"
-            noclipBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-        end
-        
-        -- Jika masih ON → langsung terapkan lagi
-        if noclipEnabled and noclipConnection == nil then
-            toggleNoclip()   -- toggle ulang untuk reconnect
-            toggleNoclip()   -- kembali ke ON
-        end
-    end)
-
-    -- Optional: matikan noclip saat karakter hilang
-    if lp.Character then
-        -- sudah ditangani di Stepped check
-    end
-
-    print("Noclip added below Speed Hack in Player tab")
-end
-
--- =============================================
---            INFINITE JUMP - DI BAWAH JUMP HACK
--- =============================================
-
-do
-    local infJumpBtn = Instance.new("TextButton")
-    infJumpBtn.Size = UDim2.new(0, 170, 0, 38)
-    infJumpBtn.Position = UDim2.new(0.52, 0, 0.36, 0)   -- bawah Jump Hack (sejajar Noclip di kiri)
-    infJumpBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    infJumpBtn.Text = "Infinite Jump (OFF)"
-    infJumpBtn.TextColor3 = Color3.new(1,1,1)
-    infJumpBtn.Font = Enum.Font.Gotham
-    infJumpBtn.TextSize = 16
-    infJumpBtn.Parent = tabPlayer
-
-    local cornerInfJump = Instance.new("UICorner", infJumpBtn)
-    cornerInfJump.CornerRadius = UDim.new(0,8)
-
-    local infJumpEnabled = false
-    local infJumpConnection
-
-    local function toggleInfiniteJump()
-        infJumpEnabled = not infJumpEnabled
-        
-        if infJumpEnabled then
-            infJumpBtn.Text = "Infinite Jump (ON)"
-            infJumpBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-            
-            -- Koneksi JumpRequest (cara paling stabil & universal)
-            if infJumpConnection then infJumpConnection:Disconnect() end
-            
-            infJumpConnection = UIS.JumpRequest:Connect(function()
-                if not infJumpEnabled then return end
+        local function applyJump()
+            pcall(function()
                 if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                    lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    lp.Character.Humanoid.JumpPower = jumpEnabled and hackJumpPower or originalJumpPower
                 end
             end)
-        else
-            infJumpBtn.Text = "Infinite Jump (OFF)"
-            infJumpBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-            if infJumpConnection then
-                infJumpConnection:Disconnect()
-                infJumpConnection = nil
+        end
+
+        jumpHackBtn.MouseButton1Click:Connect(function()
+            jumpEnabled = not jumpEnabled
+            jumpHackBtn.Text = jumpEnabled and "Jump Hack (ON)" or "Jump Hack (OFF)"
+            jumpHackBtn.BackgroundColor3 = jumpEnabled and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+            applyJump()
+        end)
+
+        local jumpLabel = Instance.new("TextLabel")
+        jumpLabel.Size = UDim2.new(0, 100, 0, 25)
+        jumpLabel.Position = UDim2.new(0.52, 0, 0.22, 0)
+        jumpLabel.BackgroundTransparency = 1
+        jumpLabel.Text = "Jump:"
+        jumpLabel.TextColor3 = Color3.fromRGB(255,200,200)
+        jumpLabel.Font = Enum.Font.Gotham
+        jumpLabel.TextSize = 14
+        jumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+        jumpLabel.Parent = tabPlayer
+
+        local jumpBox = Instance.new("TextBox")
+        jumpBox.Size = UDim2.new(0, 60, 0, 25)
+        jumpBox.Position = UDim2.new(0.52, 55, 0.22, 0)
+        jumpBox.BackgroundColor3 = SHARED_DARK2_COLOR 
+        jumpBox.BorderSizePixel = 0
+        jumpBox.Text = tostring(hackJumpPower)
+        jumpBox.TextColor3 = Color3.new(1,1,1)
+        jumpBox.Font = Enum.Font.Gotham
+        jumpBox.TextSize = 14
+        jumpBox.ClearTextOnFocus = false
+        jumpBox.Parent = tabPlayer
+        Instance.new("UICorner", jumpBox).CornerRadius = UDim.new(0,6)
+        
+        table.insert(ThemeCore.DarkBGs, jumpBox) 
+
+        jumpBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                local newVal = tonumber(jumpBox.Text)
+                if newVal and newVal >= 0 then
+                    hackJumpPower = newVal
+                    if jumpEnabled then applyJump() end
+                else
+                    jumpBox.Text = tostring(hackJumpPower)
+                end
             end
-        end
-    end
+        end)
 
-    infJumpBtn.MouseButton1Click:Connect(toggleInfiniteJump)
-
-    -- Cleanup & re-apply saat respawn
-    lp.CharacterAdded:Connect(function(newChar)
-        task.wait(0.4) -- tunggu load
-        
-        -- Reset tampilan tombol jika OFF
-        if not infJumpEnabled then
-            infJumpBtn.Text = "Infinite Jump (OFF)"
-            infJumpBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-        end
-        
-        -- Jika masih ON, reconnect
-        if infJumpEnabled and infJumpConnection == nil then
-            toggleInfiniteJump()  -- off dulu
-            toggleInfiniteJump()  -- on lagi → reconnect
-        end
-    end)
-
-    -- Optional: apply awal jika sudah ON saat load
-    if infJumpEnabled then
-        toggleInfiniteJump()   -- off
-        toggleInfiniteJump()   -- on
-    end
-
-    print("Infinite Jump added below Jump Hack in Player tab (using JumpRequest)")
-end
-
--- =============================================
---            REJOIN SERVER (Tab Misc)
--- =============================================
-
-do
-    local RejoinButton = Instance.new("TextButton")
-    RejoinButton.Size = UDim2.new(0.9, 0, 0.08, 0)
-    RejoinButton.Position = UDim2.new(0.05, 0, 0.88, 0)  -- di bawah status label (~0.87 + margin)
-    RejoinButton.BackgroundColor3 = Color3.fromRGB(120,0,0)  -- Ubah ke merah menyala gelap
-    RejoinButton.Text = "Rejoin Server"
-    RejoinButton.TextColor3 = Color3.new(1,1,1)
-    RejoinButton.Font = Enum.Font.GothamSemibold
-    RejoinButton.TextSize = 17
-    RejoinButton.Parent = tabMisc
-
-    local RejoinCorner = Instance.new("UICorner", RejoinButton)
-    RejoinCorner.CornerRadius = UDim.new(0, 8)
-
-    local RejoinStroke = Instance.new("UIStroke", RejoinButton)
-    RejoinStroke.Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-    RejoinStroke.Thickness = 1.4
-    RejoinStroke.Transparency = 0.45
-
-    local RejoinStatus = Instance.new("TextLabel")
-    RejoinStatus.Size = UDim2.new(0.9, 0, 0.05, 0)
-    RejoinStatus.Position = UDim2.new(0.05, 0, 0.965, 0)  -- di bawah tombol rejoin
-    RejoinStatus.BackgroundTransparency = 1
-    RejoinStatus.Text = ""
-    RejoinStatus.TextColor3 = Color3.fromRGB(255,100,100)  -- Ubah ke merah menyala
-    RejoinStatus.Font = Enum.Font.Gotham
-    RejoinStatus.TextSize = 13
-    RejoinStatus.TextXAlignment = Enum.TextXAlignment.Left
-    RejoinStatus.Parent = tabMisc
-
-    local function showRejoinMessage(msg, color, duration)
-        RejoinStatus.Text = msg
-        RejoinStatus.TextColor3 = color
-        task.delay(duration or 4, function()
-            if RejoinStatus.Text == msg then
-                RejoinStatus.Text = ""
+        lp.CharacterAdded:Connect(function(char)
+            task.wait(0.3)
+            local hum = char:FindFirstChild("Humanoid")
+            if hum then
+                originalJumpPower = hum.JumpPower
+                if jumpEnabled then hum.JumpPower = hackJumpPower end
             end
         end)
     end
 
-    RejoinButton.MouseButton1Click:Connect(function()
-        -- Konfirmasi sederhana via warna & teks (bisa ditambah prompt jika mau)
-        RejoinButton.Text = "Rejoining..."
-        RejoinButton.BackgroundColor3 = Color3.fromRGB(160,0,0)  -- Ubah ke merah menyala gelap
+    do
+        local noclipBtn = Instance.new("TextButton")
+        noclipBtn.Size = UDim2.new(0, 165, 0, 35)
+        noclipBtn.Position = UDim2.new(0.04, 0, 0.38, 0)
+        noclipBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        noclipBtn.Text = "Noclip (OFF)"
+        noclipBtn.TextColor3 = Color3.new(1,1,1)
+        noclipBtn.Font = Enum.Font.Gotham
+        noclipBtn.TextSize = 15
+        noclipBtn.Parent = tabPlayer
+        Instance.new("UICorner", noclipBtn).CornerRadius = UDim.new(0,8)
+
+        local noclipConnection
+        local noclipEnabled = false
+
+        table.insert(ThemeCore.Toggles, {Btn = noclipBtn, GetState = function() return noclipEnabled end})
+
+        local function toggleNoclip()
+            noclipEnabled = not noclipEnabled
+            if noclipEnabled then
+                noclipBtn.Text = "Noclip (ON)"
+                noclipBtn.BackgroundColor3 = SHARED_THEME_COLOR
+                if noclipConnection then noclipConnection:Disconnect() end
+                noclipConnection = RS.Stepped:Connect(function()
+                    if not lp.Character then return end
+                    for _, part in ipairs(lp.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = false end
+                    end
+                end)
+            else
+                noclipBtn.Text = "Noclip (OFF)"
+                noclipBtn.BackgroundColor3 = SHARED_DARK_COLOR
+                if noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
+                if lp.Character then
+                    for _, part in ipairs(lp.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then part.CanCollide = true end
+                    end
+                end
+            end
+        end
+
+        noclipBtn.MouseButton1Click:Connect(toggleNoclip)
+    end
+
+    do
+        local infJumpBtn = Instance.new("TextButton")
+        infJumpBtn.Size = UDim2.new(0, 165, 0, 35)
+        infJumpBtn.Position = UDim2.new(0.52, 0, 0.38, 0)
+        infJumpBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        infJumpBtn.Text = "Infinite Jump (OFF)"
+        infJumpBtn.TextColor3 = Color3.new(1,1,1)
+        infJumpBtn.Font = Enum.Font.Gotham
+        infJumpBtn.TextSize = 15
+        infJumpBtn.Parent = tabPlayer
+        Instance.new("UICorner", infJumpBtn).CornerRadius = UDim.new(0,8)
+
+        local infJumpEnabled = false
+        local infJumpConnection
+
+        table.insert(ThemeCore.Toggles, {Btn = infJumpBtn, GetState = function() return infJumpEnabled end})
+
+        local function toggleInfiniteJump()
+            infJumpEnabled = not infJumpEnabled
+            if infJumpEnabled then
+                infJumpBtn.Text = "Infinite Jump (ON)"
+                infJumpBtn.BackgroundColor3 = SHARED_THEME_COLOR
+                if infJumpConnection then infJumpConnection:Disconnect() end
+                infJumpConnection = UIS.JumpRequest:Connect(function()
+                    if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                        lp.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    end
+                end)
+            else
+                infJumpBtn.Text = "Infinite Jump (OFF)"
+                infJumpBtn.BackgroundColor3 = SHARED_DARK_COLOR
+                if infJumpConnection then infJumpConnection:Disconnect() infJumpConnection = nil end
+            end
+        end
+
+        infJumpBtn.MouseButton1Click:Connect(toggleInfiniteJump)
+    end
+
+    do
+        local touchFlingBtn = Instance.new("TextButton")
+        touchFlingBtn.Size = UDim2.new(0, 165, 0, 35)
+        touchFlingBtn.Position = UDim2.new(0.04, 0, 0.70, 0)
+        touchFlingBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        touchFlingBtn.Text = "Touch Fling (OFF)"
+        touchFlingBtn.TextColor3 = Color3.new(1,1,1)
+        touchFlingBtn.Font = Enum.Font.Gotham
+        touchFlingBtn.TextSize = 15
+        touchFlingBtn.Parent = tabPlayer
+        Instance.new("UICorner", touchFlingBtn).CornerRadius = UDim.new(0,8)
+
+        local hiddenfling = false
+        table.insert(ThemeCore.Toggles, {Btn = touchFlingBtn, GetState = function() return hiddenfling end})
+
+        local function flingLoop()
+            local hrp, c, vel, movel = nil, nil, nil, 0.1
+            while true do
+                RS.Heartbeat:Wait()
+                if hiddenfling then
+                    while hiddenfling and not (c and c.Parent and hrp and hrp.Parent) do
+                        RS.Heartbeat:Wait()
+                        c = lp.Character
+                        hrp = c and c:FindFirstChild("HumanoidRootPart")
+                    end
+
+                    if hiddenfling then
+                        vel = hrp.Velocity
+                        hrp.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+                        RS.RenderStepped:Wait()
+                        if c and c.Parent and hrp and hrp.Parent then
+                            hrp.Velocity = vel
+                        end
+                        RS.Stepped:Wait()
+                        if c and c.Parent and hrp and hrp.Parent then
+                            hrp.Velocity = vel + Vector3.new(0, movel, 0)
+                            movel = movel * -1
+                        end
+                    end
+                end
+            end
+        end
         
-        showRejoinMessage("Attempting to rejoin server...", Color3.fromRGB(255,220,180), 6)
+        coroutine.wrap(flingLoop)()
 
-        local success, err = pcall(function()
-            -- Metode paling umum & stabil di banyak executor 2025-2026
-            game:GetService("TeleportService"):Teleport(game.PlaceId, lp)
+        touchFlingBtn.MouseButton1Click:Connect(function()
+            hiddenfling = not hiddenfling
+            touchFlingBtn.Text = "Touch Fling (" .. (hiddenfling and "ON" or "OFF") .. ")"
+            touchFlingBtn.BackgroundColor3 = hiddenfling and SHARED_THEME_COLOR or SHARED_DARK_COLOR
         end)
+    end
 
-        if not success then
-            -- Fallback metode lain (beberapa executor butuh cara berbeda)
-            warn("Rejoin gagal via TeleportService: " .. tostring(err))
-            
-            -- Coba metode alternatif (kick + rejoin manual)
+    do
+        local invisBtn = Instance.new("TextButton")
+        invisBtn.Size = UDim2.new(0, 165, 0, 35)
+        invisBtn.Position = UDim2.new(0.52, 0, 0.70, 0)
+        invisBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        invisBtn.Text = "Invisible (OFF)"
+        invisBtn.TextColor3 = Color3.new(1,1,1)
+        invisBtn.Font = Enum.Font.Gotham
+        invisBtn.TextSize = 15
+        invisBtn.Parent = tabPlayer
+        Instance.new("UICorner", invisBtn).CornerRadius = UDim.new(0,8)
+
+        local invis_on = false
+        table.insert(ThemeCore.Toggles, {Btn = invisBtn, GetState = function() return invis_on end})
+
+        local sound = Instance.new("Sound")
+        sound.SoundId = "rbxassetid://942127495"
+        sound.Volume = 0.6
+        sound.Parent = MainGui
+
+        local function setTransparency(char, trans)
+            if not char then return end
+            for _, v in pairs(char:GetDescendants()) do
+                if v:IsA("BasePart") or v:IsA("Decal") then
+                    v.Transparency = trans
+                end
+            end
+        end
+
+        invisBtn.MouseButton1Click:Connect(function()
+            sound:Play()
+
+            local char = lp.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+            invis_on = not invis_on
+            invisBtn.Text = "Invisible (" .. (invis_on and "ON" or "OFF") .. ")"
+            invisBtn.BackgroundColor3 = invis_on and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+
+            if invis_on then
+                local saved = char.HumanoidRootPart.CFrame
+                char:MoveTo(Vector3.new(-25.95, 84, 3537.55))
+                task.wait(0.08)
+
+                local seat = Instance.new("Seat")
+                seat.Name = "invischair"
+                seat.Transparency = 1
+                seat.CanCollide = false
+                seat.Position = Vector3.new(-25.95, 84, 3537.55)
+                seat.Parent = workspace
+
+                local weld = Instance.new("Weld")
+                weld.Part0 = seat
+                weld.Part1 = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                weld.Parent = seat
+
+                task.wait()
+                seat.CFrame = saved
+                setTransparency(char, 0.5)
+            else
+                if workspace:FindFirstChild("invischair") then workspace.invischair:Destroy() end
+                setTransparency(char, 0)
+            end
+        end)
+    end
+
+    do
+        local ESP_ENABLED = false
+        local ESP_OBJECTS = {}
+
+        local ESP_BUTTON = Instance.new("TextButton")
+        ESP_BUTTON.Size = UDim2.new(0, 165, 0, 35)
+        ESP_BUTTON.Position = UDim2.new(0.04, 0, 0.08, 0)
+        ESP_BUTTON.BackgroundColor3 = SHARED_DARK_COLOR
+        ESP_BUTTON.Text = "Player ESP (OFF)"
+        ESP_BUTTON.TextColor3 = Color3.new(1,1,1)
+        ESP_BUTTON.Font = Enum.Font.Gotham
+        ESP_BUTTON.TextSize = 15
+        ESP_BUTTON.Parent = tabVisual
+        Instance.new("UICorner", ESP_BUTTON).CornerRadius = UDim.new(0,8)
+
+        table.insert(ThemeCore.Toggles, {Btn = ESP_BUTTON, GetState = function() return ESP_ENABLED end})
+
+        local function getPlayerColor(player)
+            if player.Team and lp.Team and player.Team == lp.Team then return Color3.fromRGB(80, 255, 80) end
+            return Color3.fromRGB(255, 0, 0)
+        end
+
+        local function clearESP(player)
+            local entry = ESP_OBJECTS[player]
+            if entry then
+                if HAS_DRAWING_API then
+                    pcall(function() entry.box:Remove() entry.name:Remove() end)
+                end
+                ESP_OBJECTS[player] = nil
+            end
             pcall(function()
-                lp:Kick("Rejoining server... (manual rejoin)")
+                if player.Character and player.Character:FindFirstChild("ESPHighlight") then
+                    player.Character.ESPHighlight:Destroy()
+                end
             end)
-            
-            showRejoinMessage("Rejoin triggered (alternative method)", Color3.fromRGB(255, 200, 120), 5)
         end
 
-        -- Efek hover tetap (opsional)
-        task.delay(0.3, function()
-            if RejoinButton and RejoinButton.Parent then
-                RejoinButton.Text = "Rejoin Server"
-                RejoinButton.BackgroundColor3 = Color3.fromRGB(120,0,0)  -- Ubah ke merah menyala gelap
-            end
-        end)
-    end)
+        local function updateESP()
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player == lp then continue end
+                
+                local char = player.Character
+                local root = char and (char:FindFirstChild("HumanoidRootPart") or char:FindFirstChildWhichIsA("BasePart"))
 
-    -- Hover effect
-    RejoinButton.MouseEnter:Connect(function()
-        TS:Create(RejoinButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(160,0,0)  -- Ubah ke merah menyala gelap
-        }):Play()
-        TS:Create(RejoinStroke, TweenInfo.new(0.2), {
-            Transparency = 0.2,
-            Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-        }):Play()
-    end)
+                if not ESP_ENABLED then
+                    clearESP(player)
+                    continue
+                end
 
-    RejoinButton.MouseLeave:Connect(function()
-        TS:Create(RejoinButton, TweenInfo.new(0.2), {
-            BackgroundColor3 = Color3.fromRGB(120,0,0)  -- Ubah ke merah menyala gelap
-        }):Play()
-        TS:Create(RejoinStroke, TweenInfo.new(0.2), {
-            Transparency = 0.45,
-            Color = Color3.fromRGB(255,0,0)  -- Ubah ke merah menyala
-        }):Play()
-    end)
+                if not char or not char.Parent then
+                    local entry = ESP_OBJECTS[player]
+                    if entry and HAS_DRAWING_API then
+                        entry.box.Visible = false
+                        entry.name.Visible = false
+                    end
+                    continue
+                end
 
-    print("Rejoin Server button added to Misc tab (bottom)")
-end
+                local head = char:FindFirstChild("Head")
 
--- =============================================
---            ANTI LAG - DI SAMPING ESP (Tab Visual)
--- =============================================
+                if not root then
+                    local entry = ESP_OBJECTS[player]
+                    if entry and HAS_DRAWING_API then
+                        entry.box.Visible = false
+                        entry.name.Visible = false
+                    end
+                    continue
+                end
 
-do
-    local antiLagBtn = Instance.new("TextButton")
-    antiLagBtn.Size = UDim2.new(0, 170, 0, 38)
-    antiLagBtn.Position = UDim2.new(0.52, 0, 0.08, 0)   -- di samping ESP (sejajar seperti Jump di samping Speed)
-    antiLagBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    antiLagBtn.Text = "Anti Lag (OFF)"
-    antiLagBtn.TextColor3 = Color3.new(1,1,1)
-    antiLagBtn.Font = Enum.Font.Gotham
-    antiLagBtn.TextSize = 16
-    antiLagBtn.Parent = tabVisual
+                local color = getPlayerColor(player)
 
-    local cornerAntiLag = Instance.new("UICorner", antiLagBtn)
-    cornerAntiLag.CornerRadius = UDim.new(0,8)
+                local hl = char:FindFirstChild("ESPHighlight")
+                if not hl then
+                    hl = Instance.new("Highlight")
+                    hl.Name = "ESPHighlight"
+                    hl.FillTransparency = 0.5
+                    hl.OutlineTransparency = 0.1
+                    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    hl.Parent = char
+                end
+                hl.FillColor = color
+                hl.OutlineColor = color
 
-    local antiLagEnabled = false
-    local antiLagConnection
+                if HAS_DRAWING_API then
+                    local entry = ESP_OBJECTS[player]
+                    if not entry then
+                        local box = Drawing.new("Square")
+                        box.Thickness = 2
+                        box.Filled = false
+                        box.Transparency = 1
+                        box.Visible = false
 
-    -- Fungsi optimasi anti-lag (contoh sederhana & aman)
-    local function optimizeGame()
-        -- Kurangi fallen parts destroy height (hilangkan parts jatuh terlalu jauh)
-        workspace.FallenPartsDestroyHeight = -500  -- default -500, bisa lebih rendah jika perlu
+                        local nameTag = Drawing.new("Text")
+                        nameTag.Size = 14
+                        nameTag.Center = true
+                        nameTag.Outline = true
+                        nameTag.Font = Drawing.Fonts.UI
+                        nameTag.Visible = false
 
-        -- Bersihkan Debris
-        Debris:ClearAllChildren()
+                        entry = {box = box, name = nameTag}
+                        ESP_OBJECTS[player] = entry
+                    end
 
-        -- Kurangi kualitas grafis (jika memungkinkan di executor)
-        pcall(function()
-            settings().Rendering.QualityLevel = Enum.QualityLevel.Level01  -- rendah
-            workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
-        end)
+                    local cam = workspace.CurrentCamera
+                    local rootPos, onScreen = cam:WorldToViewportPoint(root.Position)
+                    
+                    if onScreen then
+                        local topOffset = head and 0.6 or 2
+                        local bottomOffset = 2.8
+                        local headPos = cam:WorldToViewportPoint(root.Position + Vector3.new(0, topOffset, 0))
+                        local feetPos = cam:WorldToViewportPoint(root.Position - Vector3.new(0, bottomOffset, 0))
+                        local boxHeight = math.abs(headPos.Y - feetPos.Y) * 1.05
+                        local boxWidth = boxHeight * 0.55
 
-        -- Matikan unnecessary effects (misal lighting)
-        pcall(function()
-            game.Lighting.GlobalShadows = false
-            game.Lighting.Brightness = 1
-            game.Lighting.FogEnd = 99999  -- hilangkan fog jika ada
-        end)
+                        entry.box.Size = Vector2.new(boxWidth, boxHeight)
+                        entry.box.Position = Vector2.new(rootPos.X - boxWidth/2, rootPos.Y - boxHeight/2)
+                        entry.box.Color = color
+                        entry.box.Visible = true
 
-        -- Hilangkan unnecessary parts (opsional - scan & remove small debris)
-        for _, obj in ipairs(workspace:GetChildren()) do
-            if obj:IsA("Part") and obj.Name == "Debris" or obj.Size.Magnitude < 1 then
-                pcall(function() obj:Destroy() end)
+                        local distance = 0
+                        if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                            distance = (lp.Character.HumanoidRootPart.Position - root.Position).Magnitude
+                        end
+
+                        entry.name.Text = player.Name .. " [" .. math.floor(distance) .. " Studs]"
+                        entry.name.Position = Vector2.new(rootPos.X, rootPos.Y - boxHeight/2 - 16)
+                        entry.name.Color = color
+                        entry.name.Visible = true
+                    else
+                        entry.box.Visible = false
+                        entry.name.Visible = false
+                    end
+                end
             end
         end
+
+        RS.RenderStepped:Connect(updateESP)
+
+        Players.PlayerRemoving:Connect(function(player)
+            clearESP(player)
+        end)
+
+        ESP_BUTTON.MouseButton1Click:Connect(function()
+            ESP_ENABLED = not ESP_ENABLED
+            ESP_BUTTON.Text = "Player ESP (" .. (ESP_ENABLED and "ON" or "OFF") .. ")"
+            ESP_BUTTON.BackgroundColor3 = ESP_ENABLED and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+            if not ESP_ENABLED then
+                for _, player in ipairs(Players:GetPlayers()) do
+                    clearESP(player)
+                end
+            end
+        end)
     end
 
-    local function toggleAntiLag()
-        antiLagEnabled = not antiLagEnabled
-        
-        if antiLagEnabled then
-            antiLagBtn.Text = "Anti Lag (ON)"
-            antiLagBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
+    do
+        local antiLagBtn = Instance.new("TextButton")
+        antiLagBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiLagBtn.Position = UDim2.new(0.52, 0, 0.08, 0)
+        antiLagBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiLagBtn.Text = "Anti Lag (OFF)"
+        antiLagBtn.TextColor3 = Color3.new(1,1,1)
+        antiLagBtn.Font = Enum.Font.Gotham
+        antiLagBtn.TextSize = 15
+        antiLagBtn.Parent = tabVisual
+        Instance.new("UICorner", antiLagBtn).CornerRadius = UDim.new(0,8)
+
+        local antiLagEnabled = false
+        local origQualityLevel
+        local origGlobalShadows = game.Lighting.GlobalShadows
+
+        table.insert(ThemeCore.Toggles, {Btn = antiLagBtn, GetState = function() return antiLagEnabled end})
+
+        antiLagBtn.MouseButton1Click:Connect(function()
+            antiLagEnabled = not antiLagEnabled
+            antiLagBtn.Text = "Anti Lag (" .. (antiLagEnabled and "ON" or "OFF") .. ")"
+            antiLagBtn.BackgroundColor3 = antiLagEnabled and SHARED_THEME_COLOR or SHARED_DARK_COLOR
             
-            -- Jalankan optimasi awal
-            optimizeGame()
-            
-            -- Loop setiap 10 detik untuk maintain
-            if antiLagConnection then antiLagConnection:Disconnect() end
-            antiLagConnection = RS.Heartbeat:Connect(function()
-                if not antiLagEnabled then return end
-                optimizeGame()  -- jalankan ulang (bisa dikurangi frekuensi jika terlalu heavy)
-                task.wait(10)   -- tunggu 10 detik per loop
-            end)
-        else
-            antiLagBtn.Text = "Anti Lag (OFF)"
-            antiLagBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-            if antiLagConnection then
-                antiLagConnection:Disconnect()
-                antiLagConnection = nil
-            end
-            
-            -- Kembalikan setting default (opsional)
-            pcall(function()
-                settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic
+            if antiLagEnabled then
+                origQualityLevel = settings().Rendering.QualityLevel
+                settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+                workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Disabled
+                game.Lighting.GlobalShadows = false
+            else
+                if origQualityLevel then settings().Rendering.QualityLevel = origQualityLevel
+                else settings().Rendering.QualityLevel = Enum.QualityLevel.Automatic end
                 workspace.LevelOfDetail = Enum.ModelLevelOfDetail.Automatic
-                game.Lighting.GlobalShadows = true
-                game.Lighting.Brightness = 2  -- default Roblox
+                game.Lighting.GlobalShadows = origGlobalShadows
+            end
+        end)
+    end
+
+    do
+        local fullbrightBtn = Instance.new("TextButton")
+        fullbrightBtn.Size = UDim2.new(0, 165, 0, 35)
+        fullbrightBtn.Position = UDim2.new(0.04, 0, 0.36, 0)
+        fullbrightBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        fullbrightBtn.Text = "Fullbright (OFF)"
+        fullbrightBtn.TextColor3 = Color3.new(1,1,1)
+        fullbrightBtn.Font = Enum.Font.Gotham
+        fullbrightBtn.TextSize = 15
+        fullbrightBtn.Parent = tabVisual
+        Instance.new("UICorner", fullbrightBtn).CornerRadius = UDim.new(0,8)
+
+        local fullbrightEnabled = false
+        local timeLockConnection 
+        
+        table.insert(ThemeCore.Toggles, {Btn = fullbrightBtn, GetState = function() return fullbrightEnabled end})
+
+        local origAmbient = Lighting.Ambient
+        local origOutdoorAmbient = Lighting.OutdoorAmbient
+        local origBrightness = Lighting.Brightness
+        local origGlobalShadows = Lighting.GlobalShadows
+        local origClockTime = Lighting.ClockTime 
+
+        fullbrightBtn.MouseButton1Click:Connect(function()
+            fullbrightEnabled = not fullbrightEnabled
+            fullbrightBtn.Text = "Fullbright (" .. (fullbrightEnabled and "ON" or "OFF") .. ")"
+            fullbrightBtn.BackgroundColor3 = fullbrightEnabled and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+            
+            if fullbrightEnabled then
+                origAmbient = Lighting.Ambient
+                origOutdoorAmbient = Lighting.OutdoorAmbient
+                origBrightness = Lighting.Brightness
+                origGlobalShadows = Lighting.GlobalShadows
+                origClockTime = Lighting.ClockTime
+
+                Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+                Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+                Lighting.Brightness = 2
+                Lighting.GlobalShadows = false
+                
+                if timeLockConnection then timeLockConnection:Disconnect() end
+                timeLockConnection = RS.RenderStepped:Connect(function() Lighting.ClockTime = 14 end)
+            else
+                Lighting.Ambient = origAmbient
+                Lighting.OutdoorAmbient = origOutdoorAmbient
+                Lighting.Brightness = origBrightness
+                Lighting.GlobalShadows = origGlobalShadows
+                
+                if timeLockConnection then timeLockConnection:Disconnect(); timeLockConnection = nil end
+                Lighting.ClockTime = origClockTime
+            end
+        end)
+    end
+
+    do
+        local HideAllBtn = Instance.new("TextButton")
+        HideAllBtn.Size = UDim2.new(0, 165, 0, 35)
+        HideAllBtn.Position = UDim2.new(0.52, 0, 0.36, 0)
+        HideAllBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        HideAllBtn.Text = "Hide All: OFF"
+        HideAllBtn.TextColor3 = Color3.new(1,1,1)
+        HideAllBtn.Font = Enum.Font.Gotham
+        HideAllBtn.TextSize = 15
+        HideAllBtn.Parent = tabVisual
+        Instance.new("UICorner", HideAllBtn).CornerRadius = UDim.new(0,8)
+
+        local OpenListBtn = Instance.new("TextButton")
+        OpenListBtn.Size = UDim2.new(0, 165, 0, 35)
+        OpenListBtn.Position = UDim2.new(0.52, 0, 0.36, 40)
+        OpenListBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        OpenListBtn.Text = "Select Players ➔"
+        OpenListBtn.TextColor3 = Color3.new(1,1,1)
+        OpenListBtn.Font = Enum.Font.GothamSemibold
+        OpenListBtn.TextSize = 14
+        OpenListBtn.Parent = tabVisual
+        Instance.new("UICorner", OpenListBtn).CornerRadius = UDim.new(0,8)
+        table.insert(ThemeCore.SolidButtons, OpenListBtn)
+        local S_Stroke = Instance.new("UIStroke", OpenListBtn)
+        S_Stroke.Color = Color3.fromRGB(255,100,100)
+        S_Stroke.Thickness = 1.5
+
+        local Hidden = {}
+        local HideAll = false
+        
+        table.insert(ThemeCore.Toggles, {Btn = HideAllBtn, GetState = function() return HideAll end})
+
+        local function hideLogic(plr, yes)
+            if not plr.Character then return end
+            for _, v in ipairs(plr.Character:GetDescendants()) do
+                if (v:IsA("BasePart") or v:IsA("MeshPart")) and v.Name ~= "HumanoidRootPart" then
+                    v.Transparency = yes and 1 or 0
+                elseif v:IsA("Decal") then
+                    v.Transparency = yes and 1 or 0
+                elseif v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then
+                    v.Enabled = not yes
+                end
+            end
+            local head = plr.Character:FindFirstChild("Head")
+            if head then
+                for _, g in ipairs(head:GetChildren()) do
+                    if g:IsA("BillboardGui") then g.Enabled = not yes end
+                end
+            end
+        end
+
+        local function addPlayerToPanel(plr)
+            if plr == lp or PlayerScroll:FindFirstChild(plr.Name) then return end
+            
+            local btn = Instance.new("TextButton", PlayerScroll)
+            btn.Name = plr.Name
+            btn.Size = UDim2.new(1, 0, 0, 28)
+            btn.BackgroundColor3 = SHARED_DARK_COLOR
+            btn.Text = " " .. (plr.DisplayName or plr.Name)
+            btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            btn.Font = Enum.Font.Gotham
+            btn.TextSize = 13
+            btn.TextXAlignment = Enum.TextXAlignment.Left
+
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 6)
+            local stroke = Instance.new("UIStroke", btn)
+            stroke.Color = Color3.fromRGB(180, 60, 60)
+            stroke.Thickness = 1
+            stroke.Transparency = 0.6
+            
+            table.insert(ThemeCore.Toggles, {Btn = btn, GetState = function() return HideAll or Hidden[plr] end})
+
+            btn.MouseButton1Click:Connect(function()
+                if HideAll then return end
+                Hidden[plr] = not Hidden[plr]
+                hideLogic(plr, Hidden[plr])
+                btn.BackgroundColor3 = Hidden[plr] and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+                btn.TextColor3 = Hidden[plr] and Color3.new(1,1,1) or Color3.fromRGB(220, 220, 220)
             end)
         end
-    end
 
-    antiLagBtn.MouseButton1Click:Connect(toggleAntiLag)
+        HideAllBtn.MouseButton1Click:Connect(function()
+            HideAll = not HideAll
+            HideAllBtn.Text = "Hide All: " .. (HideAll and "ON" or "OFF")
+            HideAllBtn.BackgroundColor3 = HideAll and SHARED_THEME_COLOR or SHARED_DARK_COLOR
 
-    -- Handle respawn (re-apply jika ON)
-    lp.CharacterAdded:Connect(function()
-        task.wait(0.5)
-        if antiLagEnabled then
-            optimizeGame()
+            for _, plr in ipairs(Players:GetPlayers()) do
+                if plr ~= lp then
+                    hideLogic(plr, HideAll)
+                    local b = PlayerScroll:FindFirstChild(plr.Name)
+                    if b then
+                        b.BackgroundColor3 = HideAll and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+                        b.TextColor3 = HideAll and Color3.new(1,1,1) or Color3.fromRGB(220, 220, 220)
+                    end
+                end
+            end
+        end)
+
+        OpenListBtn.MouseButton1Click:Connect(function()
+            SidePanel.Visible = not SidePanel.Visible
+        end)
+
+        Players.PlayerAdded:Connect(function(p)
+            addPlayerToPanel(p)
+            p.CharacterAdded:Connect(function()
+                task.wait(0.5)
+                if HideAll or Hidden[p] then hideLogic(p, true) end
+            end)
+        end)
+
+        Players.PlayerRemoving:Connect(function(p)
+            if PlayerScroll:FindFirstChild(p.Name) then
+                PlayerScroll[p.Name]:Destroy()
+            end
+            Hidden[p] = nil
+        end)
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= lp then addPlayerToPanel(p) end
         end
-    end)
-
-    -- Apply awal jika sudah ada karakter
-    if lp.Character and antiLagEnabled then
-        optimizeGame()
     end
 
-    print("Anti Lag button added beside ESP in Visual tab")
-end
+    do
+        local antiSitBtn = Instance.new("TextButton")
+        antiSitBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiSitBtn.Position = UDim2.new(0.04, 0, 0.06, 0)
+        antiSitBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiSitBtn.Text = "Anti Sit (OFF)"
+        antiSitBtn.TextColor3 = Color3.new(1,1,1)
+        antiSitBtn.Font = Enum.Font.Gotham
+        antiSitBtn.TextSize = 15
+        antiSitBtn.Parent = tabProtect
+        Instance.new("UICorner", antiSitBtn).CornerRadius = UDim.new(0,8)
 
--- =============================================
---            FULLBRIGHT (Tab Visual) - Di bawah ESP
--- =============================================
+        local antiSitActive = false
+        table.insert(ThemeCore.Toggles, {Btn = antiSitBtn, GetState = function() return antiSitActive end})
 
-do
-    local fullbrightBtn = Instance.new("TextButton")
-    fullbrightBtn.Size = UDim2.new(0, 170, 0, 38)
-    fullbrightBtn.Position = UDim2.new(0.06, 0, 0.36, 0)   -- bawah ESP (~0.08 + 0.28 untuk margin)
-    fullbrightBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-    fullbrightBtn.Text = "Fullbright (OFF)"
-    fullbrightBtn.TextColor3 = Color3.new(1,1,1)
-    fullbrightBtn.Font = Enum.Font.Gotham
-    fullbrightBtn.TextSize = 16
-    fullbrightBtn.Parent = tabVisual
+        antiSitBtn.MouseButton1Click:Connect(function()
+            antiSitActive = not antiSitActive
+            antiSitBtn.Text = "Anti Sit (" .. (antiSitActive and "ON" or "OFF") .. ")"
+            antiSitBtn.BackgroundColor3 = antiSitActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
 
-    local cornerFullbright = Instance.new("UICorner", fullbrightBtn)
-    cornerFullbright.CornerRadius = UDim.new(0,8)
-
-    local fullbrightEnabled = false
-
-    -- Simpan nilai original Lighting
-    local Lighting = game:GetService("Lighting")
-    local originalBrightness = Lighting.Brightness
-    local originalGlobalShadows = Lighting.GlobalShadows
-    local originalFogEnd = Lighting.FogEnd
-    local originalAmbient = Lighting.Ambient
-    local originalOutdoorAmbient = Lighting.OutdoorAmbient
-    local originalClockTime = Lighting.ClockTime  -- Simpan waktu asli
-
-    local function applyFullbright()
-        Lighting.Brightness = 3
-        Lighting.GlobalShadows = false
-        Lighting.FogEnd = 100000
-        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-        Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
-        Lighting.ClockTime = 12  -- Set ke siang hari (12 siang)
+            task.spawn(function()
+                while antiSitActive and lp.Character do
+                    local humanoid = lp.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then
+                        humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, false)
+                        if humanoid:GetState() == Enum.HumanoidStateType.Seated then
+                            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                        end
+                    end
+                    task.wait(0.05)
+                end
+                if not antiSitActive then
+                    local humanoid = lp.Character and lp.Character:FindFirstChildOfClass("Humanoid")
+                    if humanoid then humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated, true) end
+                end
+            end)
+        end)
     end
 
-    local function restoreLighting()
-        Lighting.Brightness = originalBrightness
-        Lighting.GlobalShadows = originalGlobalShadows
-        Lighting.FogEnd = originalFogEnd
-        Lighting.Ambient = originalAmbient
-        Lighting.OutdoorAmbient = originalOutdoorAmbient
-        Lighting.ClockTime = originalClockTime  -- Kembalikan waktu asli
-    end
+    do
+        local antiVoidBtn = Instance.new("TextButton")
+        antiVoidBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiVoidBtn.Position = UDim2.new(0.04, 0, 0.28, 0) 
+        antiVoidBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiVoidBtn.Text = "Anti Void (OFF)"
+        antiVoidBtn.TextColor3 = Color3.new(1,1,1)
+        antiVoidBtn.Font = Enum.Font.Gotham
+        antiVoidBtn.TextSize = 15
+        antiVoidBtn.Parent = tabProtect
+        Instance.new("UICorner", antiVoidBtn).CornerRadius = UDim.new(0,8)
 
-    local function toggleFullbright()
-        fullbrightEnabled = not fullbrightEnabled
+        local antiVoidActive = false
+        table.insert(ThemeCore.Toggles, {Btn = antiVoidBtn, GetState = function() return antiVoidActive end})
         
-        if fullbrightEnabled then
-            fullbrightBtn.Text = "Fullbright (ON)"
-            fullbrightBtn.BackgroundColor3 = Color3.fromRGB(60,140,80)
-            applyFullbright()
-        else
-            fullbrightBtn.Text = "Fullbright (OFF)"
-            fullbrightBtn.BackgroundColor3 = Color3.fromRGB(85,0,0)  -- Ubah ke merah menyala gelap
-            restoreLighting()
+        local antiVoidConnection
+        local positions = {}
+
+        antiVoidBtn.MouseButton1Click:Connect(function()
+            antiVoidActive = not antiVoidActive
+            antiVoidBtn.Text = "Anti Void (" .. (antiVoidActive and "ON" or "OFF") .. ")"
+            antiVoidBtn.BackgroundColor3 = antiVoidActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+
+            if antiVoidActive then
+                positions = {} 
+                antiVoidConnection = RS.RenderStepped:Connect(function()
+                    if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                        local hrp = lp.Character.HumanoidRootPart
+                        table.insert(positions, {time = tick(), position = hrp.Position})
+                        while #positions > 0 and positions[1].time < tick() - 3 do table.remove(positions, 1) end
+
+                        if hrp.Position.Y < -100 and #positions > 0 then
+                            hrp.CFrame = CFrame.new(positions[1].position)
+                        end
+                    end
+                end)
+            else
+                if antiVoidConnection then antiVoidConnection:Disconnect(); antiVoidConnection = nil end
+                positions = {}
+            end
+        end)
+    end
+
+    do
+        local antiFlingBtn = Instance.new("TextButton")
+        antiFlingBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiFlingBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
+        antiFlingBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiFlingBtn.Text = "Anti Fling (OFF)"
+        antiFlingBtn.TextColor3 = Color3.new(1,1,1)
+        antiFlingBtn.Font = Enum.Font.Gotham
+        antiFlingBtn.TextSize = 15
+        antiFlingBtn.Parent = tabProtect
+        Instance.new("UICorner", antiFlingBtn).CornerRadius = UDim.new(0,8)
+
+        local antiFlingActive = false
+        table.insert(ThemeCore.Toggles, {Btn = antiFlingBtn, GetState = function() return antiFlingActive end})
+        
+        local antiFlingConnection
+
+        antiFlingBtn.MouseButton1Click:Connect(function()
+            antiFlingActive = not antiFlingActive
+            antiFlingBtn.Text = "Anti Fling (" .. (antiFlingActive and "ON" or "OFF") .. ")"
+            antiFlingBtn.BackgroundColor3 = antiFlingActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+
+            if antiFlingActive then
+                antiFlingConnection = RS.Stepped:Connect(function()
+                    if lp.Character then
+                        for _, player in ipairs(Players:GetPlayers()) do
+                            if player ~= lp and player.Character then
+                                for _, part in ipairs(player.Character:GetDescendants()) do
+                                    if part:IsA("BasePart") then part.CanCollide = false end
+                                end
+                            end
+                        end
+                    end
+                end)
+            else
+                if antiFlingConnection then antiFlingConnection:Disconnect(); antiFlingConnection = nil end
+            end
+        end)
+    end
+
+    do
+        local IY_BUTTON = Instance.new("TextButton")
+        IY_BUTTON.Size = UDim2.new(0, 165, 0, 35)
+        IY_BUTTON.Position = UDim2.new(0.04, 0, 0.06, 0)
+        IY_BUTTON.BackgroundColor3 = SHARED_DARK_COLOR
+        IY_BUTTON.Text = "Load Infinite Yield"
+        IY_BUTTON.TextColor3 = Color3.new(1,1,1)
+        IY_BUTTON.Font = Enum.Font.GothamSemibold
+        IY_BUTTON.TextSize = 14
+        IY_BUTTON.Parent = tabMain
+        Instance.new("UICorner", IY_BUTTON).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, IY_BUTTON)
+        local strokeIY = Instance.new("UIStroke", IY_BUTTON)
+        strokeIY.Color = Color3.fromRGB(255, 0, 0)
+        strokeIY.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, strokeIY)
+
+        local FLY_BUTTON = Instance.new("TextButton")
+        FLY_BUTTON.Size = UDim2.new(0, 165, 0, 35)
+        FLY_BUTTON.Position = UDim2.new(0.52, 0, 0.06, 0)
+        FLY_BUTTON.BackgroundColor3 = SHARED_DARK_COLOR
+        FLY_BUTTON.Text = "Load Fly GUI v3"
+        FLY_BUTTON.TextColor3 = Color3.new(1,1,1)
+        FLY_BUTTON.Font = Enum.Font.GothamSemibold
+        FLY_BUTTON.TextSize = 14
+        FLY_BUTTON.Parent = tabMain
+        Instance.new("UICorner", FLY_BUTTON).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, FLY_BUTTON)
+        local strokeFly = Instance.new("UIStroke", FLY_BUTTON)
+        strokeFly.Color = Color3.fromRGB(255, 100, 0)
+        strokeFly.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, strokeFly)
+
+        IY_BUTTON.MouseButton1Click:Connect(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+            IY_BUTTON.Text = "IY Loaded ✓"
+            IY_BUTTON.BackgroundColor3 = SHARED_THEME_COLOR
+            task.delay(1.5, function()
+                if IY_BUTTON.Parent then IY_BUTTON.Text = "Load Infinite Yield"; IY_BUTTON.BackgroundColor3 = SHARED_DARK_COLOR end
+            end)
+        end)
+
+        FLY_BUTTON.MouseButton1Click:Connect(function()
+            loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Fly-gui-v3-78856"))()
+            FLY_BUTTON.Text = "Fly GUI v3 Loaded ✓"
+            FLY_BUTTON.BackgroundColor3 = SHARED_THEME_COLOR
+            task.delay(1.5, function()
+                if FLY_BUTTON.Parent then FLY_BUTTON.Text = "Load Fly GUI v3"; FLY_BUTTON.BackgroundColor3 = SHARED_DARK_COLOR end
+            end)
+        end)
+
+        local TpContainer = Instance.new("Frame")
+        TpContainer.Size = UDim2.new(0, 165, 0, 60)
+        TpContainer.Position = UDim2.new(0.04, 0, 0.28, 0)
+        TpContainer.BackgroundColor3 = SHARED_DARK2_COLOR
+        TpContainer.Parent = tabMain
+        Instance.new("UICorner", TpContainer).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.DarkBGs, TpContainer) 
+        
+        local strokeTp = Instance.new("UIStroke", TpContainer)
+        strokeTp.Color = Color3.fromRGB(255, 0, 0)
+        strokeTp.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, strokeTp)
+
+        local TpBox = Instance.new("TextBox")
+        TpBox.Size = UDim2.new(1, 0, 0.5, 0)
+        TpBox.BackgroundTransparency = 1
+        TpBox.PlaceholderText = "Target Player Name..."
+        TpBox.TextColor3 = Color3.new(1, 1, 1)
+        TpBox.PlaceholderColor3 = Color3.fromRGB(180, 100, 100)
+        TpBox.Font = Enum.Font.Gotham
+        TpBox.TextSize = 13
+        TpBox.Text = ""
+        TpBox.ClearTextOnFocus = false
+        TpBox.Parent = TpContainer
+
+        local TpLine = Instance.new("Frame")
+        TpLine.Size = UDim2.new(1, 0, 0, 1)
+        TpLine.Position = UDim2.new(0, 0, 0.5, 0)
+        TpLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        TpLine.BorderSizePixel = 0
+        TpLine.Parent = TpContainer
+        table.insert(ThemeCore.Lines, TpLine) 
+
+        local TpBtn = Instance.new("TextButton")
+        TpBtn.Size = UDim2.new(1, 0, 0.5, 0)
+        TpBtn.Position = UDim2.new(0, 0, 0.5, 0)
+        TpBtn.BackgroundTransparency = 1
+        TpBtn.Text = "Teleport"
+        TpBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+        TpBtn.Font = Enum.Font.GothamBold
+        TpBtn.TextSize = 14
+        TpBtn.Parent = TpContainer
+
+        local isHeadsitting = false
+        local HsContainer = Instance.new("Frame")
+        HsContainer.Size = UDim2.new(0, 165, 0, 60)
+        HsContainer.Position = UDim2.new(0.52, 0, 0.28, 0)
+        HsContainer.BackgroundColor3 = SHARED_DARK2_COLOR 
+        HsContainer.ClipsDescendants = true
+        HsContainer.Parent = tabMain
+        Instance.new("UICorner", HsContainer).CornerRadius = UDim.new(0, 8)
+        
+        table.insert(ThemeCore.DarkBGs, HsContainer) 
+        
+        local strokeHs = Instance.new("UIStroke", HsContainer)
+        strokeHs.Color = Color3.fromRGB(255, 0, 0)
+        strokeHs.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, strokeHs)
+
+        local HsBox = Instance.new("TextBox")
+        HsBox.Size = UDim2.new(1, 0, 0.5, 0)
+        HsBox.BackgroundTransparency = 1
+        HsBox.PlaceholderText = "Target Player Name..."
+        HsBox.TextColor3 = Color3.new(1, 1, 1)
+        HsBox.PlaceholderColor3 = Color3.fromRGB(180, 100, 100)
+        HsBox.Font = Enum.Font.Gotham
+        HsBox.TextSize = 13
+        HsBox.Text = ""
+        HsBox.ClearTextOnFocus = false
+        HsBox.Parent = HsContainer
+
+        local HsLine = Instance.new("Frame")
+        HsLine.Size = UDim2.new(1, 0, 0, 1)
+        HsLine.Position = UDim2.new(0, 0, 0.5, 0)
+        HsLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        HsLine.BorderSizePixel = 0
+        HsLine.Parent = HsContainer
+        table.insert(ThemeCore.Lines, HsLine) 
+
+        local HsBtn = Instance.new("TextButton")
+        HsBtn.Size = UDim2.new(1, 0, 0.5, 0)
+        HsBtn.Position = UDim2.new(0, 0, 0.5, 0)
+        HsBtn.BackgroundTransparency = 1 
+        HsBtn.BorderSizePixel = 0
+        HsBtn.Text = "Headsit (OFF)"
+        HsBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+        HsBtn.Font = Enum.Font.GothamBold
+        HsBtn.TextSize = 14
+        HsBtn.Parent = HsContainer
+
+        local isViewing = false
+        local ViewContainer = Instance.new("Frame")
+        ViewContainer.Size = UDim2.new(0, 165, 0, 60)
+        ViewContainer.Position = UDim2.new(0.04, 0, 0.65, 0) 
+        ViewContainer.BackgroundColor3 = SHARED_DARK2_COLOR 
+        ViewContainer.ClipsDescendants = true
+        ViewContainer.Parent = tabMain
+        Instance.new("UICorner", ViewContainer).CornerRadius = UDim.new(0, 8)
+        
+        table.insert(ThemeCore.DarkBGs, ViewContainer) 
+        
+        local strokeView = Instance.new("UIStroke", ViewContainer)
+        strokeView.Color = Color3.fromRGB(255, 0, 0)
+        strokeView.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, strokeView)
+
+        local ViewBox = Instance.new("TextBox")
+        ViewBox.Size = UDim2.new(1, 0, 0.5, 0)
+        ViewBox.BackgroundTransparency = 1
+        ViewBox.PlaceholderText = "Target Player Name..."
+        ViewBox.TextColor3 = Color3.new(1, 1, 1)
+        ViewBox.PlaceholderColor3 = Color3.fromRGB(180, 100, 100)
+        ViewBox.Font = Enum.Font.Gotham
+        ViewBox.TextSize = 13
+        ViewBox.Text = ""
+        ViewBox.ClearTextOnFocus = false
+        ViewBox.Parent = ViewContainer
+
+        local ViewLine = Instance.new("Frame")
+        ViewLine.Size = UDim2.new(1, 0, 0, 1)
+        ViewLine.Position = UDim2.new(0, 0, 0.5, 0)
+        ViewLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        ViewLine.BorderSizePixel = 0
+        ViewLine.Parent = ViewContainer
+        table.insert(ThemeCore.Lines, ViewLine) 
+
+        local ViewBtn = Instance.new("TextButton")
+        ViewBtn.Size = UDim2.new(1, 0, 0.5, 0)
+        ViewBtn.Position = UDim2.new(0, 0, 0.5, 0)
+        ViewBtn.BackgroundTransparency = 1 
+        ViewBtn.BorderSizePixel = 0
+        ViewBtn.Text = "View (OFF)"
+        ViewBtn.TextColor3 = Color3.fromRGB(255, 200, 200) 
+        ViewBtn.Font = Enum.Font.GothamBold
+        ViewBtn.TextSize = 14
+        ViewBtn.Parent = ViewContainer
+
+        TpBtn.MouseButton1Click:Connect(function()
+            local targetName = TpBox.Text
+            if targetName == "" or targetName:match("^%s*$") then return end
+            
+            local targetPlayer = GetTargetPlayer(targetName)
+            if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                    lp.Character.HumanoidRootPart.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                    TpBtn.Text = "TP Success ✓"
+                    TpBtn.TextColor3 = SHARED_THEME_COLOR
+                end
+            else
+                TpBtn.Text = "Not Found!"
+                TpBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+            end
+            task.delay(1.5, function()
+                if TpBtn.Parent then TpBtn.Text = "Teleport"; TpBtn.TextColor3 = Color3.fromRGB(255, 200, 200) end
+            end)
+        end)
+
+        local headsitTarget = nil
+        local headsitConn = nil
+
+        HsBtn.MouseButton1Click:Connect(function()
+            if isHeadsitting then
+                isHeadsitting = false
+                HsBtn.Text = "Headsit (OFF)"
+                HsBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+                
+                if headsitConn then headsitConn:Disconnect() headsitConn = nil end
+                if lp.Character then
+                    if lp.Character:FindFirstChild("Humanoid") then lp.Character.Humanoid.Sit = false end
+                    for _, part in ipairs(lp.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then part.CanCollide = true end
+                    end
+                end
+            else
+                local targetName = HsBox.Text
+                if targetName == "" or targetName:match("^%s*$") then return end
+                
+                headsitTarget = GetTargetPlayer(targetName)
+                if headsitTarget and headsitTarget.Character and headsitTarget.Character:FindFirstChild("Head") then
+                    isHeadsitting = true
+                    HsBtn.Text = "Headsit (ON)"
+                    HsBtn.TextColor3 = SHARED_THEME_COLOR 
+
+                    headsitConn = RS.Stepped:Connect(function()
+                        if isHeadsitting and headsitTarget and headsitTarget.Character and headsitTarget.Character:FindFirstChild("Head") then
+                            local char = lp.Character
+                            if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") then
+                                char.Humanoid.Sit = true
+                                for _, part in ipairs(char:GetDescendants()) do
+                                    if part:IsA("BasePart") then part.CanCollide = false end
+                                end
+                                char.HumanoidRootPart.CFrame = headsitTarget.Character.Head.CFrame * CFrame.new(0, 1.5, 0)
+                                char.HumanoidRootPart.Velocity = Vector3.zero
+                                char.HumanoidRootPart.RotVelocity = Vector3.zero
+                            end
+                        else
+                            isHeadsitting = false
+                            HsBtn.Text = "Headsit (OFF)"
+                            HsBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+                            if headsitConn then headsitConn:Disconnect() headsitConn = nil end
+                            if lp.Character then
+                                if lp.Character:FindFirstChild("Humanoid") then lp.Character.Humanoid.Sit = false end
+                                for _, part in ipairs(lp.Character:GetDescendants()) do
+                                    if part:IsA("BasePart") then part.CanCollide = true end
+                                end
+                            end
+                        end
+                    end)
+                else
+                    HsBtn.Text = "Not Found!"
+                    HsBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+                    task.delay(1.5, function()
+                        if not isHeadsitting and HsBtn.Parent then
+                            HsBtn.Text = "Headsit (OFF)"
+                            HsBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+                        end
+                    end)
+                end
+            end
+        end)
+
+        localTime = 5
+
+        ViewBtn.MouseButton1Click:Connect(function()
+            if isViewing then
+                isViewing = false
+                ViewBtn.Text = "View (OFF)"
+                ViewBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+                if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                    workspace.CurrentCamera.CameraSubject = lp.Character.Humanoid
+                end
+            else
+                local targetName = ViewBox.Text
+                if targetName == "" or targetName:match("^%s*$") then return end
+                
+                local targetPlayer = GetTargetPlayer(targetName)
+                if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("Humanoid") then
+                    isViewing = true
+                    ViewBtn.Text = "View (ON)"
+                    ViewBtn.TextColor3 = SHARED_THEME_COLOR
+                    workspace.CurrentCamera.CameraSubject = targetPlayer.Character.Humanoid
+                else
+                    ViewBtn.Text = "Not Found!"
+                    ViewBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+                    task.delay(1.5, function()
+                        if not isViewing and ViewBtn.Parent then
+                            ViewBtn.Text = "View (OFF)"
+                            ViewBtn.TextColor3 = Color3.fromRGB(255, 200, 200)
+                        end
+                    end)
+                end
+            end
+        end)
+    end
+
+    do
+        local InfoPanel = Instance.new("Frame")
+        InfoPanel.Name = "IndoHubXPanel"
+        InfoPanel.Size = UDim2.new(0, 350, 0, 35)
+        InfoPanel.Position = UDim2.new(0, 15, 0.65, 0)
+        InfoPanel.BackgroundColor3 = Color3.fromRGB(16, 10, 10)
+        InfoPanel.BackgroundTransparency = 0.2
+        InfoPanel.Visible = false
+        InfoPanel.Parent = MainGui
+        Instance.new("UICorner", InfoPanel).CornerRadius = UDim.new(0, 8)
+
+        local PanelStroke = Instance.new("UIStroke", InfoPanel)
+        PanelStroke.Color = Color3.fromRGB(255,0,0)
+        PanelStroke.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, PanelStroke)
+
+        local PanelTitle = Instance.new("TextLabel", InfoPanel)
+        PanelTitle.Size = UDim2.new(0, 120, 1, 0)
+        PanelTitle.Position = UDim2.new(0, 10, 0, 0)
+        PanelTitle.BackgroundTransparency = 1
+        PanelTitle.Text = "IndoHub X Panel"
+        PanelTitle.TextColor3 = Color3.fromRGB(255, 40, 40)
+        PanelTitle.Font = Enum.Font.GothamBlack
+        PanelTitle.TextSize = 13
+        PanelTitle.TextXAlignment = Enum.TextXAlignment.Left
+        table.insert(ThemeCore.Texts, PanelTitle)
+
+        local FpsLabel = Instance.new("TextLabel", InfoPanel)
+        FpsLabel.Size = UDim2.new(0, 80, 1, 0)
+        FpsLabel.Position = UDim2.new(0, 150, 0, 0)
+        FpsLabel.BackgroundTransparency = 1
+        FpsLabel.Text = "FPS: 0"
+        FpsLabel.TextColor3 = Color3.new(1,1,1)
+        FpsLabel.Font = Enum.Font.GothamSemibold
+        FpsLabel.TextSize = 13
+        FpsLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        local PingLabel = Instance.new("TextLabel", InfoPanel)
+        PingLabel.Size = UDim2.new(0, 100, 1, 0)
+        PingLabel.Position = UDim2.new(0, 240, 0, 0)
+        PingLabel.BackgroundTransparency = 1
+        PingLabel.Text = "Ping: 0 ms"
+        PingLabel.TextColor3 = Color3.new(1,1,1)
+        PingLabel.Font = Enum.Font.GothamSemibold
+        PingLabel.TextSize = 13
+        PingLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+        local pDragging, pDragInput, pDragStart, pStartPos
+        InfoPanel.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                pDragging = true
+                pDragStart = input.Position
+                pStartPos = InfoPanel.Position
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then pDragging = false end
+                end)
+            end
+        end)
+        InfoPanel.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                pDragInput = input
+            end
+        end)
+        UIS.InputChanged:Connect(function(input)
+            if input == pDragInput and pDragging then
+                local delta = input.Position - pDragStart
+                InfoPanel.Position = UDim2.new(pStartPos.X.Scale, pStartPos.X.Offset + delta.X, pStartPos.Y.Scale, pStartPos.Y.Offset + delta.Y)
+            end
+        end)
+
+        local PanelToggleBtn = Instance.new("TextButton")
+        PanelToggleBtn.Size = UDim2.new(0.9, 0, 0, 30)
+        PanelToggleBtn.Position = UDim2.new(0.05, 0, 0.02, 0)
+        PanelToggleBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        PanelToggleBtn.Text = "IndoHub X Panel (OFF)"
+        PanelToggleBtn.TextColor3 = Color3.new(1,1,1)
+        PanelToggleBtn.Font = Enum.Font.GothamSemibold
+        PanelToggleBtn.TextSize = 14
+        PanelToggleBtn.Parent = tabMisc
+        Instance.new("UICorner", PanelToggleBtn).CornerRadius = UDim.new(0, 8)
+
+        local isPanelOn = false
+        table.insert(ThemeCore.Toggles, {Btn = PanelToggleBtn, GetState = function() return isPanelOn end})
+
+        PanelToggleBtn.MouseButton1Click:Connect(function()
+            isPanelOn = not isPanelOn
+            InfoPanel.Visible = isPanelOn
+            PanelToggleBtn.Text = "IndoHub X Panel (" .. (isPanelOn and "ON" or "OFF") .. ")"
+            PanelToggleBtn.BackgroundColor3 = isPanelOn and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        local lastUpdate = tick()
+        local frameCount = 0
+        RS.RenderStepped:Connect(function()
+            frameCount = frameCount + 1
+            if tick() - lastUpdate >= 1 then
+                if isPanelOn then
+                    local fps = frameCount
+                    local ping = 0
+                    pcall(function()
+                        local stats = game:GetService("Stats")
+                        local network = stats:FindFirstChild("Network")
+                        if network and network:FindFirstChild("ServerStatsItem") then
+                            local pingStr = network.ServerStatsItem:FindFirstChild("Data Ping") and network.ServerStatsItem["Data Ping"]:GetValueString()
+                            if pingStr then ping = tonumber(pingStr:match("%d+")) or 0 end
+                        end
+                    end)
+
+                    local cGreen, cYellow, cRed = Color3.fromRGB(60, 255, 80), Color3.fromRGB(255, 255, 80), Color3.fromRGB(255, 80, 80)
+                    FpsLabel.TextColor3 = fps >= 45 and cGreen or (fps >= 30 and cYellow or cRed)
+                    PingLabel.TextColor3 = ping <= 120 and cGreen or (ping <= 200 and cYellow or cRed)
+
+                    FpsLabel.Text = "FPS: " .. tostring(fps)
+                    PingLabel.Text = "Ping: " .. tostring(ping) .. " ms"
+                end
+                frameCount = 0
+                lastUpdate = tick()
+            end
+        end)
+
+        local ScriptBox = Instance.new("TextBox")
+        ScriptBox.Size = UDim2.new(0.9, 0, 0.40, 0)
+        ScriptBox.Position = UDim2.new(0.05, 0, 0.18, 0)
+        ScriptBox.BackgroundColor3 = SHARED_DARK2_COLOR 
+        ScriptBox.BorderSizePixel = 0
+        ScriptBox.TextColor3 = Color3.fromRGB(255,220,220)
+        ScriptBox.Font = Enum.Font.Code
+        ScriptBox.TextSize = 14
+        ScriptBox.MultiLine = true
+        ScriptBox.TextXAlignment = Enum.TextXAlignment.Left
+        ScriptBox.TextYAlignment = Enum.TextYAlignment.Top
+        ScriptBox.Text = "" 
+        ScriptBox.ClearTextOnFocus = false
+        ScriptBox.TextWrapped = true
+        ScriptBox.PlaceholderText = "Paste script Lua di sini..."
+        ScriptBox.Parent = tabMisc
+        Instance.new("UICorner", ScriptBox).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.DarkBGs, ScriptBox) 
+
+        local ScriptStroke = Instance.new("UIStroke", ScriptBox)
+        ScriptStroke.Color = Color3.fromRGB(255,0,0)
+        ScriptStroke.Thickness = 1.2
+        table.insert(ThemeCore.Strokes, ScriptStroke)
+
+        local ExecButton = Instance.new("TextButton")
+        ExecButton.Size = UDim2.new(0.4, 0, 0.08, 0)
+        ExecButton.Position = UDim2.new(0.05, 0, 0.63, 0)
+        ExecButton.BackgroundColor3 = SHARED_DARK_COLOR
+        ExecButton.Text = "Execute"
+        ExecButton.TextColor3 = Color3.new(1,1,1)
+        ExecButton.Font = Enum.Font.GothamSemibold
+        ExecButton.TextSize = 15
+        ExecButton.Parent = tabMisc
+        Instance.new("UICorner", ExecButton).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, ExecButton)
+
+        local ClearButton = Instance.new("TextButton")
+        ClearButton.Size = UDim2.new(0.4, 0, 0.08, 0)
+        ClearButton.Position = UDim2.new(0.55, 0, 0.63, 0)
+        ClearButton.BackgroundColor3 = SHARED_DARK_COLOR
+        ClearButton.Text = "Clear"
+        ClearButton.TextColor3 = Color3.new(1,1,1)
+        ClearButton.Font = Enum.Font.GothamSemibold
+        ClearButton.TextSize = 15
+        ClearButton.Parent = tabMisc
+        Instance.new("UICorner", ClearButton).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, ClearButton)
+
+        local RejoinButton = Instance.new("TextButton")
+        RejoinButton.Size = UDim2.new(0.9, 0, 0.08, 0)
+        RejoinButton.Position = UDim2.new(0.05, 0, 0.75, 0)
+        RejoinButton.BackgroundColor3 = SHARED_DARK_COLOR
+        RejoinButton.Text = "Rejoin Server"
+        RejoinButton.TextColor3 = Color3.new(1,1,1)
+        RejoinButton.Font = Enum.Font.GothamSemibold
+        RejoinButton.TextSize = 15
+        RejoinButton.Parent = tabMisc
+        Instance.new("UICorner", RejoinButton).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, RejoinButton)
+
+        local ThemeButton = Instance.new("TextButton")
+        ThemeButton.Size = UDim2.new(0.9, 0, 0.08, 0)
+        ThemeButton.Position = UDim2.new(0.05, 0, 0.86, 0)
+        ThemeButton.BackgroundColor3 = SHARED_DARK_COLOR
+        ThemeButton.Text = " 🎨choose a color "
+        ThemeButton.TextColor3 = Color3.new(1,1,1)
+        ThemeButton.Font = Enum.Font.GothamSemibold
+        ThemeButton.TextSize = 15
+        ThemeButton.Parent = tabMisc
+        Instance.new("UICorner", ThemeButton).CornerRadius = UDim.new(0, 8)
+        table.insert(ThemeCore.SolidButtons, ThemeButton)
+
+        local ColorFrame = Instance.new("Frame")
+        ColorFrame.Size = UDim2.new(0, 110, 0, 160)
+        ColorFrame.BackgroundColor3 = Color3.fromRGB(20, 10, 10)
+        ColorFrame.Visible = false
+        ColorFrame.ZIndex = 100
+        ColorFrame.Parent = MainGui
+        Instance.new("UICorner", ColorFrame).CornerRadius = UDim.new(0, 8)
+        local cfStroke = Instance.new("UIStroke", ColorFrame)
+        cfStroke.Color = Color3.fromRGB(255,0,0)
+        cfStroke.Thickness = 1.5
+        table.insert(ThemeCore.Strokes, cfStroke)
+
+        local cList = Instance.new("UIListLayout", ColorFrame)
+        cList.Padding = UDim.new(0, 5)
+        cList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        cList.VerticalAlignment = Enum.VerticalAlignment.Center
+
+        local availableColors = {
+            {Name = "Red", Col = Color3.fromRGB(255, 40, 40)},
+            {Name = "Green", Col = Color3.fromRGB(40, 255, 40)},
+            {Name = "Yellow", Col = Color3.fromRGB(255, 255, 40)},
+            {Name = "Blue", Col = Color3.fromRGB(40, 100, 255)},
+            {Name = "Purple", Col = Color3.fromRGB(180, 40, 255)}
+        }
+
+        for _, cData in ipairs(availableColors) do
+            local cBtn = Instance.new("TextButton", ColorFrame)
+            cBtn.Size = UDim2.new(0.85, 0, 0, 24)
+            cBtn.BackgroundColor3 = cData.Col
+            cBtn.Text = cData.Name
+            cBtn.TextColor3 = Color3.new(1,1,1)
+            cBtn.Font = Enum.Font.GothamBold
+            cBtn.TextSize = 12
+            cBtn.ZIndex = 101
+            Instance.new("UICorner", cBtn).CornerRadius = UDim.new(0, 5)
+            
+            cBtn.MouseButton1Click:Connect(function()
+                ChangeTheme(cData.Col)
+                ColorFrame.Visible = false
+            end)
+        end
+
+        ThemeButton.MouseButton1Click:Connect(function()
+            ColorFrame.Visible = not ColorFrame.Visible
+        end)
+
+        RS.RenderStepped:Connect(function()
+            if ColorFrame.Visible and HubContainer.Visible then
+                ColorFrame.Position = UDim2.new(0, HubContainer.AbsolutePosition.X + HubContainer.AbsoluteSize.X + 5, 0, HubContainer.AbsolutePosition.Y + HubContainer.AbsoluteSize.Y - 160)
+            end
+        end)
+
+        ExecButton.MouseButton1Click:Connect(function()
+            local code = ScriptBox.Text
+            if code == "" or code:match("^%s*$") then return end
+            local success, result = pcall(function() return loadstring(code)() end)
+            if success then
+                ExecButton.Text = "Executed ✓"
+                task.delay(2, function() ExecButton.Text = "Execute" end)
+            end
+        end)
+
+        ClearButton.MouseButton1Click:Connect(function() ScriptBox.Text = "" end)
+        RejoinButton.MouseButton1Click:Connect(function() game:GetService("TeleportService"):Teleport(game.PlaceId, lp) end)
+    end
+
+    do
+        local aimbotEnabled = false
+        local showFOV = false
+        local aimFOV = 180
+        local teamCheck = true
+        local wallCheck = true
+        local targetPart = "HumanoidRootPart"
+        local targetType = "ALL"
+
+        local aimBtn = Instance.new("TextButton")
+        aimBtn.Size = UDim2.new(0, 165, 0, 35)
+        aimBtn.Position = UDim2.new(0.04, 0, 0.06, 0)
+        aimBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        aimBtn.Text = "Aimbot Lock (OFF)"
+        aimBtn.TextColor3 = Color3.new(1,1,1)
+        aimBtn.Font = Enum.Font.Gotham
+        aimBtn.TextSize = 15
+        aimBtn.Parent = tabAimbot
+        Instance.new("UICorner", aimBtn).CornerRadius = UDim.new(0,8)
+        table.insert(ThemeCore.Toggles, {Btn = aimBtn, GetState = function() return aimbotEnabled end})
+
+        aimBtn.MouseButton1Click:Connect(function()
+            aimbotEnabled = not aimbotEnabled
+            aimBtn.Text = aimbotEnabled and "Aimbot Lock (ON)" or "Aimbot Lock (OFF)"
+            aimBtn.BackgroundColor3 = aimbotEnabled and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        local fovBtn = Instance.new("TextButton")
+        fovBtn.Size = UDim2.new(0, 165, 0, 35)
+        fovBtn.Position = UDim2.new(0.52, 0, 0.06, 0)
+        fovBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        fovBtn.Text = "Show FOV (OFF)"
+        fovBtn.TextColor3 = Color3.new(1,1,1)
+        fovBtn.Font = Enum.Font.Gotham
+        fovBtn.TextSize = 15
+        fovBtn.Parent = tabAimbot
+        Instance.new("UICorner", fovBtn).CornerRadius = UDim.new(0,8)
+        table.insert(ThemeCore.Toggles, {Btn = fovBtn, GetState = function() return showFOV end})
+
+        fovBtn.MouseButton1Click:Connect(function()
+            showFOV = not showFOV
+            fovBtn.Text = showFOV and "Show FOV (ON)" or "Show FOV (OFF)"
+            fovBtn.BackgroundColor3 = showFOV and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        local teamBtn = Instance.new("TextButton")
+        teamBtn.Size = UDim2.new(0, 165, 0, 35)
+        teamBtn.Position = UDim2.new(0.04, 0, 0.22, 0)
+        teamBtn.BackgroundColor3 = SHARED_THEME_COLOR
+        teamBtn.Text = "Team Check (ON)"
+        teamBtn.TextColor3 = Color3.new(1,1,1)
+        teamBtn.Font = Enum.Font.Gotham
+        teamBtn.TextSize = 15
+        teamBtn.Parent = tabAimbot
+        Instance.new("UICorner", teamBtn).CornerRadius = UDim.new(0,8)
+        table.insert(ThemeCore.Toggles, {Btn = teamBtn, GetState = function() return teamCheck end})
+
+        teamBtn.MouseButton1Click:Connect(function()
+            teamCheck = not teamCheck
+            teamBtn.Text = teamCheck and "Team Check (ON)" or "Team Check (OFF)"
+            teamBtn.BackgroundColor3 = teamCheck and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        local wallBtn = Instance.new("TextButton")
+        wallBtn.Size = UDim2.new(0, 165, 0, 35)
+        wallBtn.Position = UDim2.new(0.52, 0, 0.22, 0)
+        wallBtn.BackgroundColor3 = SHARED_THEME_COLOR
+        wallBtn.Text = "Wall Check (ON)"
+        wallBtn.TextColor3 = Color3.new(1,1,1)
+        wallBtn.Font = Enum.Font.Gotham
+        wallBtn.TextSize = 15
+        wallBtn.Parent = tabAimbot
+        Instance.new("UICorner", wallBtn).CornerRadius = UDim.new(0,8)
+        table.insert(ThemeCore.Toggles, {Btn = wallBtn, GetState = function() return wallCheck end})
+
+        wallBtn.MouseButton1Click:Connect(function()
+            wallCheck = not wallCheck
+            wallBtn.Text = wallCheck and "Wall Check (ON)" or "Wall Check (OFF)"
+            wallBtn.BackgroundColor3 = wallCheck and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        local partBtn = Instance.new("TextButton")
+        partBtn.Size = UDim2.new(0, 165, 0, 35)
+        partBtn.Position = UDim2.new(0.04, 0, 0.38, 0)
+        partBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        partBtn.Text = "Target: BODY"
+        partBtn.TextColor3 = Color3.new(1,1,1)
+        partBtn.Font = Enum.Font.Gotham
+        partBtn.TextSize = 15
+        partBtn.Parent = tabAimbot
+        Instance.new("UICorner", partBtn).CornerRadius = UDim.new(0,8)
+
+        partBtn.MouseButton1Click:Connect(function()
+            if targetPart == "HumanoidRootPart" then
+                targetPart = "Head"
+                partBtn.Text = "Target: HEAD"
+            else
+                targetPart = "HumanoidRootPart"
+                partBtn.Text = "Target: BODY"
+            end
+        end)
+
+        local typeBtn = Instance.new("TextButton")
+        typeBtn.Size = UDim2.new(0, 165, 0, 35)
+        typeBtn.Position = UDim2.new(0.52, 0, 0.38, 0)
+        typeBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        typeBtn.Text = "Type: ALL"
+        typeBtn.TextColor3 = Color3.new(1,1,1)
+        typeBtn.Font = Enum.Font.Gotham
+        typeBtn.TextSize = 15
+        typeBtn.Parent = tabAimbot
+        Instance.new("UICorner", typeBtn).CornerRadius = UDim.new(0,8)
+
+        typeBtn.MouseButton1Click:Connect(function()
+            if targetType == "ALL" then
+                targetType = "PLAYER"
+                typeBtn.Text = "Type: PLAYER"
+            elseif targetType == "PLAYER" then
+                targetType = "NPC"
+                typeBtn.Text = "Type: NPC"
+            else
+                targetType = "ALL"
+                typeBtn.Text = "Type: ALL"
+            end
+        end)
+
+        local fovLabel = Instance.new("TextLabel")
+        fovLabel.Size = UDim2.new(0, 100, 0, 25)
+        fovLabel.Position = UDim2.new(0.04, 0, 0.54, 0)
+        fovLabel.BackgroundTransparency = 1
+        fovLabel.Text = "FOV Radius:"
+        fovLabel.TextColor3 = Color3.fromRGB(255,200,200)
+        fovLabel.Font = Enum.Font.Gotham
+        fovLabel.TextSize = 14
+        fovLabel.TextXAlignment = Enum.TextXAlignment.Left
+        fovLabel.Parent = tabAimbot
+
+        local fovBox = Instance.new("TextBox")
+        fovBox.Size = UDim2.new(0, 60, 0, 25)
+        fovBox.Position = UDim2.new(0.04, 90, 0.54, 0)
+        fovBox.BackgroundColor3 = SHARED_DARK2_COLOR
+        fovBox.BorderSizePixel = 0
+        fovBox.Text = tostring(aimFOV)
+        fovBox.TextColor3 = Color3.new(1,1,1)
+        fovBox.Font = Enum.Font.Gotham
+        fovBox.TextSize = 14
+        fovBox.ClearTextOnFocus = false
+        fovBox.Parent = tabAimbot
+        Instance.new("UICorner", fovBox).CornerRadius = UDim.new(0,6)
+        table.insert(ThemeCore.DarkBGs, fovBox)
+
+        fovBox.FocusLost:Connect(function(enterPressed)
+            if enterPressed then
+                local val = tonumber(fovBox.Text)
+                if val and val >= 10 then aimFOV = val else fovBox.Text = tostring(aimFOV) end
+            end
+        end)
+
+        local fovCircle
+        if HAS_DRAWING_API then
+            fovCircle = Drawing.new("Circle")
+            fovCircle.Color = Color3.new(1,1,1)
+            fovCircle.Thickness = 1.5
+            fovCircle.Filled = false
+            fovCircle.Visible = false
+        end
+
+        local function checkVisible(char)
+            if not wallCheck then return true end
+            local part = char:FindFirstChild(targetPart)
+            if not part then return false end
+            local params = RaycastParams.new()
+            params.FilterType = Enum.RaycastFilterType.Blacklist
+            params.FilterDescendantsInstances = {lp.Character, char}
+            local result = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, part.Position - workspace.CurrentCamera.CFrame.Position, params)
+            return result == nil
+        end
+
+        local function getAimbotTarget()
+            local closest
+            local shortest = aimFOV
+            local targets = {}
+            if targetType == "PLAYER" or targetType == "ALL" then
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= lp and p.Character then table.insert(targets, {Character = p.Character, Player = p}) end
+                end
+            end
+            if targetType == "NPC" or targetType == "ALL" then
+                for _, m in ipairs(workspace:GetChildren()) do
+                    if m:IsA("Model") and m:FindFirstChild("Humanoid") and not Players:GetPlayerFromCharacter(m) then
+                        table.insert(targets, {Character = m, Player = nil})
+                    end
+                end
+            end
+            for _, data in ipairs(targets) do
+                local char = data.Character
+                local plr = data.Player
+                if plr and teamCheck and plr.Team == lp.Team then continue end
+                local part = char:FindFirstChild(targetPart)
+                local hum = char:FindFirstChildOfClass("Humanoid")
+                if part and hum and hum.Health > 0 then
+                    local pos, onScreen = workspace.CurrentCamera:WorldToViewportPoint(part.Position)
+                    if onScreen and checkVisible(char) then
+                        local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)).Magnitude
+                        if dist < shortest then
+                            shortest = dist
+                            closest = char
+                        end
+                    end
+                end
+            end
+            return closest
+        end
+
+        RS.RenderStepped:Connect(function()
+            if HAS_DRAWING_API and fovCircle then
+                fovCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X/2, workspace.CurrentCamera.ViewportSize.Y/2)
+                fovCircle.Radius = aimFOV
+                fovCircle.Visible = showFOV
+            end
+            if not aimbotEnabled then return end
+            local target = getAimbotTarget()
+            if target then
+                local part = target:FindFirstChild(targetPart)
+                if part then
+                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, part.Position)
+                end
+            end
+        end)
+    end
+
+    ToggleHub()
+    print("IndoHub X FULL VERSION Loaded")
+end
+
+InitHub()
+
+task.spawn(function()
+    local function createAdminTag(character)
+        if not character then return end
+        local head = character:FindFirstChild("Head")
+        
+        if head then
+            local bgui = head:FindFirstChild("AdminTagGUI")
+            if not bgui then
+                bgui = Instance.new("BillboardGui")
+                bgui.Name = "AdminTagGUI"
+                bgui.Adornee = head
+                bgui.Size = UDim2.new(0, 150, 0, 35)
+                bgui.StudsOffset = Vector3.new(0, 2.5, 0)
+                bgui.AlwaysOnTop = true
+
+                local textLabel = Instance.new("TextLabel")
+                textLabel.Name = "AdminText"
+                textLabel.Parent = bgui
+                textLabel.Size = UDim2.new(1, 0, 1, 0)
+                textLabel.BackgroundTransparency = 1
+                textLabel.Text = "[Script Owner]"
+                textLabel.TextColor3 = SHARED_THEME_COLOR
+                textLabel.Font = Enum.Font.GothamBlack
+                textLabel.TextScaled = true
+                textLabel.TextStrokeTransparency = 0
+                textLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+                bgui.Parent = head
+            else
+                if bgui:FindFirstChild("AdminText") then
+                    bgui.AdminText.TextColor3 = SHARED_THEME_COLOR
+                end
+            end
         end
     end
 
-    fullbrightBtn.MouseButton1Click:Connect(toggleFullbright)
-
-    -- Handle game reload or lighting changes (opsional - reapply jika ON)
-    Lighting.Changed:Connect(function(prop)
-        if fullbrightEnabled and (prop == "Brightness" or prop == "GlobalShadows" or prop == "FogEnd" or prop == "Ambient" or prop == "OutdoorAmbient" or prop == "ClockTime") then
-            applyFullbright()
+    while task.wait(1) do
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player.Name == "D_ForDeath1" or player.DisplayName == "D_ForDeath1" then
+                createAdminTag(player.Character)
+            end
         end
-    end)
-
-    print("Fullbright (Night to Day) added below ESP in Visual tab - sekarang mengubah malam menjadi siang dengan ClockTime")
-end
+    end
+end)
