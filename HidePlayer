@@ -619,7 +619,7 @@ local function InitHub()
     local ExecLine = Instance.new("Frame")
     ExecLine.Size = UDim2.new(0.92, 0, 0, 1)
     ExecLine.Position = UDim2.new(0.04, 0, 0.05, 107)
-    ExecLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ExecLine.BackgroundColor3 = SHARED_THEME_COLOR
     ExecLine.BorderSizePixel = 0
     ExecLine.Parent = tabInfo
 
@@ -637,7 +637,7 @@ local function InitHub()
     local UserLine = Instance.new("Frame")
     UserLine.Size = UDim2.new(0.92, 0, 0, 1)
     UserLine.Position = UDim2.new(0.04, 0, 0.05, 135)
-    UserLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    UserLine.BackgroundColor3 = SHARED_THEME_COLOR
     UserLine.BorderSizePixel = 0
     UserLine.Parent = tabInfo
 
@@ -646,7 +646,7 @@ local function InitHub()
     AgeLabel.Position = UDim2.new(0.04, 0, 0.05, 141)
     AgeLabel.BackgroundTransparency = 1
     AgeLabel.Text = "Account Age: " .. lp.AccountAge .. " days"
-    AgeLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    AgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     AgeLabel.Font = Enum.Font.GothamBold
     AgeLabel.TextSize = 14
     AgeLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -655,7 +655,7 @@ local function InitHub()
     local AgeLine = Instance.new("Frame")
     AgeLine.Size = UDim2.new(0.92, 0, 0, 1)
     AgeLine.Position = UDim2.new(0.04, 0, 0.05, 163)
-    AgeLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    AgeLine.BackgroundColor3 = SHARED_THEME_COLOR
     AgeLine.BorderSizePixel = 0
     AgeLine.Parent = tabInfo
 
