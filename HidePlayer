@@ -610,7 +610,7 @@ local function InitHub()
     ExecLabel.Position = UDim2.new(0.04, 0, 0.05, 85)
     ExecLabel.BackgroundTransparency = 1
     ExecLabel.Text = "Executor: " .. tostring(executorName)
-    ExecLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    ExecLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     ExecLabel.Font = Enum.Font.GothamBold
     ExecLabel.TextSize = 14
     ExecLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -628,7 +628,7 @@ local function InitHub()
     UserLabel.Position = UDim2.new(0.04, 0, 0.05, 113)
     UserLabel.BackgroundTransparency = 1
     UserLabel.Text = "User: " .. lp.Name
-    UserLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    UserLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
     UserLabel.Font = Enum.Font.GothamBold
     UserLabel.TextSize = 14
     UserLabel.TextXAlignment = Enum.TextXAlignment.Left
