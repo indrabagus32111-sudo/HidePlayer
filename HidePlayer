@@ -2105,7 +2105,7 @@ local function InitHub()
         ScriptBox.Text = "" 
         ScriptBox.ClearTextOnFocus = false
         ScriptBox.TextWrapped = true
-        ScriptBox.PlaceholderText = "Paste script Lua di sini..."
+        ScriptBox.PlaceholderText = "Paste the Lua script here..."
         ScriptBox.Parent = tabMisc
         Instance.new("UICorner", ScriptBox).CornerRadius = UDim.new(0, 8)
         table.insert(ThemeCore.DarkBGs, ScriptBox) 
