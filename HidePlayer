@@ -1797,6 +1797,49 @@ local function InitHub()
     end
 
     do
+        local laserImmuneBtn = Instance.new("TextButton")
+        laserImmuneBtn.Size = UDim2.new(0, 165, 0, 35)
+        -- Posisi disesuaikan tepat di bawah Anti Void (0.28 + 0.22 = 0.50)
+        laserImmuneBtn.Position = UDim2.new(0.04, 0, 0.50, 0) 
+        laserImmuneBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        laserImmuneBtn.Text = "Laser Immune (OFF)"
+        laserImmuneBtn.TextColor3 = Color3.new(1,1,1)
+        laserImmuneBtn.Font = Enum.Font.Gotham
+        laserImmuneBtn.TextSize = 15
+        laserImmuneBtn.Parent = tabProtect
+        Instance.new("UICorner", laserImmuneBtn).CornerRadius = UDim.new(0,8)
+
+        local laserImmuneActive = false
+        
+        -- Daftarkan ke sistem tema agar warnanya berubah saat tema diganti
+        table.insert(ThemeCore.Toggles, {Btn = laserImmuneBtn, GetState = function() return laserImmuneActive end})
+
+        laserImmuneBtn.MouseButton1Click:Connect(function()
+            laserImmuneActive = not laserImmuneActive
+            laserImmuneBtn.Text = "Laser Immune (" .. (laserImmuneActive and "ON" or "OFF") .. ")"
+            laserImmuneBtn.BackgroundColor3 = laserImmuneActive and SHARED_THEME_COLOR or SHARED_DARK_COLOR
+        end)
+
+        -- Logika mematikan/menyalakan CanTouch dari script yang kamu berikan
+        task.spawn(function()
+            while task.wait() do
+                local character = lp.Character
+                if character and character:FindFirstChild("HumanoidRootPart") then
+                    -- Ambil semua part dalam radius 10 stud
+                    local parts = workspace:GetPartBoundsInRadius(character.HumanoidRootPart.Position, 10)
+                    for _, part in ipairs(parts) do
+                        if part:IsA("BasePart") then
+                            -- Jika tombol ON (laserImmuneActive = true), maka CanTouch = false (Nembus/Immune)
+                            -- Jika OFF (laserImmuneActive = false), maka CanTouch = true (Terkena damage)
+                            part.CanTouch = not laserImmuneActive
+                        end
+                    end
+                end
+            end
+        end)
+    end
+
+    do
         local IY_BUTTON = Instance.new("TextButton")
         IY_BUTTON.Size = UDim2.new(0, 165, 0, 35)
         IY_BUTTON.Position = UDim2.new(0.04, 0, 0.06, 0)
