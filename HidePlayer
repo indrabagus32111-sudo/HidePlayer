@@ -587,7 +587,7 @@ local function InitHub()
     InfoTitle.Size = UDim2.new(0, 200, 0, 25)
     InfoTitle.Position = UDim2.new(0, 90, 0.05, 5)
     InfoTitle.BackgroundTransparency = 1
-    InfoTitle.Text = "Owner Script"
+    InfoTitle.Text = "Script Owner:"
     InfoTitle.TextColor3 = Color3.new(1, 1, 1)
     InfoTitle.Font = Enum.Font.GothamBlack
     InfoTitle.TextSize = 18
