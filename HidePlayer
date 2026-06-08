@@ -1666,6 +1666,125 @@ local function InitHub()
     end
 
     do
+        -- 1. Membuat Tombol Anti Kick
+        local antiKickBtn = Instance.new("TextButton")
+        antiKickBtn.Size = UDim2.new(0, 165, 0, 35)
+        antiKickBtn.Position = UDim2.new(0.52, 0, 0.28, 0) -- Posisi tepat di bawah Anti Fling
+        antiKickBtn.BackgroundColor3 = SHARED_DARK_COLOR
+        antiKickBtn.Text = "Anti Kick (OFF)"
+        antiKickBtn.TextColor3 = Color3.new(1,1,1)
+        antiKickBtn.Font = Enum.Font.Gotham
+        antiKickBtn.TextSize = 15
+        antiKickBtn.Parent = tabProtect
+        Instance.new("UICorner", antiKickBtn).CornerRadius = UDim.new(0,8)
+
+        -- 2. Membuat Teks Note di Bawah Tombol
+        local antiKickNote = Instance.new("TextLabel")
+        antiKickNote.Size = UDim2.new(0, 165, 0, 30)
+        antiKickNote.Position = UDim2.new(0.52, 0, 0.42, 0) -- Menyesuaikan posisi di bawah tombol
+        antiKickNote.BackgroundTransparency = 1
+        antiKickNote.Text = "Note: the script doesn't work if the developer/admin kicks it"
+        antiKickNote.TextColor3 = Color3.fromRGB(255, 150, 150) -- Warna merah redup
+        antiKickNote.Font = Enum.Font.Gotham
+        antiKickNote.TextSize = 10
+        antiKickNote.TextWrapped = true
+        antiKickNote.Parent = tabProtect
+
+        local antiKickActive = false
+        table.insert(ThemeCore.Toggles, {Btn = antiKickBtn, GetState = function() return antiKickActive end})
+
+        -- 3. Menjalankan Script Anti Kick Saat Tombol Ditekan
+        antiKickBtn.MouseButton1Click:Connect(function()
+            if antiKickActive then return end -- Fungsi anti-kick ini permanen saat dinyalakan dalam satu sesi
+            antiKickActive = true
+            antiKickBtn.Text = "Anti Kick (ON)"
+            antiKickBtn.BackgroundColor3 = SHARED_THEME_COLOR
+
+            task.spawn(function()
+                -- Menggunakan referensi pemain lokal dari parent script (lp)
+                local LocalPlayer = lp 
+                
+                getgenv().AntiKickMax = true
+                local mt = getrawmetatable(game)
+                
+                local function showKickBlocked()
+                    pcall(function()
+                        game:GetService("StarterGui"):SetCore("SendNotification", {
+                            Title = "IndoHub X",
+                            Text = "Kick blocked",
+                            Duration = 2,
+                            Icon = "",
+                        })
+                    end)
+                end
+
+                if getgenv().AntiKickLoaded then return end
+                getgenv().AntiKickLoaded = true
+
+                setreadonly(mt, false)
+                local old_namecall = mt.__namecall
+                mt.__namecall = newcclosure(function(self, ...)
+                    local method = getnamecallmethod()
+                    
+                    if self == LocalPlayer and (method == "Kick" or method:lower():find("kick") or method:lower():find("ban")) then
+                        showKickBlocked()
+                        return
+                    end
+                    
+                    if method == "FireServer" and (tostring(self):find("Kick") or tostring(self):find("Ban") or tostring(self):find("exploit")) then
+                        showKickBlocked()
+                        return
+                    end
+                    
+                    if method == "Disconnect" and self == LocalPlayer then
+                        showKickBlocked()
+                        return
+                    end
+                    
+                    return old_namecall(self, ...)
+                end)
+                
+                if hookfunction then
+                    hookfunction(LocalPlayer.Kick, function() showKickBlocked() end)
+                end
+
+                local old_error = error
+                error = function(msg, level)
+                    local s = tostring(msg):lower()
+                    if s:find("kick") or s:find("exploit") or s:find("ban") or #tostring(msg) > 1000 then
+                        showKickBlocked()
+                        return
+                    end
+                    return old_error(msg, level)
+                end
+
+                spawn(function()
+                    while task.wait(0.15) do
+                        pcall(function()
+                            for _, c in ipairs(getconnections(LocalPlayer.Idled)) do
+                                c:Disable()
+                            end
+                        end)
+                        
+                        pcall(function()
+                            setreadonly(mt, false)
+                            mt.__namecall = newcclosure(function(self, ...)
+                                if self == LocalPlayer and getnamecallmethod():lower():find("kick") then
+                                    showKickBlocked()
+                                    return
+                                end
+                                return old_namecall(self, ...)
+                            end)
+                            setreadonly(mt, true)
+                        end)
+                    end
+                end)
+                setreadonly(mt, true)
+            end)
+        end)
+    end
+
+    do
         local IY_BUTTON = Instance.new("TextButton")
         IY_BUTTON.Size = UDim2.new(0, 165, 0, 35)
         IY_BUTTON.Position = UDim2.new(0.04, 0, 0.06, 0)
