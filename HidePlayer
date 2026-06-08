@@ -1665,7 +1665,7 @@ local function InitHub()
         end)
     end
 
-    do
+        do
         -- 1. Membuat Tombol Anti Kick
         local antiKickBtn = Instance.new("TextButton")
         antiKickBtn.Size = UDim2.new(0, 165, 0, 35)
@@ -1695,17 +1695,20 @@ local function InitHub()
 
         -- 3. Menjalankan Script Anti Kick Saat Tombol Ditekan
         antiKickBtn.MouseButton1Click:Connect(function()
-            if antiKickActive then return end -- Fungsi anti-kick ini permanen saat dinyalakan dalam satu sesi
-            antiKickActive = true
-            antiKickBtn.Text = "Anti Kick (ON)"
-            antiKickBtn.BackgroundColor3 = SHARED_THEME_COLOR
+            -- Toggle status (Jika true jadi false, jika false jadi true)
+            antiKickActive = not antiKickActive
+            
+            -- Ubah visual tombol sesuai status
+            if antiKickActive then
+                antiKickBtn.Text = "Anti Kick (ON)"
+                antiKickBtn.BackgroundColor3 = SHARED_THEME_COLOR
+            else
+                antiKickBtn.Text = "Anti Kick (OFF)"
+                antiKickBtn.BackgroundColor3 = SHARED_DARK_COLOR
+            end
 
             task.spawn(function()
-                -- Menggunakan referensi pemain lokal dari parent script (lp)
                 local LocalPlayer = lp 
-                
-                getgenv().AntiKickMax = true
-                local mt = getrawmetatable(game)
                 
                 local function showKickBlocked()
                     pcall(function()
@@ -1718,68 +1721,77 @@ local function InitHub()
                     end)
                 end
 
+                -- Pastikan fungsi hook / bypass HANYA dimuat 1 kali untuk menghindari crash
                 if getgenv().AntiKickLoaded then return end
                 getgenv().AntiKickLoaded = true
 
+                local mt = getrawmetatable(game)
                 setreadonly(mt, false)
+                
+                -- Hook Namecall
                 local old_namecall = mt.__namecall
                 mt.__namecall = newcclosure(function(self, ...)
-                    local method = getnamecallmethod()
-                    
-                    if self == LocalPlayer and (method == "Kick" or method:lower():find("kick") or method:lower():find("ban")) then
-                        showKickBlocked()
-                        return
-                    end
-                    
-                    if method == "FireServer" and (tostring(self):find("Kick") or tostring(self):find("Ban") or tostring(self):find("exploit")) then
-                        showKickBlocked()
-                        return
-                    end
-                    
-                    if method == "Disconnect" and self == LocalPlayer then
-                        showKickBlocked()
-                        return
+                    if antiKickActive then -- Hanya memblokir jika tombol sedang ON
+                        local method = getnamecallmethod()
+                        
+                        if self == LocalPlayer and (method == "Kick" or method:lower():find("kick") or method:lower():find("ban")) then
+                            showKickBlocked()
+                            return
+                        end
+                        
+                        if method == "FireServer" and (tostring(self):find("Kick") or tostring(self):find("Ban") or tostring(self):find("exploit")) then
+                            showKickBlocked()
+                            return
+                        end
+                        
+                        if method == "Disconnect" and self == LocalPlayer then
+                            showKickBlocked()
+                            return
+                        end
                     end
                     
                     return old_namecall(self, ...)
                 end)
                 
+                -- Hook Fungsi Kick Bawaan
                 if hookfunction then
-                    hookfunction(LocalPlayer.Kick, function() showKickBlocked() end)
+                    local old_kick
+                    old_kick = hookfunction(LocalPlayer.Kick, function(self, ...) 
+                        if antiKickActive then
+                            showKickBlocked()
+                            return
+                        end
+                        return old_kick(self, ...)
+                    end)
                 end
 
+                -- Hook Fungsi Error
                 local old_error = error
                 error = function(msg, level)
-                    local s = tostring(msg):lower()
-                    if s:find("kick") or s:find("exploit") or s:find("ban") or #tostring(msg) > 1000 then
-                        showKickBlocked()
-                        return
+                    if antiKickActive then
+                        local s = tostring(msg):lower()
+                        if s:find("kick") or s:find("exploit") or s:find("ban") or #tostring(msg) > 1000 then
+                            showKickBlocked()
+                            return
+                        end
                     end
                     return old_error(msg, level)
                 end
+                
+                setreadonly(mt, true)
 
+                -- Loop Anti-AFK (Hanya berjalan jika toggle ON)
                 spawn(function()
                     while task.wait(0.15) do
-                        pcall(function()
-                            for _, c in ipairs(getconnections(LocalPlayer.Idled)) do
-                                c:Disable()
-                            end
-                        end)
-                        
-                        pcall(function()
-                            setreadonly(mt, false)
-                            mt.__namecall = newcclosure(function(self, ...)
-                                if self == LocalPlayer and getnamecallmethod():lower():find("kick") then
-                                    showKickBlocked()
-                                    return
+                        if antiKickActive then
+                            pcall(function()
+                                for _, c in ipairs(getconnections(LocalPlayer.Idled)) do
+                                    c:Disable()
                                 end
-                                return old_namecall(self, ...)
                             end)
-                            setreadonly(mt, true)
-                        end)
+                        end
                     end
                 end)
-                setreadonly(mt, true)
             end)
         end)
     end
