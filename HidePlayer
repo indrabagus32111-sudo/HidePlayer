@@ -2688,7 +2688,7 @@ end)
     do
         local MarketplaceService = game:GetService("MarketplaceService")
 
-        -- DAFTAR GAMEPASS KAMU (Silakan ganti ID & nama sesuai milik Anda)
+        -- Daftar gamepass Anda
         local gamepasses = {
             {Name = "Donate (10 Robux)", ID = 1405998443},
             {Name = "Donate (15 Robux)", ID = 1870974532},
@@ -2701,13 +2701,18 @@ end)
             {Name = "Donate (50 Robux)", ID = 1729053907}
         }
 
-        -- Membuat wadah scrolling agar jika gamepass banyak bisa di-scroll ke bawah
+        -- PEMBENARAN: Kita buat Page resmi terlebih dahulu menggunakan fungsi bawaan script (CreatePage)
+        -- Ini agar sistem navigasi tab tahu kalau halaman ini ada dan wajib ditampilkan saat diklik
+        local pageSupport = CreatePage(tabSupport)
+
+        -- Membuat wadah scrolling di dalam page resmi yang baru dibuat
         local SupportScroll = Instance.new("ScrollingFrame")
         SupportScroll.Size = UDim2.new(1, 0, 1, 0)
         SupportScroll.BackgroundTransparency = 1
+        SupportScroll.BorderSizePixel = 0
         SupportScroll.ScrollBarThickness = 4
         SupportScroll.ScrollBarImageColor3 = SHARED_THEME_COLOR
-        SupportScroll.Parent = tabSupport
+        SupportScroll.Parent = pageSupport -- PEMBENARAN: Dimasukkan ke pageSupport, bukan langsung ke tabSupport
 
         local SupportLayout = Instance.new("UIListLayout")
         SupportLayout.Padding = UDim.new(0, 8)
@@ -2715,23 +2720,26 @@ end)
         SupportLayout.SortOrder = Enum.SortOrder.LayoutOrder
         SupportLayout.Parent = SupportScroll
 
+        -- Otomatis mengatur ukuran panjang scroll berdasarkan jumlah gamepass
         SupportLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            SupportScroll.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 10)
+            SupportScroll.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 15)
+            pageSupport.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 15)
         end)
 
-        -- Membaca tabel dan membuat tombol otomatis
+        -- Membuat tombol gamepass secara otomatis
         for i, gpInfo in ipairs(gamepasses) do
             local gpBtn = Instance.new("TextButton")
             gpBtn.Size = UDim2.new(0.92, 0, 0, 38)
             gpBtn.BackgroundColor3 = SHARED_DARK_COLOR
-            gpBtn.Text = "Buy " .. gpInfo.Name
+            gpBtn.Text = "🛒 Buy " .. gpInfo.Name
             gpBtn.TextColor3 = Color3.new(1, 1, 1)
             gpBtn.Font = Enum.Font.GothamSemibold
             gpBtn.TextSize = 14
             gpBtn.LayoutOrder = i
             gpBtn.Parent = SupportScroll
             
-            Instance.new("UICorner", gpBtn).CornerRadius = UDim.new(0, 8)
+            local corner = Instance.new("UICorner", gpBtn)
+            corner.CornerRadius = UDim.new(0, 8)
             table.insert(ThemeCore.SolidButtons, gpBtn)
 
             local gpStroke = Instance.new("UIStroke", gpBtn)
@@ -2740,7 +2748,7 @@ end)
             gpStroke.Transparency = 0.4
             table.insert(ThemeCore.Strokes, gpStroke)
 
-            -- Fungsi saat tombol Gamepass diklik
+            -- Fungsi beli ketika tombol di klik
             gpBtn.MouseButton1Click:Connect(function()
                 pcall(function()
                     MarketplaceService:PromptGamePassPurchase(lp, gpInfo.ID)
@@ -2748,3 +2756,4 @@ end)
             end)
         end
     end
+
