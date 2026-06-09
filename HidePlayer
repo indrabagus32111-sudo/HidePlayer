@@ -506,7 +506,7 @@ local function InitHub()
 
     local function CreateTab(name, index)
         local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, 77, 1, -4) 
+        btn.Size = UDim2.new(0, 68, 1, -4) 
         btn.BackgroundColor3 = SHARED_DARK_COLOR
         btn.BackgroundTransparency = 0.5
         btn.Text = name
@@ -539,7 +539,6 @@ local function InitHub()
 
         return content
     end
-
     local tabInfo      = CreateTab("Info", 1)
     local tabMain      = CreateTab("Main", 2)
     local tabPlayer    = CreateTab("Player", 3)
@@ -547,6 +546,7 @@ local function InitHub()
     local tabProtect   = CreateTab("Protect", 5)
     local tabMisc      = CreateTab("Misc", 6)
     local tabAimbot    = CreateTab("Aimbot", 7)
+    local tabSupport   = CreateTab("Support", 8)
 
     tabInfo.Visible = true
     tabButtons[1].BackgroundTransparency = 0.2
@@ -2684,3 +2684,67 @@ task.spawn(function()
         end
     end
 end)
+
+    do
+        local MarketplaceService = game:GetService("MarketplaceService")
+
+        -- DAFTAR GAMEPASS KAMU (Silakan ganti ID & nama sesuai milik Anda)
+        local gamepasses = {
+            {Name = "Donate (10 Robux)", ID = 1405998443},
+            {Name = "Donate (15 Robux)", ID = 1870974532},
+            {Name = "Donate (20 Robux)", ID = 1373451173},
+            {Name = "Donate (25 Robux)", ID = 1618631214},
+            {Name = "Donate (30 Robux)", ID = 1868195113},
+            {Name = "Donate (35 Robux)", ID = 1871360534},
+            {Name = "Donate (40 Robux)", ID = 1872140507},
+            {Name = "Donate (45 Robux)", ID = 1872038508},
+            {Name = "Donate (50 Robux)", ID = 1729053907}
+        }
+
+        -- Membuat wadah scrolling agar jika gamepass banyak bisa di-scroll ke bawah
+        local SupportScroll = Instance.new("ScrollingFrame")
+        SupportScroll.Size = UDim2.new(1, 0, 1, 0)
+        SupportScroll.BackgroundTransparency = 1
+        SupportScroll.ScrollBarThickness = 4
+        SupportScroll.ScrollBarImageColor3 = SHARED_THEME_COLOR
+        SupportScroll.Parent = tabSupport
+
+        local SupportLayout = Instance.new("UIListLayout")
+        SupportLayout.Padding = UDim.new(0, 8)
+        SupportLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        SupportLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        SupportLayout.Parent = SupportScroll
+
+        SupportLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            SupportScroll.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 10)
+        end)
+
+        -- Membaca tabel dan membuat tombol otomatis
+        for i, gpInfo in ipairs(gamepasses) do
+            local gpBtn = Instance.new("TextButton")
+            gpBtn.Size = UDim2.new(0.92, 0, 0, 38)
+            gpBtn.BackgroundColor3 = SHARED_DARK_COLOR
+            gpBtn.Text = "Buy " .. gpInfo.Name
+            gpBtn.TextColor3 = Color3.new(1, 1, 1)
+            gpBtn.Font = Enum.Font.GothamSemibold
+            gpBtn.TextSize = 14
+            gpBtn.LayoutOrder = i
+            gpBtn.Parent = SupportScroll
+            
+            Instance.new("UICorner", gpBtn).CornerRadius = UDim.new(0, 8)
+            table.insert(ThemeCore.SolidButtons, gpBtn)
+
+            local gpStroke = Instance.new("UIStroke", gpBtn)
+            gpStroke.Color = SHARED_THEME_COLOR
+            gpStroke.Thickness = 1.5
+            gpStroke.Transparency = 0.4
+            table.insert(ThemeCore.Strokes, gpStroke)
+
+            -- Fungsi saat tombol Gamepass diklik
+            gpBtn.MouseButton1Click:Connect(function()
+                pcall(function()
+                    MarketplaceService:PromptGamePassPurchase(lp, gpInfo.ID)
+                end)
+            end)
+        end
+    end
