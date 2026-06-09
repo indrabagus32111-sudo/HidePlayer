@@ -2688,7 +2688,7 @@ end)
     do
         local MarketplaceService = game:GetService("MarketplaceService")
 
-        -- Daftar gamepass Anda
+        -- Daftar Gamepass
         local gamepasses = {
             {Name = "Donate (10 Robux)", ID = 1405998443},
             {Name = "Donate (15 Robux)", ID = 1870974532},
@@ -2701,32 +2701,32 @@ end)
             {Name = "Donate (50 Robux)", ID = 1729053907}
         }
 
-        -- PEMBENARAN: Kita buat Page resmi terlebih dahulu menggunakan fungsi bawaan script (CreatePage)
-        -- Ini agar sistem navigasi tab tahu kalau halaman ini ada dan wajib ditampilkan saat diklik
-        local pageSupport = CreatePage(tabSupport)
-
-        -- Membuat wadah scrolling di dalam page resmi yang baru dibuat
-        local SupportScroll = Instance.new("ScrollingFrame")
-        SupportScroll.Size = UDim2.new(1, 0, 1, 0)
-        SupportScroll.BackgroundTransparency = 1
-        SupportScroll.BorderSizePixel = 0
-        SupportScroll.ScrollBarThickness = 4
-        SupportScroll.ScrollBarImageColor3 = SHARED_THEME_COLOR
-        SupportScroll.Parent = pageSupport -- PEMBENARAN: Dimasukkan ke pageSupport, bukan langsung ke tabSupport
+        -- Mencari Container Utama Halaman (Mencari MainFrame / PagesContainer)
+        -- Kita ambil parent dari salah satu halaman yang sudah pasti ada, misal Pages dari tabMain
+        local PagesContainer = mainFrame:FindFirstChild("Pages") or mainFrame:FindFirstChildOfClass("Frame")
+        
+        -- Membuat Page khusus Support secara mandiri agar tidak dirusak script utama
+        local customPageSupport = Instance.new("ScrollingFrame")
+        customPageSupport.Name = "SupportPage"
+        customPageSupport.Size = UDim2.new(1, 0, 1, 0)
+        customPageSupport.BackgroundTransparency = 1
+        customPageSupport.BorderSizePixel = 0
+        customPageSupport.Visible = false -- Default tersembunyi
+        customPageSupport.ScrollBarThickness = 4
+        customPageSupport.ScrollBarImageColor3 = SHARED_THEME_COLOR
+        customPageSupport.Parent = PagesContainer
 
         local SupportLayout = Instance.new("UIListLayout")
         SupportLayout.Padding = UDim.new(0, 8)
         SupportLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
         SupportLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        SupportLayout.Parent = SupportScroll
+        SupportLayout.Parent = customPageSupport
 
-        -- Otomatis mengatur ukuran panjang scroll berdasarkan jumlah gamepass
         SupportLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            SupportScroll.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 15)
-            pageSupport.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 15)
+            customPageSupport.CanvasSize = UDim2.new(0, 0, 0, SupportLayout.AbsoluteContentSize.Y + 20)
         end)
 
-        -- Membuat tombol gamepass secara otomatis
+        -- Membuat tombol gamepass ke dalam customPageSupport
         for i, gpInfo in ipairs(gamepasses) do
             local gpBtn = Instance.new("TextButton")
             gpBtn.Size = UDim2.new(0.92, 0, 0, 38)
@@ -2736,7 +2736,7 @@ end)
             gpBtn.Font = Enum.Font.GothamSemibold
             gpBtn.TextSize = 14
             gpBtn.LayoutOrder = i
-            gpBtn.Parent = SupportScroll
+            gpBtn.Parent = customPageSupport
             
             local corner = Instance.new("UICorner", gpBtn)
             corner.CornerRadius = UDim.new(0, 8)
@@ -2748,12 +2748,32 @@ end)
             gpStroke.Transparency = 0.4
             table.insert(ThemeCore.Strokes, gpStroke)
 
-            -- Fungsi beli ketika tombol di klik
             gpBtn.MouseButton1Click:Connect(function()
                 pcall(function()
                     MarketplaceService:PromptGamePassPurchase(lp, gpInfo.ID)
                 end)
             end)
         end
-    end
 
+        -- LOGIKA OVERRIDE: Saat Tab Support diklik, paksa halaman lain bersembunyi
+        tabSupport.MouseButton1Click:Connect(function()
+            -- Sembunyikan semua halaman bawaan script asli
+            for _, child in ipairs(PagesContainer:GetChildren()) do
+                if child:IsA("GuiObject") then
+                    child.Visible = false
+                end
+            end
+            -- Tampilkan halaman support kita
+            customPageSupport.Visible = true
+        end)
+
+        -- Tambahkan logika agar jika tab LAIN diklik, halaman Support kita ikut sembunyi
+        local allTabs = {tabInfo, tabMain, tabPlayer, tabVisual, tabProtect, tabMisc, tabAimbot}
+        for _, otherTab in ipairs(allTabs) do
+            if otherTab then
+                otherTab.MouseButton1Click:Connect(function()
+                    customPageSupport.Visible = false
+                end)
+            end
+        end
+    end
