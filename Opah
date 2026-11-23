@@ -461,15 +461,17 @@ local function registerObject(object)
 	if object:IsA("ProximityPrompt") then
 		local objectText = cleanText(object.ObjectText)
 		local actionText = cleanText(object.ActionText)
-		if objectText:match(" Key$") or objectText:lower():find("key", 1, true) then
-			table.insert(Tracked.Keys, object)
-		elseif objectText == "Passcode Note" then
-			Tracked.Note = object
-		elseif objectText:find("Padlock", 1, true) then
-			table.insert(Tracked.Locks, object)
-		elseif objectText == "Keypad" then
+		local lower = objectText:lower()
+
+		if lower:find("keypad", 1, true) then
 			Tracked.Keypad = object
-		elseif objectText:find("Pelita", 1, true) then
+		elseif lower:find("key", 1, true) then
+			table.insert(Tracked.Keys, object)
+		elseif lower:find("passcode", 1, true) or objectText == "Passcode Note" then
+			Tracked.Note = object
+		elseif lower:find("padlock", 1, true) then
+			table.insert(Tracked.Locks, object)
+		elseif lower:find("pelita", 1, true) then
 			table.insert(Tracked.Lamps, object)
 		elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
 			Tracked.MusicBox = object
@@ -653,7 +655,7 @@ task.spawn(function()
 					prompt,
 					prompt:FindFirstAncestorOfClass("Model"),
 					"Keypad [" .. getDistance(position) .. "m]",
-					Color3.fromRGB(70, 140, 255)
+					Color3.fromRGB(255, 235, 70)
 				)
 			end
 		end
