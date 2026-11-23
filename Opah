@@ -21,7 +21,7 @@ local allowedPlaceIds = {
 if not allowedPlaceIds[game.PlaceId] then
 	pcall(function()
 		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "OpahX",
+			Title = "Suki Hub",
 			Text = "This script can only be used at Night with OPAH",
 			Duration = 5
 		})
