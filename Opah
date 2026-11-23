@@ -21,7 +21,7 @@ local allowedPlaceIds = {
 if not allowedPlaceIds[game.PlaceId] then
 	pcall(function()
 		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "Suki Hub",
+			Title = "OpahX",
 			Text = "This script can only be used at Night with OPAH",
 			Duration = 5
 		})
@@ -31,11 +31,13 @@ if not allowedPlaceIds[game.PlaceId] then
 end
 
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local SoundService = game:GetService("SoundService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -100,7 +102,7 @@ local function getRoot()
 end
 
 local function getAnchor(object)
-	if not object or not object.Parent then
+	if not object then
 		return nil
 	end
 	if object:IsA("BasePart") or object:IsA("Attachment") then
@@ -128,16 +130,13 @@ end
 
 local function getPosition(object)
 	local anchor = getAnchor(object)
-	if not anchor or not anchor.Parent then
+	if not anchor then
 		return nil
 	end
 	if anchor:IsA("Attachment") then
 		return anchor.WorldPosition
 	end
-	if anchor:IsA("BasePart") then
-		return anchor.Position
-	end
-	return nil
+	return anchor.Position
 end
 
 local function getDistance(position)
@@ -210,18 +209,18 @@ local function clearEsp()
 end
 
 local function getHighlightAdornee(target, fallback)
-	if target and target.Parent and (target:IsA("Model") or target:IsA("BasePart")) then
+	if target and (target:IsA("Model") or target:IsA("BasePart")) then
 		return target
 	end
 	if target and target:IsA("ProximityPrompt") then
 		local model = target:FindFirstAncestorOfClass("Model")
-		if model and model.Parent then
+		if model then
 			return model
 		end
 	end
 	if target and target:IsA("Attachment") then
 		local parent = target.Parent
-		if parent and parent:IsA("BasePart") and parent.Parent then
+		if parent and parent:IsA("BasePart") then
 			return parent
 		end
 	end
@@ -240,32 +239,30 @@ local function updateEsp(id, object, highlightTarget, text, color)
 		return
 	end
 
-	local billboardAdornee
 	if anchor:IsA("Attachment") then
 		local parent = anchor.Parent
-		if not parent or not parent:IsA("BasePart") or not parent.Parent then
+		if not parent or not parent:IsA("BasePart") then
 			removeEsp(id)
 			return
 		end
-		billboardAdornee = parent
-	elseif anchor:IsA("BasePart") then
-		billboardAdornee = anchor
-	else
+	elseif not anchor:IsA("BasePart") then
 		removeEsp(id)
 		return
 	end
 
-	local highlightAdornee = getHighlightAdornee(highlightTarget, billboardAdornee)
-	if not highlightAdornee or not highlightAdornee.Parent or not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
-		highlightAdornee = billboardAdornee
+	local highlightAdornee = getHighlightAdornee(highlightTarget, anchor)
+	if not highlightAdornee or not highlightAdornee.Parent then
+		highlightAdornee = anchor
+	end
+	if not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
+		highlightAdornee = anchor
 	end
 
 	text = tostring(text or "Unknown Item")
 	color = typeof(color) == "Color3" and color or Color3.new(1, 1, 1)
 
 	local old = ActiveEsp[id]
-	if old and old.Anchor == billboardAdornee and old.Target == highlightAdornee
-		and old.Billboard and old.Billboard.Parent and old.Label and old.Label.Parent then
+	if old and old.Anchor == anchor and old.Target == highlightAdornee then
 		if old.Text ~= text then
 			old.Text = text
 			old.Label.Text = text
@@ -273,10 +270,8 @@ local function updateEsp(id, object, highlightTarget, text, color)
 		if old.Color ~= color then
 			old.Color = color
 			old.Label.TextColor3 = color
-			if old.Highlight and old.Highlight.Parent then
-				old.Highlight.FillColor = color
-				old.Highlight.OutlineColor = color
-			end
+			old.Highlight.FillColor = color
+			old.Highlight.OutlineColor = color
 		end
 		return
 	end
@@ -285,7 +280,7 @@ local function updateEsp(id, object, highlightTarget, text, color)
 
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "ItemESP_Billboard"
-	billboard.Adornee = billboardAdornee
+	billboard.Adornee = anchor
 	billboard.Size = UDim2.fromOffset(220, 24)
 	billboard.StudsOffset = Vector3.new(0, 1.8, 0)
 	billboard.AlwaysOnTop = true
@@ -304,24 +299,21 @@ local function updateEsp(id, object, highlightTarget, text, color)
 	label.Text = text
 	label.Parent = billboard
 
-	local highlight
-	pcall(function()
-		highlight = Instance.new("Highlight")
-		highlight.Name = "ItemESP_Highlight"
-		highlight.Adornee = highlightAdornee
-		highlight.FillColor = color
-		highlight.OutlineColor = color
-		highlight.FillTransparency = 0.7
-		highlight.OutlineTransparency = 0
-		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-		highlight.Parent = highlightAdornee
-	end)
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "ItemESP_Highlight"
+	highlight.Adornee = highlightAdornee
+	highlight.FillColor = color
+	highlight.OutlineColor = color
+	highlight.FillTransparency = 0.7
+	highlight.OutlineTransparency = 0
+	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+	highlight.Parent = EspGui
 
 	ActiveEsp[id] = {
 		Billboard = billboard,
 		Label = label,
 		Highlight = highlight,
-		Anchor = billboardAdornee,
+		Anchor = anchor,
 		Target = highlightAdornee,
 		Text = text,
 		Color = color
@@ -465,41 +457,20 @@ local function findPasscode()
 	return fallback
 end
 
-local function appendUniquePrompt(list, prompt)
-	for _, existing in ipairs(list) do
-		if existing == prompt then
-			return
-		end
-	end
-	table.insert(list, prompt)
-end
-
-local function appendUniquePartEntry(list, part, model)
-	for _, existing in ipairs(list) do
-		if existing.Part == part then
-			return
-		end
-	end
-	table.insert(list, { Part = part, Model = model })
-end
-
 local function registerObject(object)
-	if not object or not object.Parent then
-		return
-	end
 	if object:IsA("ProximityPrompt") then
 		local objectText = cleanText(object.ObjectText)
 		local actionText = cleanText(object.ActionText)
 		if objectText:match(" Key$") or objectText:lower():find("key", 1, true) then
-			appendUniquePrompt(Tracked.Keys, object)
+			table.insert(Tracked.Keys, object)
 		elseif objectText == "Passcode Note" then
 			Tracked.Note = object
 		elseif objectText:find("Padlock", 1, true) then
-			appendUniquePrompt(Tracked.Locks, object)
+			table.insert(Tracked.Locks, object)
 		elseif objectText == "Keypad" then
 			Tracked.Keypad = object
 		elseif objectText:find("Pelita", 1, true) then
-			appendUniquePrompt(Tracked.Lamps, object)
+			table.insert(Tracked.Lamps, object)
 		elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
 			Tracked.MusicBox = object
 		elseif objectText == "Old Photo" then
@@ -512,52 +483,16 @@ local function registerObject(object)
 				and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
 				or object
 			if part then
-				appendUniquePartEntry(Tracked.Wardrobes, part, object)
+				table.insert(Tracked.Wardrobes, { Part = part, Model = object })
 			end
 		elseif parent and parent.Name == "FlipFlops" then
 			local part = object:IsA("Model")
 				and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
 				or object
 			if part then
-				appendUniquePartEntry(Tracked.FlipFlops, part, object)
+				table.insert(Tracked.FlipFlops, { Part = part, Model = object })
 			end
 		end
-	end
-end
-
-local function removeFromPromptList(list, target)
-	for i = #list, 1, -1 do
-		if list[i] == target then
-			table.remove(list, i)
-		end
-	end
-end
-
-local function removeFromPartList(list, target)
-	for i = #list, 1, -1 do
-		local entry = list[i]
-		if entry.Part == target or entry.Model == target then
-			table.remove(list, i)
-		end
-	end
-end
-
-local function unregisterObject(object)
-	if not object then
-		return
-	end
-	Index.passText[object] = nil
-	if object:IsA("ProximityPrompt") then
-		removeFromPromptList(Tracked.Keys, object)
-		removeFromPromptList(Tracked.Locks, object)
-		removeFromPromptList(Tracked.Lamps, object)
-		if Tracked.Note == object then Tracked.Note = nil end
-		if Tracked.Keypad == object then Tracked.Keypad = nil end
-		if Tracked.MusicBox == object then Tracked.MusicBox = nil end
-		if Tracked.Photo == object then Tracked.Photo = nil end
-	elseif object:IsA("BasePart") or object:IsA("Model") then
-		removeFromPartList(Tracked.Wardrobes, object)
-		removeFromPartList(Tracked.FlipFlops, object)
 	end
 end
 
@@ -581,12 +516,7 @@ Workspace.DescendantAdded:Connect(function(object)
 	indexPassObject(object)
 end)
 
-Workspace.DescendantRemoving:Connect(unregisterObject)
-
 PlayerGui.DescendantAdded:Connect(indexPassObject)
-PlayerGui.DescendantRemoving:Connect(function(object)
-	Index.passText[object] = nil
-end)
 
 task.spawn(scanWorkspace)
 scanPasscodeObjects()
@@ -676,236 +606,230 @@ end)
 
 task.spawn(function()
 	while Running do
-		local okLoop, errLoop = pcall(function()
-			local used = {}
+		local used = {}
 
-			if State.EspKey then
-				for _, prompt in ipairs(Tracked.Keys) do
-					if prompt and prompt.Parent then
-						local position = getPosition(prompt)
-						if position then
-							local name = getDisplayName(prompt, "Key")
-							local colorName = name:match("^(%a+)")
-							local color = KeyColors[colorName] or Color3.fromRGB(255, 235, 70)
-							local label = name .. " [" .. getDistance(position) .. "m]"
-							if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
-								label = label .. " - NEXT"
-								color = Color3.fromRGB(255, 40, 120)
-							end
-							used[prompt] = true
-							updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
-						end
-					end
-				end
-			end
-
-			if State.EspNote and Tracked.Note and Tracked.Note.Parent then
-				local prompt = Tracked.Note
-				local position = getPosition(prompt)
-				if position then
-					used.Note = true
-					updateEsp(
-						"Note",
-						prompt,
-						prompt:FindFirstAncestorOfClass("Model"),
-						"Passcode Note [" .. getDistance(position) .. "m]",
-						Color3.fromRGB(255, 40, 160)
-					)
-				end
-			end
-
-			if State.EspKeypad and Tracked.Keypad and Tracked.Keypad.Parent then
-				local prompt = Tracked.Keypad
-				local position = getPosition(prompt)
-				if position then
-					used.Keypad = true
-					updateEsp(
-						"Keypad",
-						prompt,
-						prompt:FindFirstAncestorOfClass("Model"),
-						"Keypad [" .. getDistance(position) .. "m]",
-						Color3.fromRGB(70, 140, 255)
-					)
-				end
-			end
-
-			if State.EspPadlock then
-				for _, prompt in ipairs(Tracked.Locks) do
-					if prompt and prompt.Parent then
-						local position = getPosition(prompt)
-						if position then
-							used[prompt] = true
-							updateEsp(
-								prompt,
-								prompt,
-								prompt:FindFirstAncestorOfClass("Model"),
-								getDisplayName(prompt, "Padlock") .. " [" .. getDistance(position) .. "m]",
-								getPadlockColor(prompt)
-							)
-						end
-					end
-				end
-			end
-
-			if State.EspFlipFlop then
-				local list = {}
-				for _, item in ipairs(Tracked.FlipFlops) do
-					if item.Part and item.Part.Parent then
-						local position = getPosition(item.Part)
-						if position then
-							table.insert(list, {
-								Part = item.Part,
-								Model = item.Model,
-								Distance = getDistance(position)
-							})
-						end
-					end
-				end
-				table.sort(list, function(a, b)
-					return a.Distance < b.Distance
-				end)
-				for index = 1, math.min(3, #list) do
-					local item = list[index]
-					used[item.Part] = true
-					updateEsp(
-						item.Part,
-						item.Part,
-						item.Model,
-						"Flip Flop [" .. item.Distance .. "m]",
-						Color3.fromRGB(100, 220, 255)
-					)
-				end
-			end
-
-			if State.EspWardNear then
-				local nearest
-				local nearestDistance
-				for _, item in ipairs(Tracked.Wardrobes) do
-					if item.Part and item.Part.Parent then
-						local position = getPosition(item.Part)
-						if position then
-							local distance = getDistance(position)
-							if not nearestDistance or distance < nearestDistance then
-								nearest = item
-								nearestDistance = distance
-							end
-						end
-					end
-				end
-				if nearest then
-					used.WardrobeNearest = true
-					updateEsp(
-						"WardrobeNearest",
-						nearest.Part,
-						nearest.Model,
-						"Nearest Wardrobe [" .. nearestDistance .. "m]",
-						Color3.fromRGB(60, 255, 60)
-					)
-				end
-			end
-
-			if State.EspLamp then
-				for _, prompt in ipairs(Tracked.Lamps) do
-					if prompt and prompt.Parent then
-						local position = getPosition(prompt)
-						if position then
-							local name = getDisplayName(prompt, "Lamp")
-							local label = name .. " [" .. getDistance(position) .. "m]"
-							local color = Color3.fromRGB(255, 235, 70)
-							local lit = false
-							for code in pairs(LitLamps) do
-								if name:find(code, 1, true) then
-									lit = true
-									break
-								end
-							end
-							if lit then
-								label = label .. " - LIT"
-								color = Color3.fromRGB(60, 255, 60)
-							end
-							used[prompt] = true
-							updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
-						end
-					end
-				end
-
-				if Tracked.MusicBox and Tracked.MusicBox.Parent then
-					local object = Tracked.MusicBox
-					local position = getPosition(object)
+		if State.EspKey then
+			for _, prompt in ipairs(Tracked.Keys) do
+				if prompt and prompt.Parent then
+					local position = getPosition(prompt)
 					if position then
-						used.MusicBox = true
-						updateEsp(
-							"MusicBox",
-							object,
-							object:FindFirstAncestorOfClass("Model"),
-							"Music Box [" .. getDistance(position) .. "m]",
-							Color3.fromRGB(255, 255, 255)
-						)
-					end
-				end
-
-				if Tracked.Photo and Tracked.Photo.Parent then
-					local object = Tracked.Photo
-					local position = getPosition(object)
-					if position then
-						used.Photo = true
-						updateEsp(
-							"Photo",
-							object,
-							object:FindFirstAncestorOfClass("Model"),
-							"Old Photo [" .. getDistance(position) .. "m]",
-							Color3.fromRGB(255, 190, 120)
-						)
+						local name = getDisplayName(prompt, "Key")
+						local colorName = name:match("^(%a+)")
+						local color = KeyColors[colorName] or Color3.fromRGB(255, 235, 70)
+						local label = name .. " [" .. getDistance(position) .. "m]"
+						if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
+							label = label .. " - NEXT"
+							color = Color3.fromRGB(255, 40, 120)
+						end
+						used[prompt] = true
+						updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
 					end
 				end
 			end
+		end
 
-			if State.EspOpah then
-				local opah = Workspace:FindFirstChild("Opah")
-				local root = opah and (
-					opah:FindFirstChild("HumanoidRootPart")
-					or opah:FindFirstChildWhichIsA("BasePart", true)
+		if State.EspNote and Tracked.Note and Tracked.Note.Parent then
+			local prompt = Tracked.Note
+			local position = getPosition(prompt)
+			if position then
+				used.Note = true
+				updateEsp(
+					"Note",
+					prompt,
+					prompt:FindFirstAncestorOfClass("Model"),
+					"Passcode Note [" .. getDistance(position) .. "m]",
+					Color3.fromRGB(255, 40, 160)
 				)
-				if root then
-					used.Opah = true
-					updateEsp(
-						"Opah",
-						root,
-						opah,
-						"OPAH [" .. getDistance(root.Position) .. "m]",
-						Color3.fromRGB(255, 40, 40)
-					)
+			end
+		end
+
+		if State.EspKeypad and Tracked.Keypad and Tracked.Keypad.Parent then
+			local prompt = Tracked.Keypad
+			local position = getPosition(prompt)
+			if position then
+				used.Keypad = true
+				updateEsp(
+					"Keypad",
+					prompt,
+					prompt:FindFirstAncestorOfClass("Model"),
+					"Keypad [" .. getDistance(position) .. "m]",
+					Color3.fromRGB(70, 140, 255)
+				)
+			end
+		end
+
+		if State.EspPadlock then
+			for _, prompt in ipairs(Tracked.Locks) do
+				if prompt and prompt.Parent then
+					local position = getPosition(prompt)
+					if position then
+						used[prompt] = true
+						updateEsp(
+							prompt,
+							prompt,
+							prompt:FindFirstAncestorOfClass("Model"),
+							getDisplayName(prompt, "Padlock") .. " [" .. getDistance(position) .. "m]",
+							getPadlockColor(prompt)
+						)
+					end
 				end
 			end
+		end
 
-			if State.EspPlayer then
-				for _, player in ipairs(Players:GetPlayers()) do
-					if player ~= LocalPlayer then
-						local character = player.Character
-						local root = character and character:FindFirstChild("HumanoidRootPart")
-						if root then
-							used[player] = true
-							updateEsp(
-								player,
-								root,
-								character,
-								player.Name .. " [" .. getDistance(root.Position) .. "m]",
-								Color3.fromRGB(70, 255, 90)
-							)
+		if State.EspFlipFlop then
+			local list = {}
+			for _, item in ipairs(Tracked.FlipFlops) do
+				if item.Part and item.Part.Parent then
+					local position = getPosition(item.Part)
+					if position then
+						table.insert(list, {
+							Part = item.Part,
+							Model = item.Model,
+							Distance = getDistance(position)
+						})
+					end
+				end
+			end
+			table.sort(list, function(a, b)
+				return a.Distance < b.Distance
+			end)
+			for index = 1, math.min(3, #list) do
+				local item = list[index]
+				used[item.Part] = true
+				updateEsp(
+					item.Part,
+					item.Part,
+					item.Model,
+					"Flip Flop [" .. item.Distance .. "m]",
+					Color3.fromRGB(100, 220, 255)
+				)
+			end
+		end
+
+		if State.EspWardNear then
+			local nearest
+			local nearestDistance
+			for _, item in ipairs(Tracked.Wardrobes) do
+				if item.Part and item.Part.Parent then
+					local position = getPosition(item.Part)
+					if position then
+						local distance = getDistance(position)
+						if not nearestDistance or distance < nearestDistance then
+							nearest = item
+							nearestDistance = distance
 						end
 					end
 				end
 			end
+			if nearest then
+				used.WardrobeNearest = true
+				updateEsp(
+					"WardrobeNearest",
+					nearest.Part,
+					nearest.Model,
+					"Nearest Wardrobe [" .. nearestDistance .. "m]",
+					Color3.fromRGB(60, 255, 60)
+				)
+			end
+		end
 
-			for id in pairs(ActiveEsp) do
-				if not used[id] then
-					removeEsp(id)
+		if State.EspLamp then
+			for _, prompt in ipairs(Tracked.Lamps) do
+				if prompt and prompt.Parent then
+					local position = getPosition(prompt)
+					if position then
+						local name = getDisplayName(prompt, "Lamp")
+						local label = name .. " [" .. getDistance(position) .. "m]"
+						local color = Color3.fromRGB(255, 235, 70)
+						local lit = false
+						for code in pairs(LitLamps) do
+							if name:find(code, 1, true) then
+								lit = true
+								break
+							end
+						end
+						if lit then
+							label = label .. " - LIT"
+							color = Color3.fromRGB(60, 255, 60)
+						end
+						used[prompt] = true
+						updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
+					end
 				end
 			end
-		end)
 
-		if not okLoop then
-			warn("[ESP Loop Error]: " .. tostring(errLoop))
+			if Tracked.MusicBox and Tracked.MusicBox.Parent then
+				local object = Tracked.MusicBox
+				local position = getPosition(object)
+				if position then
+					used.MusicBox = true
+					updateEsp(
+						"MusicBox",
+						object,
+						object:FindFirstAncestorOfClass("Model"),
+						"Music Box [" .. getDistance(position) .. "m]",
+						Color3.fromRGB(255, 255, 255)
+					)
+				end
+			end
+
+			if Tracked.Photo and Tracked.Photo.Parent then
+				local object = Tracked.Photo
+				local position = getPosition(object)
+				if position then
+					used.Photo = true
+					updateEsp(
+						"Photo",
+						object,
+						object:FindFirstAncestorOfClass("Model"),
+						"Old Photo [" .. getDistance(position) .. "m]",
+						Color3.fromRGB(255, 190, 120)
+					)
+				end
+			end
+		end
+
+		if State.EspOpah then
+			local opah = Workspace:FindFirstChild("Opah")
+			local root = opah and (
+				opah:FindFirstChild("HumanoidRootPart")
+				or opah:FindFirstChildWhichIsA("BasePart", true)
+			)
+			if root then
+				used.Opah = true
+				updateEsp(
+					"Opah",
+					root,
+					opah,
+					"OPAH [" .. getDistance(root.Position) .. "m]",
+					Color3.fromRGB(255, 40, 40)
+				)
+			end
+		end
+
+		if State.EspPlayer then
+			for _, player in ipairs(Players:GetPlayers()) do
+				if player ~= LocalPlayer then
+					local character = player.Character
+					local root = character and character:FindFirstChild("HumanoidRootPart")
+					if root then
+						used[player] = true
+						updateEsp(
+							player,
+							root,
+							character,
+							player.Name .. " [" .. getDistance(root.Position) .. "m]",
+							Color3.fromRGB(70, 255, 90)
+						)
+					end
+				end
+			end
+		end
+
+		for id in pairs(ActiveEsp) do
+			if not used[id] then
+				removeEsp(id)
+			end
 		end
 
 		task.wait(math.clamp(tonumber(State.UpdateDelay) or 0.5, 0.1, 5))
