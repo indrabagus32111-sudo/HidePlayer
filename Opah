@@ -125,10 +125,6 @@ local function getAnchor(object)
 	if model then
 		return model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
 	end
-	local descendantPart = object:FindFirstChildWhichIsA("BasePart", true)
-	if descendantPart then
-		return descendantPart
-	end
 	return nil
 end
 
@@ -162,17 +158,11 @@ local function getDisplayName(prompt, fallback)
 			return actionText
 		end
 	end
-	if prompt and prompt:IsA("Model") then
-		return cleanText(prompt.Name)
-	end
 	local model = prompt and prompt:FindFirstAncestorOfClass("Model")
-	if model then
+	if model and cleanText(model.Name) ~= "" then
 		return cleanText(model.Name)
 	end
-	if prompt and prompt:IsA("BasePart") then
-		return cleanText(prompt.Name)
-	end
-	if prompt and prompt.Parent then
+	if prompt and prompt.Parent and cleanText(prompt.Parent.Name) ~= "" then
 		return cleanText(prompt.Parent.Name)
 	end
 	return fallback or "Unknown Item"
@@ -227,6 +217,10 @@ local function getHighlightAdornee(target, fallback)
 		if model then
 			return model
 		end
+		local part = target.Parent and (target.Parent:IsA("BasePart") and target.Parent or target:FindFirstAncestorWhichIsA("BasePart"))
+		if part then
+			return part
+		end
 	end
 	if target and target:IsA("Attachment") then
 		local parent = target.Parent
@@ -238,96 +232,98 @@ local function getHighlightAdornee(target, fallback)
 end
 
 local function updateEsp(id, object, highlightTarget, text, color)
-	if not object or not object.Parent then
-		removeEsp(id)
-		return
-	end
-
-	local anchor = getAnchor(object)
-	if not anchor or not anchor.Parent then
-		removeEsp(id)
-		return
-	end
-
-	if anchor:IsA("Attachment") then
-		local parent = anchor.Parent
-		if not parent or not parent:IsA("BasePart") then
+	pcall(function()
+		if not object or not object.Parent then
 			removeEsp(id)
 			return
 		end
-	elseif not anchor:IsA("BasePart") then
+
+		local anchor = getAnchor(object)
+		if not anchor or not anchor.Parent then
+			removeEsp(id)
+			return
+		end
+
+		if anchor:IsA("Attachment") then
+			local parent = anchor.Parent
+			if not parent or not parent:IsA("BasePart") then
+				removeEsp(id)
+				return
+			end
+		elseif not anchor:IsA("BasePart") then
+			removeEsp(id)
+			return
+		end
+
+		local highlightAdornee = getHighlightAdornee(highlightTarget, anchor)
+		if not highlightAdornee or not highlightAdornee.Parent then
+			highlightAdornee = anchor
+		end
+		if not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
+			highlightAdornee = anchor
+		end
+
+		text = tostring(text or "Unknown Item")
+		color = typeof(color) == "Color3" and color or Color3.new(1, 1, 1)
+
+		local old = ActiveEsp[id]
+		if old and old.Anchor == anchor and old.Target == highlightAdornee and old.Billboard and old.Billboard.Parent and old.Highlight and old.Highlight.Parent then
+			if old.Text ~= text then
+				old.Text = text
+				old.Label.Text = text
+			end
+			if old.Color ~= color then
+				old.Color = color
+				old.Label.TextColor3 = color
+				old.Highlight.FillColor = color
+				old.Highlight.OutlineColor = color
+			end
+			return
+		end
+
 		removeEsp(id)
-		return
-	end
 
-	local highlightAdornee = getHighlightAdornee(highlightTarget, anchor)
-	if not highlightAdornee or not highlightAdornee.Parent then
-		highlightAdornee = anchor
-	end
-	if not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
-		highlightAdornee = anchor
-	end
+		local billboard = Instance.new("BillboardGui")
+		billboard.Name = "ItemESP_Billboard"
+		billboard.Adornee = anchor
+		billboard.Size = UDim2.fromOffset(220, 24)
+		billboard.StudsOffset = Vector3.new(0, 1.8, 0)
+		billboard.AlwaysOnTop = true
+		billboard.MaxDistance = 10000
+		billboard.Parent = EspGui
 
-	text = tostring(text or "Unknown Item")
-	color = typeof(color) == "Color3" and color or Color3.new(1, 1, 1)
+		local label = Instance.new("TextLabel")
+		label.Name = "ItemName"
+		label.BackgroundTransparency = 1
+		label.Size = UDim2.fromScale(1, 1)
+		label.Font = Enum.Font.GothamBold
+		label.TextSize = 13
+		label.TextColor3 = color
+		label.TextStrokeColor3 = Color3.new(0, 0, 0)
+		label.TextStrokeTransparency = 0
+		label.Text = text
+		label.Parent = billboard
 
-	local old = ActiveEsp[id]
-	if old and old.Anchor == anchor and old.Target == highlightAdornee then
-		if old.Text ~= text then
-			old.Text = text
-			old.Label.Text = text
-		end
-		if old.Color ~= color then
-			old.Color = color
-			old.Label.TextColor3 = color
-			old.Highlight.FillColor = color
-			old.Highlight.OutlineColor = color
-		end
-		return
-	end
+		local highlight = Instance.new("Highlight")
+		highlight.Name = "ItemESP_Highlight"
+		highlight.Adornee = highlightAdornee
+		highlight.FillColor = color
+		highlight.OutlineColor = color
+		highlight.FillTransparency = 0.7
+		highlight.OutlineTransparency = 0
+		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+		highlight.Parent = EspGui
 
-	removeEsp(id)
-
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "ItemESP_Billboard"
-	billboard.Adornee = anchor
-	billboard.Size = UDim2.fromOffset(220, 24)
-	billboard.StudsOffset = Vector3.new(0, 1.8, 0)
-	billboard.AlwaysOnTop = true
-	billboard.MaxDistance = 10000
-	billboard.Parent = EspGui
-
-	local label = Instance.new("TextLabel")
-	label.Name = "ItemName"
-	label.BackgroundTransparency = 1
-	label.Size = UDim2.fromScale(1, 1)
-	label.Font = Enum.Font.GothamBold
-	label.TextSize = 13
-	label.TextColor3 = color
-	label.TextStrokeColor3 = Color3.new(0, 0, 0)
-	label.TextStrokeTransparency = 0
-	label.Text = text
-	label.Parent = billboard
-
-	local highlight = Instance.new("Highlight")
-	highlight.Name = "ItemESP_Highlight"
-	highlight.Adornee = highlightAdornee
-	highlight.FillColor = color
-	highlight.OutlineColor = color
-	highlight.FillTransparency = 0.7
-	highlight.OutlineTransparency = 0
-	highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-	highlight.Parent = EspGui
-
-	ActiveEsp[id] = {
-		Billboard = billboard,
-		Label = label,
-		Highlight = highlight,
-		Anchor = anchor,
-		Target = highlightAdornee,
-		Text = text,
-		Color = color
-	}
+		ActiveEsp[id] = {
+			Billboard = billboard,
+			Label = label,
+			Highlight = highlight,
+			Anchor = anchor,
+			Target = highlightAdornee,
+			Text = text,
+			Color = color
+		}
+	end)
 end
 
 local KeyColors = {
@@ -335,159 +331,107 @@ local KeyColors = {
 	Blue = Color3.fromRGB(70, 140, 255),
 	Green = Color3.fromRGB(70, 255, 90),
 	Yellow = Color3.fromRGB(255, 235, 70),
-	Purple = Color3.fromRGB(190, 100, 255)
+	Purple = Color3.fromRGB(190, 100, 255),
+	Orange = Color3.fromRGB(255, 155, 45),
+	Pink = Color3.fromRGB(255, 110, 180),
+	Cyan = Color3.fromRGB(65, 235, 255),
+	White = Color3.fromRGB(240, 240, 240)
 }
 
-local function colorNameFromColor(color)
-	if typeof(color) ~= "Color3" then
-		return nil
-	end
-	local hue, saturation, value = Color3.toHSV(color)
-	if saturation < 0.28 or value < 0.16 then
-		return nil
-	end
-	local closestName
-	local closestDifference = math.huge
-	for name, keyColor in pairs(KeyColors) do
-		local targetHue = Color3.toHSV(keyColor)
-		local difference = math.abs(hue - targetHue)
-		difference = math.min(difference, 1 - difference)
-		if difference < closestDifference then
-			closestDifference = difference
-			closestName = name
-		end
-	end
-	if closestDifference <= 0.12 then
-		return closestName
-	end
-	return nil
-end
-
 local function findKeyColorName(value)
-	if typeof(value) == "Color3" then
-		return colorNameFromColor(value)
-	end
-	if typeof(value) == "BrickColor" then
-		value = value.Name
-	end
 	local text = cleanText(value):lower()
+	if text == "" then
+		return nil
+	end
 	for colorName in pairs(KeyColors) do
 		if text:find(colorName:lower(), 1, true) then
 			return colorName
 		end
 	end
+	if text:find("merah", 1, true) then return "Red" end
+	if text:find("biru", 1, true) then return "Blue" end
+	if text:find("hijau", 1, true) then return "Green" end
+	if text:find("kuning", 1, true) then return "Yellow" end
+	if text:find("ungu", 1, true) then return "Purple" end
+	if text:find("oren", 1, true) or text:find("jingga", 1, true) then return "Orange" end
+	if text:find("merah muda", 1, true) or text:find("pink", 1, true) then return "Pink" end
+	if text:find("cyan", 1, true) or text:find("toska", 1, true) then return "Cyan" end
 	return nil
 end
 
-local function getObjectSearchText(object)
-	local values = {}
-	local current = object
-	while current and current ~= Workspace do
-		table.insert(values, current.Name)
-		if current:IsA("ProximityPrompt") then
-			table.insert(values, current.ObjectText)
-			table.insert(values, current.ActionText)
-		end
-		local attributes = current:GetAttributes()
-		for attributeName, attributeValue in pairs(attributes) do
-			table.insert(values, attributeName)
-			table.insert(values, tostring(attributeValue))
-		end
-		current = current.Parent
+local function detectColorFromPrompt(prompt, defaultColor)
+	if not prompt then
+		return defaultColor, nil
 	end
-	return table.concat(values, " "):lower()
-end
+	local ok, col, cname = pcall(function()
+		local model = prompt:FindFirstAncestorOfClass("Model")
+		local part = prompt.Parent and (prompt.Parent:IsA("BasePart") and prompt.Parent or prompt:FindFirstAncestorWhichIsA("BasePart"))
 
-local function getObjectColorName(object)
-	if not object then
-		return nil
-	end
-	local current = object
-	while current and current ~= Workspace do
-		local nameColor = findKeyColorName(current.Name)
-		if nameColor then
-			return nameColor
+		local attrColor = prompt:GetAttribute("KeyColor")
+			or (part and part:GetAttribute("KeyColor"))
+			or (model and model:GetAttribute("KeyColor"))
+
+		local colorName = findKeyColorName(attrColor)
+			or findKeyColorName(prompt.ObjectText)
+			or findKeyColorName(prompt.ActionText)
+			or findKeyColorName(part and part.Name)
+			or findKeyColorName(model and model.Name)
+
+		local current = prompt.Parent
+		while current and current ~= Workspace and not colorName do
+			colorName = findKeyColorName(current:GetAttribute("KeyColor")) or findKeyColorName(current.Name)
+			current = current.Parent
 		end
-		if current:IsA("ProximityPrompt") then
-			local promptColor = findKeyColorName(current.ObjectText) or findKeyColorName(current.ActionText)
-			if promptColor then
-				return promptColor
-			end
+
+		if colorName and KeyColors[colorName] then
+			return KeyColors[colorName], colorName
 		end
-		for attributeName, attributeValue in pairs(current:GetAttributes()) do
-			local attributeKey = attributeName:lower()
-			if attributeKey:find("color", 1, true) or attributeKey:find("colour", 1, true) then
-				local attributeColor = findKeyColorName(attributeValue)
-				if attributeColor then
-					return attributeColor
+
+		local root = model or part
+		local closestColor
+		local closestDifference = math.huge
+		if root then
+			for _, descendant in ipairs(root:GetDescendants()) do
+				if descendant:IsA("BasePart") then
+					local partColor = descendant.Color
+					for name, keyColor in pairs(KeyColors) do
+						local difference =
+							math.abs(partColor.R - keyColor.R) +
+							math.abs(partColor.G - keyColor.G) +
+							math.abs(partColor.B - keyColor.B)
+						if difference < closestDifference then
+							closestDifference = difference
+							closestColor = name
+						end
+					end
 				end
 			end
 		end
-		current = current.Parent
-	end
 
-	local function readPartColor(part)
-		local brickColorName = findKeyColorName(part.BrickColor.Name)
-		if brickColorName then
-			return brickColorName
+		if closestColor and closestDifference < 0.9 and KeyColors[closestColor] then
+			return KeyColors[closestColor], closestColor
 		end
-		return colorNameFromColor(part.Color)
-	end
 
-	local model = object:IsA("Model") and object or object:FindFirstAncestorOfClass("Model")
-	if model then
-		for _, descendant in ipairs(model:GetDescendants()) do
-			if descendant:IsA("BasePart") then
-				local partColorName = readPartColor(descendant)
-				if partColorName then
-					return partColorName
-				end
-			end
-		end
-	else
-		local part = object:IsA("BasePart") and object or object:FindFirstAncestorWhichIsA("BasePart")
-		if part then
-			return readPartColor(part)
-		end
+		return defaultColor, colorName
+	end)
+
+	if ok and col then
+		return col, cname
 	end
-	return nil
+	return defaultColor, nil
 end
 
-local function getKeyColor(object)
-	local colorName = getObjectColorName(object)
-	return colorName and KeyColors[colorName] or Color3.fromRGB(255, 235, 70)
+local function getKeyColor(prompt)
+	return detectColorFromPrompt(prompt, Color3.fromRGB(255, 235, 70))
 end
 
-local function getPadlockColor(object)
-	local colorName = getObjectColorName(object)
-	return colorName and KeyColors[colorName] or Color3.fromRGB(255, 160, 40)
-end
-
-local function addTrackedObject(list, object)
-	if not object then
-		return
-	end
-	for _, existing in ipairs(list) do
-		if existing == object then
-			return
-		end
-	end
-	table.insert(list, object)
-end
-
-local function getEspModel(object)
-	if not object then
-		return nil
-	end
-	if object:IsA("Model") then
-		return object
-	end
-	return object:FindFirstAncestorOfClass("Model")
+local function getPadlockColor(prompt)
+	local col = detectColorFromPrompt(prompt, Color3.fromRGB(255, 160, 40))
+	return col
 end
 
 local Tracked = {
 	Keys = {},
-	KeyObjects = {},
 	Locks = {},
 	Lamps = {},
 	Wardrobes = {},
@@ -507,12 +451,12 @@ local Index = {
 	passText = {}
 }
 
-local PASS_WORDS = { "pass", "code", "note", "sandi", "kertas", "paper", "memo" }
+local PASS_WORDS = { "pass", "code", "note", "sandi", "kertas", "paper", "memo", "keypad", "pin" }
 
 local function nameHasPassWord(inst)
 	local p = inst
 	while p and p ~= Workspace do
-		local n = p.Name:lower()
+		local n = tostring(p.Name or ""):lower()
 		for _, w in ipairs(PASS_WORDS) do
 			if n:find(w, 1, true) then
 				return true
@@ -524,9 +468,14 @@ local function nameHasPassWord(inst)
 end
 
 local function indexPassObject(inst)
-	if inst:IsA("TextLabel") or inst:IsA("TextBox") or inst:IsA("ValueBase") then
-		Index.passText[inst] = true
+	if not inst then
+		return
 	end
+	pcall(function()
+		if inst:IsA("TextLabel") or inst:IsA("TextBox") or inst:IsA("ValueBase") then
+			Index.passText[inst] = true
+		end
+	end)
 end
 
 local function scanPasscodeObjects()
@@ -540,95 +489,126 @@ local function scanPasscodeObjects()
 end
 
 local function findPasscode()
-	local fallback = nil
-	for d in pairs(Index.passText) do
-		if d.Parent then
-			if d:IsA("TextLabel") or d:IsA("TextBox") then
-				local t = d.Text:gsub("%s", "")
-				if t:match("^%d+$") and #t >= 3 and #t <= 6 then
-					if nameHasPassWord(d) then
+	local ok, found = pcall(function()
+		local fallback = nil
+		for d in pairs(Index.passText) do
+			if d and d.Parent then
+				if d:IsA("TextLabel") or d:IsA("TextBox") then
+					local raw = tostring(d.Text or "")
+					local t = raw:gsub("%D", "")
+					if #t >= 3 and #t <= 6 and raw:gsub("%s", "") == t then
+						if nameHasPassWord(d) then
+							return t
+						end
+						if not fallback and (d:FindFirstAncestorWhichIsA("SurfaceGui") or d:FindFirstAncestorWhichIsA("BillboardGui")) then
+							fallback = t
+						end
+					end
+				elseif d:IsA("ValueBase") then
+					local t = tostring(d.Value or ""):gsub("%D", "")
+					if #t >= 3 and #t <= 6 then
 						return t
 					end
-					if not fallback and d:FindFirstAncestorWhichIsA("SurfaceGui") then
-						fallback = t
-					end
-				end
-			elseif d:IsA("ValueBase") then
-				local t = tostring(d.Value)
-				if t:match("^%d+$") and #t >= 3 and #t <= 6 then
-					return t
 				end
 			end
 		end
+
+		local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+		local note = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
+		if note then
+			for _, desc in ipairs(note:GetDescendants()) do
+				if desc:IsA("TextLabel") or desc:IsA("TextBox") then
+					local t = tostring(desc.Text or ""):gsub("%D", "")
+					if #t >= 3 and #t <= 6 then
+						return t
+					end
+				end
+			end
+		end
+
+		return fallback
+	end)
+	return ok and found or nil
+end
+
+local function addUnique(list, item)
+	if not item then
+		return
 	end
-	return fallback
+	for _, existing in ipairs(list) do
+		if existing == item then
+			return
+		end
+	end
+	table.insert(list, item)
 end
 
 local function registerObject(object)
-	if object:IsA("ProximityPrompt") then
-		local objectText = cleanText(object.ObjectText)
-		local actionText = cleanText(object.ActionText)
-		local searchText = getObjectSearchText(object)
-
-		if searchText:find("keypad", 1, true) then
-			Tracked.Keypad = object
-		elseif searchText:find("passcode", 1, true)
-			or searchText:find("pass code", 1, true)
-			or searchText:find("sandi", 1, true)
-			or (searchText:find("note", 1, true) and searchText:find("puzzleitems", 1, true)) then
-			Tracked.Note = object
-		elseif searchText:find("padlock", 1, true)
-			or searchText:find("puzzlelocks", 1, true)
-			or searchText:find("lock", 1, true) then
-			addTrackedObject(Tracked.Locks, object)
-		elseif searchText:find("key", 1, true) then
-			addTrackedObject(Tracked.Keys, object)
-		elseif searchText:find("pelita", 1, true) then
-			addTrackedObject(Tracked.Lamps, object)
-		elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
-			Tracked.MusicBox = object
-		elseif objectText == "Old Photo" then
-			Tracked.Photo = object
-		end
-	elseif object:IsA("BasePart") or object:IsA("Model") then
-		local parent = object.Parent
-		local objectName = object.Name:lower()
-		if object:IsA("Model") and objectName == "passcodenote" and not Tracked.Note then
-			Tracked.Note = object:FindFirstChildWhichIsA("ProximityPrompt", true) or object
-		elseif object:IsA("Model") and objectName == "keypad" and not Tracked.Keypad then
-			Tracked.Keypad = object:FindFirstChildWhichIsA("ProximityPrompt", true) or object
-		elseif parent and parent.Name == "PuzzleLocks" then
-			local lockPrompt = object:FindFirstChildWhichIsA("ProximityPrompt", true)
-			addTrackedObject(Tracked.Locks, lockPrompt or object)
-		elseif parent and parent.Name == "PuzzleItems" then
-			local itemType = tostring(object:GetAttribute("ItemType") or ""):lower()
-			local isKeyObject = itemType == "key" or objectName:find("key", 1, true) ~= nil
-			if isKeyObject and not object:FindFirstChildWhichIsA("ProximityPrompt", true) then
-				addTrackedObject(Tracked.KeyObjects, object)
-			end
-		end
-
-		if parent and parent.Name == "HidingWardrobes" then
-			local part = object:IsA("Model")
-				and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
-				or object
-			if part then
-				table.insert(Tracked.Wardrobes, { Part = part, Model = object })
-			end
-		elseif parent and parent.Name == "FlipFlops" then
-			local part = object:IsA("Model")
-				and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
-				or object
-			if part then
-				table.insert(Tracked.FlipFlops, { Part = part, Model = object })
-			end
-		end
+	if not object then
+		return
 	end
+	pcall(function()
+		if object:IsA("ProximityPrompt") then
+			local objectText = cleanText(object.ObjectText)
+			local actionText = cleanText(object.ActionText)
+			local parentName = object.Parent and cleanText(object.Parent.Name) or ""
+			local model = object:FindFirstAncestorOfClass("Model")
+			local modelName = model and cleanText(model.Name) or ""
+			local lower = objectText:lower()
+
+			if lower:find("keypad", 1, true)
+				or actionText:lower():find("keypad", 1, true)
+				or parentName:lower():find("keypad", 1, true)
+				or modelName:lower():find("keypad", 1, true) then
+				Tracked.Keypad = object
+			elseif lower:find("key", 1, true)
+				or actionText:lower():find("key", 1, true)
+				or parentName:lower():find("key", 1, true)
+				or modelName:lower():find("key", 1, true)
+				or (model and model:GetAttribute("ItemType") == "Key")
+				or (model and model:GetAttribute("KeyColor") ~= nil) then
+				addUnique(Tracked.Keys, object)
+			elseif lower:find("passcode", 1, true)
+				or objectText == "Passcode Note"
+				or modelName:lower():find("passcode", 1, true)
+				or parentName:lower():find("passcode", 1, true) then
+				Tracked.Note = object
+			elseif lower:find("padlock", 1, true)
+				or actionText:find("Padlock", 1, true)
+				or lower:find("lock", 1, true)
+				or parentName:lower():find("lock", 1, true)
+				or modelName:lower():find("lock", 1, true) then
+				addUnique(Tracked.Locks, object)
+			elseif lower:find("pelita", 1, true) then
+				addUnique(Tracked.Lamps, object)
+			elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
+				Tracked.MusicBox = object
+			elseif objectText == "Old Photo" then
+				Tracked.Photo = object
+			end
+		elseif object:IsA("BasePart") or object:IsA("Model") then
+			local parent = object.Parent
+			if parent and parent.Name == "HidingWardrobes" then
+				local part = object:IsA("Model")
+					and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
+					or object
+				if part then
+					table.insert(Tracked.Wardrobes, { Part = part, Model = object })
+				end
+			elseif parent and parent.Name == "FlipFlops" then
+				local part = object:IsA("Model")
+					and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
+					or object
+				if part then
+					table.insert(Tracked.FlipFlops, { Part = part, Model = object })
+				end
+			end
+		end
+	end)
 end
 
 local function scanWorkspace()
 	Tracked.Keys = {}
-	Tracked.KeyObjects = {}
 	Tracked.Locks = {}
 	Tracked.Lamps = {}
 	Tracked.Wardrobes = {}
@@ -639,23 +619,6 @@ local function scanWorkspace()
 	Tracked.Photo = nil
 	for _, object in ipairs(Workspace:GetDescendants()) do
 		registerObject(object)
-	end
-	local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
-	local passcodeNote = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
-	if passcodeNote and not Tracked.Note then
-		Tracked.Note = passcodeNote:FindFirstChildWhichIsA("ProximityPrompt", true) or passcodeNote
-	end
-	local frontDoor = Workspace:FindFirstChild("FrontDoor")
-	local lockFolder = frontDoor and frontDoor:FindFirstChild("PuzzleLocks")
-	if lockFolder then
-		for _, lock in ipairs(lockFolder:GetChildren()) do
-			local lockPrompt = lock:FindFirstChildWhichIsA("ProximityPrompt", true)
-			addTrackedObject(Tracked.Locks, lockPrompt or lock)
-		end
-	end
-	local keypad = frontDoor and frontDoor:FindFirstChild("Keypad")
-	if keypad and not Tracked.Keypad then
-		Tracked.Keypad = keypad:FindFirstChildWhichIsA("ProximityPrompt", true) or keypad
 	end
 end
 
@@ -692,7 +655,8 @@ local passcodeParagraph = EspSection:AddParagraph({
 local function updatePasscodeDisplay()
 	if passcodeParagraph and type(passcodeParagraph.SetContent) == "function" then
 		pcall(function()
-			passcodeParagraph:SetContent(RecordedPasscode and tostring(RecordedPasscode) or "----")
+			local digits = RecordedPasscode and tostring(RecordedPasscode):gsub("%D", "") or ""
+			passcodeParagraph:SetContent(digits ~= "" and digits or "----")
 		end)
 	end
 end
@@ -701,13 +665,15 @@ local Running = true
 
 task.spawn(function()
 	while Running do
-		if not PasscodeFromRemote then
-			local passcode = findPasscode()
-			if passcode and passcode ~= RecordedPasscode then
-				RecordedPasscode = passcode
-				updatePasscodeDisplay()
+		pcall(function()
+			if not PasscodeFromRemote then
+				local passcode = findPasscode()
+				if passcode and tostring(passcode) ~= tostring(RecordedPasscode or "") then
+					RecordedPasscode = tostring(passcode)
+					updatePasscodeDisplay()
+				end
 			end
-		end
+		end)
 		task.wait(0.5)
 	end
 end)
@@ -722,20 +688,25 @@ task.spawn(function()
 	local puzzleRemote = puzzleShared and puzzleShared:FindFirstChild("PuzzleRemote")
 	if puzzleRemote and puzzleRemote:IsA("RemoteEvent") then
 		puzzleRemote.OnClientEvent:Connect(function(action, data)
-			if action == "Passcode" and type(data) == "string" then
-				RecordedPasscode = data
-				PasscodeFromRemote = true
-				updatePasscodeDisplay()
-			elseif action == "Notify" and type(data) == "string" then
-				if data:find("^Next") then
-					NextKeyName = data:match("%s+(%a+)")
-				elseif data:find(" lit the ", 1, true) then
-					local code = data:match("^Pelita%s+[\128-\255]+%s+(%S+)")
-					if code then
-						LitLamps[code] = true
+			pcall(function()
+				if action == "Passcode" and data ~= nil then
+					local digits = tostring(data):gsub("%D", "")
+					if digits ~= "" then
+						RecordedPasscode = digits
+						PasscodeFromRemote = true
+						updatePasscodeDisplay()
+					end
+				elseif action == "Notify" and type(data) == "string" then
+					if data:find("^Next") then
+						NextKeyName = data:match("%s+(%a+)")
+					elseif data:find(" lit the ", 1, true) then
+						local code = data:match("^Pelita%s+[\128-\255]+%s+(%S+)")
+						if code then
+							LitLamps[code] = true
+						end
 					end
 				end
-			end
+			end)
 		end)
 	end
 
@@ -743,11 +714,16 @@ task.spawn(function()
 	local secretRemote = secretShared and secretShared:FindFirstChild("SecretRemote")
 	if secretRemote and secretRemote:IsA("RemoteEvent") then
 		secretRemote.OnClientEvent:Connect(function(action, data)
-			if action == "Held" and data then
-				RecordedPasscode = tostring(data)
-				PasscodeFromRemote = true
-				updatePasscodeDisplay()
-			end
+			pcall(function()
+				if action == "Held" and data then
+					local digits = tostring(data):gsub("%D", "")
+					if digits ~= "" then
+						RecordedPasscode = digits
+						PasscodeFromRemote = true
+						updatePasscodeDisplay()
+					end
+				end
+			end)
 		end)
 	end
 end)
@@ -762,33 +738,17 @@ task.spawn(function()
 					local position = getPosition(prompt)
 					if position then
 						local name = getDisplayName(prompt, "Key")
-						local colorName = getObjectColorName(prompt)
-						local color = getKeyColor(prompt)
+						local color, colorName = getKeyColor(prompt)
+						if not colorName then
+							colorName = name:match("^(%a+)")
+						end
 						local label = name .. " [" .. getDistance(position) .. "m]"
 						if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
 							label = label .. " - NEXT"
+							color = Color3.fromRGB(255, 40, 120)
 						end
 						used[prompt] = true
-						updateEsp(prompt, prompt, getEspModel(prompt), label, color)
-					end
-				end
-			end
-		end
-
-		if State.EspKey then
-			for _, keyObject in ipairs(Tracked.KeyObjects) do
-				if keyObject and keyObject.Parent and not keyObject:FindFirstChildWhichIsA("ProximityPrompt", true) then
-					local position = getPosition(keyObject)
-					if position then
-						local name = getDisplayName(keyObject, "Key")
-						local colorName = getObjectColorName(keyObject)
-						local color = getKeyColor(keyObject)
-						local label = name .. " [" .. getDistance(position) .. "m]"
-						if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
-							label = label .. " - NEXT"
-						end
-						used[keyObject] = true
-						updateEsp(keyObject, keyObject, getEspModel(keyObject), label, color)
+						updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
 					end
 				end
 			end
@@ -798,12 +758,16 @@ task.spawn(function()
 			local prompt = Tracked.Note
 			local position = getPosition(prompt)
 			if position then
+				local passCode = RecordedPasscode or findPasscode()
+				local noteLabel = passCode
+					and ("Passcode Note [" .. tostring(passCode) .. "] [" .. getDistance(position) .. "m]")
+					or ("Passcode Note [" .. getDistance(position) .. "m]")
 				used.Note = true
 				updateEsp(
 					"Note",
 					prompt,
-					getEspModel(prompt),
-					"Passcode Note [" .. getDistance(position) .. "m]",
+					prompt:FindFirstAncestorOfClass("Model"),
+					noteLabel,
 					Color3.fromRGB(255, 40, 160)
 				)
 			end
@@ -817,9 +781,9 @@ task.spawn(function()
 				updateEsp(
 					"Keypad",
 					prompt,
-					getEspModel(prompt),
+					prompt:FindFirstAncestorOfClass("Model"),
 					"Keypad [" .. getDistance(position) .. "m]",
-					Color3.fromRGB(255, 255, 0)
+					Color3.fromRGB(255, 235, 70)
 				)
 			end
 		end
@@ -833,7 +797,7 @@ task.spawn(function()
 						updateEsp(
 							prompt,
 							prompt,
-							getEspModel(prompt),
+							prompt:FindFirstAncestorOfClass("Model"),
 							getDisplayName(prompt, "Padlock") .. " [" .. getDistance(position) .. "m]",
 							getPadlockColor(prompt)
 						)
@@ -1679,7 +1643,6 @@ local function fAutoEndingJob(jobKey)
 		end
 	end
 end
-
 
 local function runAutoPlayMusic(token)
 	local secretEnding = Workspace:FindFirstChild("SecretEnding") or Workspace:WaitForChild("SecretEnding", 8)
