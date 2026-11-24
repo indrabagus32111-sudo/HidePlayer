@@ -746,14 +746,14 @@ local EspSection = EspTab:AddSection("ESP & Passcode", true)
 
 local passcodeParagraph = EspSection:AddParagraph({
     Title = "PASSCODE",
-    Content = "----"
+    Content = "N/A"
 })
 
 local function updatePasscodeDisplay()
     if passcodeParagraph and type(passcodeParagraph.SetContent) == "function" then
         pcall(function()
             local digits = RecordedPasscode and tostring(RecordedPasscode):gsub("%D", "") or ""
-            passcodeParagraph:SetContent(digits ~= "" and digits or "----")
+            passcodeParagraph:SetContent(digits ~= "" and digits or "N/A")
         end)
     end
 end
@@ -1311,13 +1311,52 @@ local function getHrp()
     return fRoot()
 end
 
--- ClickDetector hanya akan dipanggil jika jarak HRP ke pusat BasePart <= 1.5 stud.
--- Jarak dihitung ulang tepat sebelum fireclickdetector dijalankan.
 local CLICK_DETECTOR_RADIUS = 1.5
 
 local function isKeyName(name)
     return tostring(name or ""):lower():find("key", 1, true) ~= nil
 end
+
+local function getClickDetectorPart(detector)
+    if not detector then return nil end
+    local part = detector.Parent
+    if part and part:IsA("BasePart") then
+        return part
+    end
+    return detector:FindFirstAncestorWhichIsA("BasePart")
+end
+
+local function clampClickDetectorDistance(detector)
+    if not detector or not detector:IsA("ClickDetector") then
+        return
+    end
+    pcall(function()
+        detector.MaxActivationDistance = CLICK_DETECTOR_RADIUS
+    end)
+end
+
+local function isClickDetectorInRange(detector, part)
+    if not detector or not detector.Parent or not part or not part.Parent then
+        return false
+    end
+    local hrp = getHrp()
+    if not hrp then
+        return false
+    end
+    return (part.Position - hrp.Position).Magnitude <= CLICK_DETECTOR_RADIUS
+end
+
+for _, descendant in ipairs(Workspace:GetDescendants()) do
+    if descendant:IsA("ClickDetector") then
+        clampClickDetectorDistance(descendant)
+    end
+end
+
+Workspace.DescendantAdded:Connect(function(descendant)
+    if descendant:IsA("ClickDetector") then
+        clampClickDetectorDistance(descendant)
+    end
+end)
 
 local function nearby(radius)
     local result = { prompts = {}, clicks = {} }
@@ -1326,19 +1365,19 @@ local function nearby(radius)
 
     local promptRadius = math.max(tonumber(radius) or 12, 0)
     for _, inst in ipairs(Workspace:GetDescendants()) do
-        if inst:IsA("ProximityPrompt") or inst:IsA("ClickDetector") then
+        if inst:IsA("ProximityPrompt") then
             local part = inst.Parent
             if part and not part:IsA("BasePart") then
                 part = inst:FindFirstAncestorWhichIsA("BasePart")
             end
-
-            if part then
-                local distance = (part.Position - hrp.Position).Magnitude
-                if inst:IsA("ProximityPrompt") and distance <= promptRadius then
-                    table.insert(result.prompts, { inst = inst })
-                elseif inst:IsA("ClickDetector") and distance <= CLICK_DETECTOR_RADIUS then
-                    table.insert(result.clicks, { inst = inst, part = part })
-                end
+            if part and (part.Position - hrp.Position).Magnitude <= promptRadius then
+                table.insert(result.prompts, { inst = inst })
+            end
+        elseif inst:IsA("ClickDetector") then
+            local part = getClickDetectorPart(inst)
+            clampClickDetectorDistance(inst)
+            if part and isClickDetectorInRange(inst, part) then
+                table.insert(result.clicks, { inst = inst, part = part })
             end
         end
     end
@@ -1371,18 +1410,16 @@ local function fireNearby(radius)
             n = n + 1
         end
     end
-    if fireclickdetector then
+    if type(fireclickdetector) == "function" then
         for _, e in ipairs(r.clicks) do
-            local hrp = getHrp()
-            local part = e.part
             local detector = e.inst
-            if detector and detector.Parent and part and part.Parent and hrp then
-                local currentDistance = (part.Position - hrp.Position).Magnitude
-                if currentDistance <= CLICK_DETECTOR_RADIUS then
-                    local ok = pcall(fireclickdetector, detector)
-                    if ok then
-                        n = n + 1
-                    end
+            local part = e.part
+            if isClickDetectorInRange(detector, part) then
+                local ok = pcall(function()
+                    fireclickdetector(detector)
+                end)
+                if ok then
+                    n = n + 1
                 end
             end
         end
@@ -1626,10 +1663,8 @@ local function findSubmitPasscodeRemote()
     return nil
 end
 
---==============================================================--
--- FIX: TETAP DI LOKASI KUNCI SAMPAI INVENTORY TERKONFIRMASI      --
--- Maksimal 1 detik untuk setiap percobaan pengambilan kunci.    --
---==============================================================--
+local KEY_STOP_DURATION = 0.7
+
 local function collectKeyEntry(entry, jobKey)
     if KKG.farm ~= jobKey then
         return false
@@ -1643,13 +1678,11 @@ local function collectKeyEntry(entry, jobKey)
 
     local color = entry.color
     local initialKeyCount = keyToolCount()
-
     local keyPos = fPosOf(prompt) or fPosOf(target)
     if not keyPos then
         return false
     end
 
-    -- Bergerak ke kunci satu kali; jangan mulai menuju gembok sebelum pickup dikonfirmasi.
     if not fMoveTo(keyPos + Vector3.new(0, 1.0, 0), 1.4) then
         return false
     end
@@ -1660,13 +1693,10 @@ local function collectKeyEntry(entry, jobKey)
         return hasKeyInInventory(color) or keyToolCount() > initialKeyCount
     end
 
-    -- Cek terlebih dahulu untuk menghindari interaksi ulang jika kunci sudah masuk.
     if isCollected() then
         return true
     end
 
-    -- Beberapa kali mencoba; setiap percobaan menunggu sampai inventory terdeteksi
-    -- atau tepat 1 detik berlalu. Karakter tetap berada di area kunci selama menunggu.
     for attempt = 1, 6 do
         if KKG.farm ~= jobKey then
             return false
@@ -1677,8 +1707,7 @@ local function collectKeyEntry(entry, jobKey)
         end
 
         if not prompt.Parent then
-            -- Prompt menghilang belum tentu inventory sudah tersinkron; tetap tunggu 1 detik.
-            local disappearanceDeadline = os.clock() + 1
+            local disappearanceDeadline = os.clock() + KEY_STOP_DURATION
             while KKG.farm == jobKey and os.clock() < disappearanceDeadline do
                 if isCollected() then
                     return true
@@ -1688,10 +1717,10 @@ local function collectKeyEntry(entry, jobKey)
             return isCollected()
         end
 
-        -- Tetap di posisi pengambilan; hanya koreksi kecil bila karakter terdorong.
         local currentRoot = fRoot()
         local currentPromptPos = fPosOf(prompt)
-        if currentRoot and currentPromptPos and (currentRoot.Position - (currentPromptPos + Vector3.new(0, 1.0, 0))).Magnitude > 3 then
+        if currentRoot and currentPromptPos
+            and (currentRoot.Position - (currentPromptPos + Vector3.new(0, 1.0, 0))).Magnitude > 3 then
             if not fMoveTo(currentPromptPos + Vector3.new(0, 1.0, 0), 1.4) then
                 return false
             end
@@ -1699,24 +1728,22 @@ local function collectKeyEntry(entry, jobKey)
 
         trigger(target, keyPart, 12)
 
-        local pickupDeadline = os.clock() + 1
+        local pickupDeadline = os.clock() + KEY_STOP_DURATION
         while KKG.farm == jobKey and os.clock() < pickupDeadline do
             if isCollected() then
                 return true
             end
-            task.wait(0.1)
+            task.wait(0.05)
         end
 
         if KKG.farm ~= jobKey then
             return false
         end
 
-        -- Pemeriksaan setelah batas tunggu untuk menangkap update inventory yang terlambat.
         if isCollected() then
             return true
         end
 
-        -- Jika objek kunci sudah hilang tetapi belum masuk inventory, jangan menganggap sukses.
         if not prompt.Parent then
             return false
         end
