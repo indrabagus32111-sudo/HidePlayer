@@ -1311,7 +1311,7 @@ local function getHrp()
     return fRoot()
 end
 
-local CLICK_DETECTOR_RADIUS = 1.5
+local CLICK_DETECTOR_RADIUS = 1
 
 local function isKeyName(name)
     return tostring(name or ""):lower():find("key", 1, true) ~= nil
@@ -1663,7 +1663,7 @@ local function findSubmitPasscodeRemote()
     return nil
 end
 
-local KEY_STOP_DURATION = 0.7
+local KEY_STOP_DURATION = 0.3
 
 local function collectKeyEntry(entry, jobKey)
     if KKG.farm ~= jobKey then
