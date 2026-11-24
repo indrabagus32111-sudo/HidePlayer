@@ -38,6 +38,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local SoundService = game:GetService("SoundService")
+local Lighting = game:GetService("Lighting")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -58,7 +59,9 @@ local State = {
 	InfiniteSprint = false,
 	DoubleJump = false,
 	Noclip = false,
-	UpdateDelay = 0.5
+	UpdateDelay = 0.5,
+	AutoSkip = true,
+	Fullbright = false
 }
 
 local function loadConfig()
@@ -89,6 +92,83 @@ local function saveConfig()
 end
 
 loadConfig()
+State.AutoSkip = true
+
+local originalLighting = {
+	Brightness = Lighting.Brightness,
+	ClockTime = Lighting.ClockTime,
+	FogEnd = Lighting.FogEnd,
+	GlobalShadows = Lighting.GlobalShadows,
+	Ambient = Lighting.Ambient,
+	OutdoorAmbient = Lighting.OutdoorAmbient,
+}
+
+local function setFullbright(enabled)
+	State.Fullbright = enabled
+	if not enabled then
+		for prop, val in pairs(originalLighting) do
+			pcall(function()
+				Lighting[prop] = val
+			end)
+		end
+	end
+end
+
+local function applyFullbrightFrame()
+	if not State.Fullbright then
+		return
+	end
+	Lighting.Brightness = 2
+	Lighting.ClockTime = 14
+	Lighting.FogEnd = 1000000
+	Lighting.GlobalShadows = false
+	Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+	Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+end
+
+local function triggerSkipCutscene()
+	local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+	local cutsceneGui = playerGui and playerGui:FindFirstChild("CutsceneGui")
+	local skipButton = cutsceneGui and cutsceneGui:FindFirstChild("SkipButton")
+
+	if not skipButton then
+		return false
+	end
+
+	local visible = false
+	local active = false
+
+	pcall(function()
+		visible = skipButton.Visible
+		active = skipButton.Active and skipButton.AutoButtonColor
+	end)
+
+	if visible and active and typeof(getconnections) == "function" then
+		for _, conn in ipairs(getconnections(skipButton.Activated)) do
+			pcall(function()
+				conn:Fire()
+			end)
+		end
+		return true
+	end
+
+	return false
+end
+
+local skipTimer = 0
+local SkipInterval = 0.1
+
+RunService.Heartbeat:Connect(function(dt)
+	applyFullbrightFrame()
+
+	if State.AutoSkip then
+		skipTimer += dt
+		if skipTimer >= SkipInterval then
+			skipTimer = 0
+			pcall(triggerSkipCutscene)
+		end
+	end
+end)
 
 local function cleanText(value)
 	local text = tostring(value or "")
@@ -1957,10 +2037,20 @@ end
 
 local AutoTab = Window:AddTab({
 	Name = "Auto",
-	Icon = "rbxassetid://10723346959"
+	Icon = "rbxassetid://10709782230"
 })
 
 local AutoSection = AutoTab:AddSection("Auto Farm", true)
+
+AutoSection:AddParagraph({
+	Title = "Catatan",
+	Content = "Jika kunci gagal di ambil, nyalakan ulang tombol nya"
+})
+
+AutoSection:AddParagraph({
+	Title = "Note",
+	Content = "If the key fails to be retrieved, restart the button"
+})
 
 AutoToggleRefs.ending = AutoSection:AddToggle({
 	Title = "Auto Ending (Kunci + Kode Pintu)",
@@ -1991,6 +2081,67 @@ AutoToggleRefs.secret = AutoSection:AddToggle({
 			KKG.mode = nil
 			syncAutoToggles(nil)
 		end
+	end
+})
+
+local SettingsTab = Window:AddTab({
+	Name = "Settings",
+	Icon = "rbxassetid://10734950309"
+})
+
+local SettingsSection = SettingsTab:AddSection("Settings", true)
+
+SettingsSection:AddToggle({
+	Title = "Auto Skip Cutscene",
+	Default = true,
+	Callback = function(value)
+		State.AutoSkip = value
+		saveConfig()
+	end
+})
+
+SettingsSection:AddToggle({
+	Title = "Fullbright",
+	Default = State.Fullbright,
+	Callback = function(value)
+		setFullbright(value)
+		saveConfig()
+	end
+})
+
+local ConfigTab = Window:AddTab({
+	Name = "Config",
+	Icon = "rbxassetid://10723356830"
+})
+
+local ConfigSection = ConfigTab:AddSection("Config", true)
+
+ConfigSection:AddButton({
+	Title = "Save Config",
+	Callback = function()
+		saveConfig()
+	end
+})
+
+ConfigSection:AddButton({
+	Title = "Reset Config",
+	Callback = function()
+		State.EspKey = false
+		State.EspKeypad = false
+		State.EspNote = false
+		State.EspPadlock = false
+		State.EspFlipFlop = false
+		State.EspWardNear = false
+		State.EspLamp = false
+		State.EspOpah = false
+		State.EspPlayer = false
+		State.InfiniteSprint = false
+		State.DoubleJump = false
+		State.Noclip = false
+		State.UpdateDelay = 0.5
+		State.AutoSkip = true
+		setFullbright(false)
+		saveConfig()
 	end
 })
 
