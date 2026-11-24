@@ -1,33 +1,33 @@
 local LIBRARY_URL = "https://raw.githubusercontent.com/indrabagus32111-sudo/Project/refs/heads/main/Project"
 local okLib, libSource = pcall(game.HttpGet, game, LIBRARY_URL)
 if not okLib or type(libSource) ~= "string" or libSource:find("404: Not Found", 1, true) then
-	error("Library gagal diunduh. Cek link Raw GitHub: repo harus public dan nama file harus tepat.")
+    error("Library gagal diunduh. Cek link Raw GitHub: repo harus public dan nama file harus tepat.")
 end
 local libFn, libErr = loadstring(libSource)
 if not libFn then
-	error("Library gagal dikompilasi: " .. tostring(libErr))
+    error("Library gagal dikompilasi: " .. tostring(libErr))
 end
 local Library = libFn()
 
 if not game:IsLoaded() then
-	game.Loaded:Wait()
+    game.Loaded:Wait()
 end
 
 local allowedPlaceIds = {
-	[91246277860636] = true,
-	[101051454784523] = true,
+    [91246277860636] = true,
+    [101051454784523] = true,
 }
 
 if not allowedPlaceIds[game.PlaceId] then
-	pcall(function()
-		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = "Suki Hub",
-			Text = "This script can only be used at Night with OPAH",
-			Duration = 5
-		})
-	end)
-	warn("This script can only be used at Night with OPAH")
-	return
+    pcall(function()
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "Suki Hub",
+            Text = "This script can only be used at Night with OPAH",
+            Duration = 5
+        })
+    end)
+    warn("This script can only be used at Night with OPAH")
+    return
 end
 
 local Players = game:GetService("Players")
@@ -47,212 +47,212 @@ local FolderName = "OpahX"
 local ConfigPath = FolderName .. "/OpahHelper.json"
 
 local State = {
-	EspKey = false,
-	EspKeypad = false,
-	EspNote = false,
-	EspPadlock = false,
-	EspFlipFlop = false,
-	EspWardNear = false,
-	EspLamp = false,
-	EspOpah = false,
-	EspPlayer = false,
-	InfiniteSprint = false,
-	DoubleJump = false,
-	Noclip = false,
-	UpdateDelay = 0.5,
-	AutoSkip = true,
-	Fullbright = false
+    EspKey = false,
+    EspKeypad = false,
+    EspNote = false,
+    EspPadlock = false,
+    EspFlipFlop = false,
+    EspWardNear = false,
+    EspLamp = false,
+    EspOpah = false,
+    EspPlayer = false,
+    InfiniteSprint = false,
+    DoubleJump = false,
+    Noclip = false,
+    UpdateDelay = 0.5,
+    AutoSkip = true,
+    Fullbright = false
 }
 
 local function loadConfig()
-	if not (isfile and readfile) or not isfile(ConfigPath) then
-		return
-	end
-	local success, data = pcall(function()
-		return HttpService:JSONDecode(readfile(ConfigPath))
-	end)
-	if success and type(data) == "table" then
-		for key, value in pairs(data) do
-			if State[key] ~= nil and type(value) == type(State[key]) then
-				State[key] = value
-			end
-		end
-	end
+    if not (isfile and readfile) or not isfile(ConfigPath) then
+        return
+    end
+    local success, data = pcall(function()
+        return HttpService:JSONDecode(readfile(ConfigPath))
+    end)
+    if success and type(data) == "table" then
+        for key, value in pairs(data) do
+            if State[key] ~= nil and type(value) == type(State[key]) then
+                State[key] = value
+            end
+        end
+    end
 end
 
 local function saveConfig()
-	if makefolder and isfolder and not isfolder(FolderName) then
-		pcall(makefolder, FolderName)
-	end
-	if writefile then
-		pcall(function()
-			writefile(ConfigPath, HttpService:JSONEncode(State))
-		end)
-	end
+    if makefolder and isfolder and not isfolder(FolderName) then
+        pcall(makefolder, FolderName)
+    end
+    if writefile then
+        pcall(function()
+            writefile(ConfigPath, HttpService:JSONEncode(State))
+        end)
+    end
 end
 
 loadConfig()
 State.AutoSkip = true
 
 local originalLighting = {
-	Brightness = Lighting.Brightness,
-	ClockTime = Lighting.ClockTime,
-	FogEnd = Lighting.FogEnd,
-	GlobalShadows = Lighting.GlobalShadows,
-	Ambient = Lighting.Ambient,
-	OutdoorAmbient = Lighting.OutdoorAmbient,
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime,
+    FogEnd = Lighting.FogEnd,
+    GlobalShadows = Lighting.GlobalShadows,
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
 }
 
 local function setFullbright(enabled)
-	State.Fullbright = enabled
-	if not enabled then
-		for prop, val in pairs(originalLighting) do
-			pcall(function()
-				Lighting[prop] = val
-			end)
-		end
-	end
+    State.Fullbright = enabled
+    if not enabled then
+        for prop, val in pairs(originalLighting) do
+            pcall(function()
+                Lighting[prop] = val
+            end)
+        end
+    end
 end
 
 local function applyFullbrightFrame()
-	if not State.Fullbright then
-		return
-	end
-	Lighting.Brightness = 2
-	Lighting.ClockTime = 14
-	Lighting.FogEnd = 1000000
-	Lighting.GlobalShadows = false
-	Lighting.Ambient = Color3.fromRGB(200, 200, 200)
-	Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
+    if not State.Fullbright then
+        return
+    end
+    Lighting.Brightness = 2
+    Lighting.ClockTime = 14
+    Lighting.FogEnd = 1000000
+    Lighting.GlobalShadows = false
+    Lighting.Ambient = Color3.fromRGB(200, 200, 200)
+    Lighting.OutdoorAmbient = Color3.fromRGB(200, 200, 200)
 end
 
 local function triggerSkipCutscene()
-	local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
-	local cutsceneGui = playerGui and playerGui:FindFirstChild("CutsceneGui")
-	local skipButton = cutsceneGui and cutsceneGui:FindFirstChild("SkipButton")
+    local playerGui = LocalPlayer:FindFirstChild("PlayerGui")
+    local cutsceneGui = playerGui and playerGui:FindFirstChild("CutsceneGui")
+    local skipButton = cutsceneGui and cutsceneGui:FindFirstChild("SkipButton")
 
-	if not skipButton then
-		return false
-	end
+    if not skipButton then
+        return false
+    end
 
-	local visible = false
-	local active = false
+    local visible = false
+    local active = false
 
-	pcall(function()
-		visible = skipButton.Visible
-		active = skipButton.Active and skipButton.AutoButtonColor
-	end)
+    pcall(function()
+        visible = skipButton.Visible
+        active = skipButton.Active and skipButton.AutoButtonColor
+    end)
 
-	if visible and active and typeof(getconnections) == "function" then
-		for _, conn in ipairs(getconnections(skipButton.Activated)) do
-			pcall(function()
-				conn:Fire()
-			end)
-		end
-		return true
-	end
+    if visible and active and typeof(getconnections) == "function" then
+        for _, conn in ipairs(getconnections(skipButton.Activated)) do
+            pcall(function()
+                conn:Fire()
+            end)
+        end
+        return true
+    end
 
-	return false
+    return false
 end
 
 local skipTimer = 0
 local SkipInterval = 0.1
 
 RunService.Heartbeat:Connect(function(dt)
-	applyFullbrightFrame()
+    applyFullbrightFrame()
 
-	if State.AutoSkip then
-		skipTimer += dt
-		if skipTimer >= SkipInterval then
-			skipTimer = 0
-			pcall(triggerSkipCutscene)
-		end
-	end
+    if State.AutoSkip then
+        skipTimer += dt
+        if skipTimer >= SkipInterval then
+            skipTimer = 0
+            pcall(triggerSkipCutscene)
+        end
+    end
 end)
 
 local function cleanText(value)
-	local text = tostring(value or "")
-	text = text:gsub("\u{200B}", ""):gsub("\u{FE0F}", ""):gsub("%s+", " ")
-	return text:match("^%s*(.-)%s*$") or ""
+    local text = tostring(value or "")
+    text = text:gsub("\u{200B}", ""):gsub("\u{FE0F}", ""):gsub("%s+", " ")
+    return text:match("^%s*(.-)%s*$") or ""
 end
 
 local function getRoot()
-	local character = LocalPlayer.Character
-	return character and character:FindFirstChild("HumanoidRootPart")
+    local character = LocalPlayer.Character
+    return character and character:FindFirstChild("HumanoidRootPart")
 end
 
 local function getAnchor(object)
-	if not object then
-		return nil
-	end
-	if object:IsA("BasePart") or object:IsA("Attachment") then
-		return object
-	end
-	if object:IsA("ProximityPrompt") then
-		local parent = object.Parent
-		if parent and (parent:IsA("BasePart") or parent:IsA("Attachment")) then
-			return parent
-		end
-		local part = object:FindFirstAncestorWhichIsA("BasePart")
-		if part then
-			return part
-		end
-	end
-	if object:IsA("Model") then
-		return object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true)
-	end
-	local model = object:FindFirstAncestorOfClass("Model")
-	if model then
-		return model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
-	end
-	return nil
+    if not object then
+        return nil
+    end
+    if object:IsA("BasePart") or object:IsA("Attachment") then
+        return object
+    end
+    if object:IsA("ProximityPrompt") then
+        local parent = object.Parent
+        if parent and (parent:IsA("BasePart") or parent:IsA("Attachment")) then
+            return parent
+        end
+        local part = object:FindFirstAncestorWhichIsA("BasePart")
+        if part then
+            return part
+        end
+    end
+    if object:IsA("Model") then
+        return object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true)
+    end
+    local model = object:FindFirstAncestorOfClass("Model")
+    if model then
+        return model.PrimaryPart or model:FindFirstChildWhichIsA("BasePart", true)
+    end
+    return nil
 end
 
 local function getPosition(object)
-	local anchor = getAnchor(object)
-	if not anchor then
-		return nil
-	end
-	if anchor:IsA("Attachment") then
-		return anchor.WorldPosition
-	end
-	return anchor.Position
+    local anchor = getAnchor(object)
+    if not anchor then
+        return nil
+    end
+    if anchor:IsA("Attachment") then
+        return anchor.WorldPosition
+    end
+    return anchor.Position
 end
 
 local function getDistance(position)
-	local root = getRoot()
-	if not root or not position then
-		return 0
-	end
-	return math.floor((position - root.Position).Magnitude)
+    local root = getRoot()
+    if not root or not position then
+        return 0
+    end
+    return math.floor((position - root.Position).Magnitude)
 end
 
 local function getDisplayName(prompt, fallback)
-	if prompt and prompt:IsA("ProximityPrompt") then
-		local objectText = cleanText(prompt.ObjectText)
-		local actionText = cleanText(prompt.ActionText)
-		if objectText ~= "" then
-			return objectText
-		end
-		if actionText ~= "" then
-			return actionText
-		end
-	end
-	local model = prompt and prompt:FindFirstAncestorOfClass("Model")
-	if model and cleanText(model.Name) ~= "" then
-		return cleanText(model.Name)
-	end
-	if prompt and prompt.Parent and cleanText(prompt.Parent.Name) ~= "" then
-		return cleanText(prompt.Parent.Name)
-	end
-	return fallback or "Unknown Item"
+    if prompt and prompt:IsA("ProximityPrompt") then
+        local objectText = cleanText(prompt.ObjectText)
+        local actionText = cleanText(prompt.ActionText)
+        if objectText ~= "" then
+            return objectText
+        end
+        if actionText ~= "" then
+            return actionText
+        end
+    end
+    local model = prompt and prompt:FindFirstAncestorOfClass("Model")
+    if model and cleanText(model.Name) ~= "" then
+        return cleanText(model.Name)
+    end
+    if prompt and prompt.Parent and cleanText(prompt.Parent.Name) ~= "" then
+        return cleanText(prompt.Parent.Name)
+    end
+    return fallback or "Unknown Item"
 end
 
 local GuiParent
 pcall(function()
-	if typeof(gethui) == "function" then
-		GuiParent = gethui()
-	end
+    if typeof(gethui) == "function" then
+        GuiParent = gethui()
+    end
 end)
 
 local EspGui = Instance.new("ScreenGui")
@@ -265,261 +265,261 @@ EspGui.Parent = GuiParent or PlayerGui
 local ActiveEsp = {}
 
 local function removeEsp(id)
-	local entry = ActiveEsp[id]
-	if not entry then
-		return
-	end
-	if entry.Billboard then
-		pcall(function()
-			entry.Billboard:Destroy()
-		end)
-	end
-	if entry.Highlight then
-		pcall(function()
-			entry.Highlight:Destroy()
-		end)
-	end
-	ActiveEsp[id] = nil
+    local entry = ActiveEsp[id]
+    if not entry then
+        return
+    end
+    if entry.Billboard then
+        pcall(function()
+            entry.Billboard:Destroy()
+        end)
+    end
+    if entry.Highlight then
+        pcall(function()
+            entry.Highlight:Destroy()
+        end)
+    end
+    ActiveEsp[id] = nil
 end
 
 local function clearEsp()
-	for id in pairs(ActiveEsp) do
-		removeEsp(id)
-	end
+    for id in pairs(ActiveEsp) do
+        removeEsp(id)
+    end
 end
 
 local function getHighlightAdornee(target, fallback)
-	if target and (target:IsA("Model") or target:IsA("BasePart")) then
-		return target
-	end
-	if target and target:IsA("ProximityPrompt") then
-		local model = target:FindFirstAncestorOfClass("Model")
-		if model then
-			return model
-		end
-		local part = target.Parent and (target.Parent:IsA("BasePart") and target.Parent or target:FindFirstAncestorWhichIsA("BasePart"))
-		if part then
-			return part
-		end
-	end
-	if target and target:IsA("Attachment") then
-		local parent = target.Parent
-		if parent and parent:IsA("BasePart") then
-			return parent
-		end
-	end
-	return fallback
+    if target and (target:IsA("Model") or target:IsA("BasePart")) then
+        return target
+    end
+    if target and target:IsA("ProximityPrompt") then
+        local model = target:FindFirstAncestorOfClass("Model")
+        if model then
+            return model
+        end
+        local part = target.Parent and (target.Parent:IsA("BasePart") and target.Parent or target:FindFirstAncestorWhichIsA("BasePart"))
+        if part then
+            return part
+        end
+    end
+    if target and target:IsA("Attachment") then
+        local parent = target.Parent
+        if parent and parent:IsA("BasePart") then
+            return parent
+        end
+    end
+    return fallback
 end
 
 local function updateEsp(id, object, highlightTarget, text, color)
-	pcall(function()
-		if not object or not object.Parent then
-			removeEsp(id)
-			return
-		end
+    pcall(function()
+        if not object or not object.Parent then
+            removeEsp(id)
+            return
+        end
 
-		local anchor = getAnchor(object)
-		if not anchor or not anchor.Parent then
-			removeEsp(id)
-			return
-		end
+        local anchor = getAnchor(object)
+        if not anchor or not anchor.Parent then
+            removeEsp(id)
+            return
+        end
 
-		if anchor:IsA("Attachment") then
-			local parent = anchor.Parent
-			if not parent or not parent:IsA("BasePart") then
-				removeEsp(id)
-				return
-			end
-		elseif not anchor:IsA("BasePart") then
-			removeEsp(id)
-			return
-		end
+        if anchor:IsA("Attachment") then
+            local parent = anchor.Parent
+            if not parent or not parent:IsA("BasePart") then
+                removeEsp(id)
+                return
+            end
+        elseif not anchor:IsA("BasePart") then
+            removeEsp(id)
+            return
+        end
 
-		local highlightAdornee = getHighlightAdornee(highlightTarget, anchor)
-		if not highlightAdornee or not highlightAdornee.Parent then
-			highlightAdornee = anchor
-		end
-		if not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
-			highlightAdornee = anchor
-		end
+        local highlightAdornee = getHighlightAdornee(highlightTarget, anchor)
+        if not highlightAdornee or not highlightAdornee.Parent then
+            highlightAdornee = anchor
+        end
+        if not (highlightAdornee:IsA("Model") or highlightAdornee:IsA("BasePart")) then
+            highlightAdornee = anchor
+        end
 
-		text = tostring(text or "Unknown Item")
-		color = typeof(color) == "Color3" and color or Color3.new(1, 1, 1)
+        text = tostring(text or "Unknown Item")
+        color = typeof(color) == "Color3" and color or Color3.new(1, 1, 1)
 
-		local old = ActiveEsp[id]
-		if old and old.Anchor == anchor and old.Target == highlightAdornee and old.Billboard and old.Billboard.Parent and old.Highlight and old.Highlight.Parent then
-			if old.Text ~= text then
-				old.Text = text
-				old.Label.Text = text
-			end
-			if old.Color ~= color then
-				old.Color = color
-				old.Label.TextColor3 = color
-				old.Highlight.FillColor = color
-				old.Highlight.OutlineColor = color
-			end
-			return
-		end
+        local old = ActiveEsp[id]
+        if old and old.Anchor == anchor and old.Target == highlightAdornee and old.Billboard and old.Billboard.Parent and old.Highlight and old.Highlight.Parent then
+            if old.Text ~= text then
+                old.Text = text
+                old.Label.Text = text
+            end
+            if old.Color ~= color then
+                old.Color = color
+                old.Label.TextColor3 = color
+                old.Highlight.FillColor = color
+                old.Highlight.OutlineColor = color
+            end
+            return
+        end
 
-		removeEsp(id)
+        removeEsp(id)
 
-		local billboard = Instance.new("BillboardGui")
-		billboard.Name = "ItemESP_Billboard"
-		billboard.Adornee = anchor
-		billboard.Size = UDim2.fromOffset(220, 24)
-		billboard.StudsOffset = Vector3.new(0, 1.8, 0)
-		billboard.AlwaysOnTop = true
-		billboard.MaxDistance = 10000
-		billboard.Parent = EspGui
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "ItemESP_Billboard"
+        billboard.Adornee = anchor
+        billboard.Size = UDim2.fromOffset(220, 24)
+        billboard.StudsOffset = Vector3.new(0, 1.8, 0)
+        billboard.AlwaysOnTop = true
+        billboard.MaxDistance = 10000
+        billboard.Parent = EspGui
 
-		local label = Instance.new("TextLabel")
-		label.Name = "ItemName"
-		label.BackgroundTransparency = 1
-		label.Size = UDim2.fromScale(1, 1)
-		label.Font = Enum.Font.GothamBold
-		label.TextSize = 13
-		label.TextColor3 = color
-		label.TextStrokeColor3 = Color3.new(0, 0, 0)
-		label.TextStrokeTransparency = 0
-		label.Text = text
-		label.Parent = billboard
+        local label = Instance.new("TextLabel")
+        label.Name = "ItemName"
+        label.BackgroundTransparency = 1
+        label.Size = UDim2.fromScale(1, 1)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 13
+        label.TextColor3 = color
+        label.TextStrokeColor3 = Color3.new(0, 0, 0)
+        label.TextStrokeTransparency = 0
+        label.Text = text
+        label.Parent = billboard
 
-		local highlight = Instance.new("Highlight")
-		highlight.Name = "ItemESP_Highlight"
-		highlight.Adornee = highlightAdornee
-		highlight.FillColor = color
-		highlight.OutlineColor = color
-		highlight.FillTransparency = 0.7
-		highlight.OutlineTransparency = 0
-		highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-		highlight.Parent = EspGui
+        local highlight = Instance.new("Highlight")
+        highlight.Name = "ItemESP_Highlight"
+        highlight.Adornee = highlightAdornee
+        highlight.FillColor = color
+        highlight.OutlineColor = color
+        highlight.FillTransparency = 0.7
+        highlight.OutlineTransparency = 0
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.Parent = EspGui
 
-		ActiveEsp[id] = {
-			Billboard = billboard,
-			Label = label,
-			Highlight = highlight,
-			Anchor = anchor,
-			Target = highlightAdornee,
-			Text = text,
-			Color = color
-		}
-	end)
+        ActiveEsp[id] = {
+            Billboard = billboard,
+            Label = label,
+            Highlight = highlight,
+            Anchor = anchor,
+            Target = highlightAdornee,
+            Text = text,
+            Color = color
+        }
+    end)
 end
 
 local KeyColors = {
-	Red = Color3.fromRGB(255, 70, 70),
-	Blue = Color3.fromRGB(70, 140, 255),
-	Green = Color3.fromRGB(70, 255, 90),
-	Yellow = Color3.fromRGB(255, 235, 70),
-	Purple = Color3.fromRGB(190, 100, 255),
-	Orange = Color3.fromRGB(255, 155, 45),
-	Pink = Color3.fromRGB(255, 110, 180),
-	Cyan = Color3.fromRGB(65, 235, 255),
-	White = Color3.fromRGB(240, 240, 240)
+    Red = Color3.fromRGB(255, 70, 70),
+    Blue = Color3.fromRGB(70, 140, 255),
+    Green = Color3.fromRGB(70, 255, 90),
+    Yellow = Color3.fromRGB(255, 235, 70),
+    Purple = Color3.fromRGB(190, 100, 255),
+    Orange = Color3.fromRGB(255, 155, 45),
+    Pink = Color3.fromRGB(255, 110, 180),
+    Cyan = Color3.fromRGB(65, 235, 255),
+    White = Color3.fromRGB(240, 240, 240)
 }
 
 local function findKeyColorName(value)
-	local text = cleanText(value):lower()
-	if text == "" then
-		return nil
-	end
-	for colorName in pairs(KeyColors) do
-		if text:find(colorName:lower(), 1, true) then
-			return colorName
-		end
-	end
-	if text:find("merah", 1, true) then return "Red" end
-	if text:find("biru", 1, true) then return "Blue" end
-	if text:find("hijau", 1, true) then return "Green" end
-	if text:find("kuning", 1, true) then return "Yellow" end
-	if text:find("ungu", 1, true) then return "Purple" end
-	if text:find("oren", 1, true) or text:find("jingga", 1, true) then return "Orange" end
-	if text:find("merah muda", 1, true) or text:find("pink", 1, true) then return "Pink" end
-	if text:find("cyan", 1, true) or text:find("toska", 1, true) then return "Cyan" end
-	return nil
+    local text = cleanText(value):lower()
+    if text == "" then
+        return nil
+    end
+    for colorName in pairs(KeyColors) do
+        if text:find(colorName:lower(), 1, true) then
+            return colorName
+        end
+    end
+    if text:find("merah", 1, true) then return "Red" end
+    if text:find("biru", 1, true) then return "Blue" end
+    if text:find("hijau", 1, true) then return "Green" end
+    if text:find("kuning", 1, true) then return "Yellow" end
+    if text:find("ungu", 1, true) then return "Purple" end
+    if text:find("oren", 1, true) or text:find("jingga", 1, true) then return "Orange" end
+    if text:find("merah muda", 1, true) or text:find("pink", 1, true) then return "Pink" end
+    if text:find("cyan", 1, true) or text:find("toska", 1, true) then return "Cyan" end
+    return nil
 end
 
 local function detectColorFromPrompt(prompt, defaultColor)
-	if not prompt then
-		return defaultColor, nil
-	end
-	local ok, col, cname = pcall(function()
-		local model = prompt:FindFirstAncestorOfClass("Model")
-		local part = prompt.Parent and (prompt.Parent:IsA("BasePart") and prompt.Parent or prompt:FindFirstAncestorWhichIsA("BasePart"))
+    if not prompt then
+        return defaultColor, nil
+    end
+    local ok, col, cname = pcall(function()
+        local model = prompt:FindFirstAncestorOfClass("Model")
+        local part = prompt.Parent and (prompt.Parent:IsA("BasePart") and prompt.Parent or prompt:FindFirstAncestorWhichIsA("BasePart"))
 
-		local attrColor = prompt:GetAttribute("KeyColor")
-			or (part and part:GetAttribute("KeyColor"))
-			or (model and model:GetAttribute("KeyColor"))
+        local attrColor = prompt:GetAttribute("KeyColor")
+            or (part and part:GetAttribute("KeyColor"))
+            or (model and model:GetAttribute("KeyColor"))
 
-		local colorName = findKeyColorName(attrColor)
-			or findKeyColorName(prompt.ObjectText)
-			or findKeyColorName(prompt.ActionText)
-			or findKeyColorName(part and part.Name)
-			or findKeyColorName(model and model.Name)
+        local colorName = findKeyColorName(attrColor)
+            or findKeyColorName(prompt.ObjectText)
+            or findKeyColorName(prompt.ActionText)
+            or findKeyColorName(part and part.Name)
+            or findKeyColorName(model and model.Name)
 
-		local current = prompt.Parent
-		while current and current ~= Workspace and not colorName do
-			colorName = findKeyColorName(current:GetAttribute("KeyColor")) or findKeyColorName(current.Name)
-			current = current.Parent
-		end
+        local current = prompt.Parent
+        while current and current ~= Workspace and not colorName do
+            colorName = findKeyColorName(current:GetAttribute("KeyColor")) or findKeyColorName(current.Name)
+            current = current.Parent
+        end
 
-		if colorName and KeyColors[colorName] then
-			return KeyColors[colorName], colorName
-		end
+        if colorName and KeyColors[colorName] then
+            return KeyColors[colorName], colorName
+        end
 
-		local root = model or part
-		local closestColor
-		local closestDifference = math.huge
-		if root then
-			for _, descendant in ipairs(root:GetDescendants()) do
-				if descendant:IsA("BasePart") then
-					local partColor = descendant.Color
-					for name, keyColor in pairs(KeyColors) do
-						local difference =
-							math.abs(partColor.R - keyColor.R) +
-							math.abs(partColor.G - keyColor.G) +
-							math.abs(partColor.B - keyColor.B)
-						if difference < closestDifference then
-							closestDifference = difference
-							closestColor = name
-						end
-					end
-				end
-			end
-		end
+        local root = model or part
+        local closestColor
+        local closestDifference = math.huge
+        if root then
+            for _, descendant in ipairs(root:GetDescendants()) do
+                if descendant:IsA("BasePart") then
+                    local partColor = descendant.Color
+                    for name, keyColor in pairs(KeyColors) do
+                        local difference =
+                            math.abs(partColor.R - keyColor.R) +
+                            math.abs(partColor.G - keyColor.G) +
+                            math.abs(partColor.B - keyColor.B)
+                        if difference < closestDifference then
+                            closestDifference = difference
+                            closestColor = name
+                        end
+                    end
+                end
+            end
+        end
 
-		if closestColor and closestDifference < 0.9 and KeyColors[closestColor] then
-			return KeyColors[closestColor], closestColor
-		end
+        if closestColor and closestDifference < 0.9 and KeyColors[closestColor] then
+            return KeyColors[closestColor], closestColor
+        end
 
-		return defaultColor, colorName
-	end)
+        return defaultColor, colorName
+    end)
 
-	if ok and col then
-		return col, cname
-	end
-	return defaultColor, nil
+    if ok and col then
+        return col, cname
+    end
+    return defaultColor, nil
 end
 
 local function getKeyColor(prompt)
-	return detectColorFromPrompt(prompt, Color3.fromRGB(255, 235, 70))
+    return detectColorFromPrompt(prompt, Color3.fromRGB(255, 235, 70))
 end
 
 local function getPadlockColor(prompt)
-	local col = detectColorFromPrompt(prompt, Color3.fromRGB(255, 160, 40))
-	return col
+    local col = detectColorFromPrompt(prompt, Color3.fromRGB(255, 160, 40))
+    return col
 end
 
 local Tracked = {
-	Keys = {},
-	Locks = {},
-	Lamps = {},
-	Wardrobes = {},
-	FlipFlops = {},
-	Note = nil,
-	Keypad = nil,
-	MusicBox = nil,
-	Photo = nil
+    Keys = {},
+    Locks = {},
+    Lamps = {},
+    Wardrobes = {},
+    FlipFlops = {},
+    Note = nil,
+    Keypad = nil,
+    MusicBox = nil,
+    Photo = nil
 }
 
 local RecordedPasscode
@@ -528,183 +528,199 @@ local NextKeyName
 local LitLamps = {}
 
 local Index = {
-	passText = {}
+    passText = {}
 }
 
 local PASS_WORDS = { "pass", "code", "note", "sandi", "kertas", "paper", "memo", "keypad", "pin" }
 
 local function nameHasPassWord(inst)
-	local p = inst
-	while p and p ~= Workspace do
-		local n = tostring(p.Name or ""):lower()
-		for _, w in ipairs(PASS_WORDS) do
-			if n:find(w, 1, true) then
-				return true
-			end
-		end
-		p = p.Parent
-	end
-	return false
+    local p = inst
+    while p and p ~= Workspace do
+        local n = tostring(p.Name or ""):lower()
+        for _, w in ipairs(PASS_WORDS) do
+            if n:find(w, 1, true) then
+                return true
+            end
+        end
+        p = p.Parent
+    end
+    return false
 end
 
 local function indexPassObject(inst)
-	if not inst then
-		return
-	end
-	pcall(function()
-		if inst:IsA("TextLabel") or inst:IsA("TextBox") or inst:IsA("ValueBase") then
-			Index.passText[inst] = true
-		end
-	end)
+    if not inst then
+        return
+    end
+    pcall(function()
+        if inst:IsA("TextLabel") or inst:IsA("TextBox") or inst:IsA("ValueBase") then
+            Index.passText[inst] = true
+        end
+    end)
 end
 
 local function scanPasscodeObjects()
-	table.clear(Index.passText)
-	for _, inst in ipairs(PlayerGui:GetDescendants()) do
-		indexPassObject(inst)
-	end
-	for _, inst in ipairs(Workspace:GetDescendants()) do
-		indexPassObject(inst)
-	end
+    table.clear(Index.passText)
+    for _, inst in ipairs(PlayerGui:GetDescendants()) do
+        indexPassObject(inst)
+    end
+    for _, inst in ipairs(Workspace:GetDescendants()) do
+        indexPassObject(inst)
+    end
+end
+
+local function isPureDigitText(raw)
+    local compact = tostring(raw or ""):gsub("%s", "")
+    if compact:match("^%d+$") and #compact >= 3 and #compact <= 6 then
+        return compact
+    end
+    return nil
 end
 
 local function findPasscode()
-	local ok, found = pcall(function()
-		local fallback = nil
-		for d in pairs(Index.passText) do
-			if d and d.Parent then
-				if d:IsA("TextLabel") or d:IsA("TextBox") then
-					local raw = tostring(d.Text or "")
-					local t = raw:gsub("%D", "")
-					if #t >= 3 and #t <= 6 and raw:gsub("%s", "") == t then
-						if nameHasPassWord(d) then
-							return t
-						end
-						if not fallback and (d:FindFirstAncestorWhichIsA("SurfaceGui") or d:FindFirstAncestorWhichIsA("BillboardGui")) then
-							fallback = t
-						end
-					end
-				elseif d:IsA("ValueBase") then
-					local t = tostring(d.Value or ""):gsub("%D", "")
-					if #t >= 3 and #t <= 6 then
-						return t
-					end
-				end
-			end
-		end
+    local ok, found = pcall(function()
+        local namedText = nil
+        local namedValue = nil
+        local fallbackText = nil
 
-		local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
-		local note = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
-		if note then
-			for _, desc in ipairs(note:GetDescendants()) do
-				if desc:IsA("TextLabel") or desc:IsA("TextBox") then
-					local t = tostring(desc.Text or ""):gsub("%D", "")
-					if #t >= 3 and #t <= 6 then
-						return t
-					end
-				end
-			end
-		end
+        for d in pairs(Index.passText) do
+            if d and d.Parent then
+                if d:IsA("TextLabel") or d:IsA("TextBox") then
+                    local t = isPureDigitText(d.Text)
+                    if t then
+                        if nameHasPassWord(d) then
+                            namedText = namedText or t
+                        elseif not fallbackText and (d:FindFirstAncestorWhichIsA("SurfaceGui") or d:FindFirstAncestorWhichIsA("BillboardGui")) then
+                            fallbackText = t
+                        end
+                    end
+                elseif d:IsA("ValueBase") and nameHasPassWord(d) then
+                    local t = isPureDigitText(d.Value)
+                    if t then
+                        namedValue = namedValue or t
+                    end
+                end
+            end
+        end
 
-		return fallback
-	end)
-	return ok and found or nil
+        if namedText then
+            return namedText
+        end
+        if namedValue then
+            return namedValue
+        end
+
+        local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+        local note = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
+        if note then
+            for _, desc in ipairs(note:GetDescendants()) do
+                if desc:IsA("TextLabel") or desc:IsA("TextBox") then
+                    local t = isPureDigitText(desc.Text)
+                    if t then
+                        return t
+                    end
+                end
+            end
+        end
+
+        return fallbackText
+    end)
+    return ok and found or nil
 end
 
 local function addUnique(list, item)
-	if not item then
-		return
-	end
-	for _, existing in ipairs(list) do
-		if existing == item then
-			return
-		end
-	end
-	table.insert(list, item)
+    if not item then
+        return
+    end
+    for _, existing in ipairs(list) do
+        if existing == item then
+            return
+        end
+    end
+    table.insert(list, item)
 end
 
 local function registerObject(object)
-	if not object then
-		return
-	end
-	pcall(function()
-		if object:IsA("ProximityPrompt") then
-			local objectText = cleanText(object.ObjectText)
-			local actionText = cleanText(object.ActionText)
-			local parentName = object.Parent and cleanText(object.Parent.Name) or ""
-			local model = object:FindFirstAncestorOfClass("Model")
-			local modelName = model and cleanText(model.Name) or ""
-			local lower = objectText:lower()
+    if not object then
+        return
+    end
+    pcall(function()
+        if object:IsA("ProximityPrompt") then
+            local objectText = cleanText(object.ObjectText)
+            local actionText = cleanText(object.ActionText)
+            local parentName = object.Parent and cleanText(object.Parent.Name) or ""
+            local model = object:FindFirstAncestorOfClass("Model")
+            local modelName = model and cleanText(model.Name) or ""
+            local lower = objectText:lower()
 
-			if lower:find("keypad", 1, true)
-				or actionText:lower():find("keypad", 1, true)
-				or parentName:lower():find("keypad", 1, true)
-				or modelName:lower():find("keypad", 1, true) then
-				Tracked.Keypad = object
-			elseif lower:find("key", 1, true)
-				or actionText:lower():find("key", 1, true)
-				or parentName:lower():find("key", 1, true)
-				or modelName:lower():find("key", 1, true)
-				or (model and model:GetAttribute("ItemType") == "Key")
-				or (model and model:GetAttribute("KeyColor") ~= nil) then
-				addUnique(Tracked.Keys, object)
-			elseif lower:find("passcode", 1, true)
-				or objectText == "Passcode Note"
-				or modelName:lower():find("passcode", 1, true)
-				or parentName:lower():find("passcode", 1, true) then
-				Tracked.Note = object
-			elseif lower:find("padlock", 1, true)
-				or actionText:find("Padlock", 1, true)
-				or lower:find("lock", 1, true)
-				or parentName:lower():find("lock", 1, true)
-				or modelName:lower():find("lock", 1, true) then
-				addUnique(Tracked.Locks, object)
-			elseif lower:find("pelita", 1, true) then
-				addUnique(Tracked.Lamps, object)
-			elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
-				Tracked.MusicBox = object
-			elseif objectText == "Old Photo" then
-				Tracked.Photo = object
-			end
-		elseif object:IsA("BasePart") or object:IsA("Model") then
-			local parent = object.Parent
-			if parent and parent.Name == "HidingWardrobes" then
-				local part = object:IsA("Model")
-					and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
-					or object
-				if part then
-					table.insert(Tracked.Wardrobes, { Part = part, Model = object })
-				end
-			elseif parent and parent.Name == "FlipFlops" then
-				local part = object:IsA("Model")
-					and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
-					or object
-				if part then
-					table.insert(Tracked.FlipFlops, { Part = part, Model = object })
-				end
-			end
-		end
-	end)
+            if lower:find("keypad", 1, true)
+                or actionText:lower():find("keypad", 1, true)
+                or parentName:lower():find("keypad", 1, true)
+                or modelName:lower():find("keypad", 1, true) then
+                Tracked.Keypad = object
+            elseif lower:find("key", 1, true)
+                or actionText:lower():find("key", 1, true)
+                or parentName:lower():find("key", 1, true)
+                or modelName:lower():find("key", 1, true)
+                or (model and model:GetAttribute("ItemType") == "Key")
+                or (model and model:GetAttribute("KeyColor") ~= nil) then
+                addUnique(Tracked.Keys, object)
+            elseif lower:find("passcode", 1, true)
+                or objectText == "Passcode Note"
+                or modelName:lower():find("passcode", 1, true)
+                or parentName:lower():find("passcode", 1, true) then
+                Tracked.Note = object
+            elseif lower:find("padlock", 1, true)
+                or actionText:find("Padlock", 1, true)
+                or lower:find("lock", 1, true)
+                or parentName:lower():find("lock", 1, true)
+                or modelName:lower():find("lock", 1, true) then
+                addUnique(Tracked.Locks, object)
+            elseif lower:find("pelita", 1, true) then
+                addUnique(Tracked.Lamps, object)
+            elseif objectText == "Music Box" or (actionText == "Listen" and object:FindFirstAncestor("KotakMuzik")) then
+                Tracked.MusicBox = object
+            elseif objectText == "Old Photo" then
+                Tracked.Photo = object
+            end
+        elseif object:IsA("BasePart") or object:IsA("Model") then
+            local parent = object.Parent
+            if parent and parent.Name == "HidingWardrobes" then
+                local part = object:IsA("Model")
+                    and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
+                    or object
+                if part then
+                    table.insert(Tracked.Wardrobes, { Part = part, Model = object })
+                end
+            elseif parent and parent.Name == "FlipFlops" then
+                local part = object:IsA("Model")
+                    and (object.PrimaryPart or object:FindFirstChildWhichIsA("BasePart", true))
+                    or object
+                if part then
+                    table.insert(Tracked.FlipFlops, { Part = part, Model = object })
+                end
+            end
+        end
+    end)
 end
 
 local function scanWorkspace()
-	Tracked.Keys = {}
-	Tracked.Locks = {}
-	Tracked.Lamps = {}
-	Tracked.Wardrobes = {}
-	Tracked.FlipFlops = {}
-	Tracked.Note = nil
-	Tracked.Keypad = nil
-	Tracked.MusicBox = nil
-	Tracked.Photo = nil
-	for _, object in ipairs(Workspace:GetDescendants()) do
-		registerObject(object)
-	end
+    Tracked.Keys = {}
+    Tracked.Locks = {}
+    Tracked.Lamps = {}
+    Tracked.Wardrobes = {}
+    Tracked.FlipFlops = {}
+    Tracked.Note = nil
+    Tracked.Keypad = nil
+    Tracked.MusicBox = nil
+    Tracked.Photo = nil
+    for _, object in ipairs(Workspace:GetDescendants()) do
+        registerObject(object)
+    end
 end
 
 Workspace.DescendantAdded:Connect(function(object)
-	registerObject(object)
-	indexPassObject(object)
+    registerObject(object)
+    indexPassObject(object)
 end)
 
 PlayerGui.DescendantAdded:Connect(indexPassObject)
@@ -713,348 +729,349 @@ task.spawn(scanWorkspace)
 scanPasscodeObjects()
 
 local Window = Library:Window({
-	Title = "Suki Hub",
-	Footer = "Malam bersama OPAH",
-	Logo = "rbxassetid://99822358250705"
+    Title = "Suki Hub",
+    Subtitle = "Malam bersama OPAH",
+    Discord = "",
+    Logo = "rbxassetid://99822358250705"
 })
 
 Window:SetBackgroundImage("rbxassetid://99822358250705", 0.3)
 
 local EspTab = Window:AddTab({
-	Name = "ESP",
-	Icon = "rbxassetid://10723346959"
+    Name = "ESP",
+    Icon = "rbxassetid://10723346959"
 })
 
 local EspSection = EspTab:AddSection("ESP & Passcode", true)
 
 local passcodeParagraph = EspSection:AddParagraph({
-	Title = "PASSCODE",
-	Content = "----"
+    Title = "PASSCODE",
+    Content = "----"
 })
 
 local function updatePasscodeDisplay()
-	if passcodeParagraph and type(passcodeParagraph.SetContent) == "function" then
-		pcall(function()
-			local digits = RecordedPasscode and tostring(RecordedPasscode):gsub("%D", "") or ""
-			passcodeParagraph:SetContent(digits ~= "" and digits or "----")
-		end)
-	end
+    if passcodeParagraph and type(passcodeParagraph.SetContent) == "function" then
+        pcall(function()
+            local digits = RecordedPasscode and tostring(RecordedPasscode):gsub("%D", "") or ""
+            passcodeParagraph:SetContent(digits ~= "" and digits or "----")
+        end)
+    end
 end
 
 local Running = true
 
 task.spawn(function()
-	while Running do
-		pcall(function()
-			if not PasscodeFromRemote then
-				local passcode = findPasscode()
-				if passcode and tostring(passcode) ~= tostring(RecordedPasscode or "") then
-					RecordedPasscode = tostring(passcode)
-					updatePasscodeDisplay()
-				end
-			end
-		end)
-		task.wait(0.5)
-	end
+    while Running do
+        pcall(function()
+            if not PasscodeFromRemote then
+                local passcode = findPasscode()
+                if passcode and tostring(passcode) ~= tostring(RecordedPasscode or "") then
+                    RecordedPasscode = tostring(passcode)
+                    updatePasscodeDisplay()
+                end
+            end
+        end)
+        task.wait(0.5)
+    end
 end)
 
 task.spawn(function()
-	local remotes = ReplicatedStorage:WaitForChild("Remotes", 10)
-	if not remotes then
-		return
-	end
+    local remotes = ReplicatedStorage:WaitForChild("Remotes", 10)
+    if not remotes then
+        return
+    end
 
-	local puzzleShared = remotes:FindFirstChild("PuzzleShared")
-	local puzzleRemote = puzzleShared and puzzleShared:FindFirstChild("PuzzleRemote")
-	if puzzleRemote and puzzleRemote:IsA("RemoteEvent") then
-		puzzleRemote.OnClientEvent:Connect(function(action, data)
-			pcall(function()
-				if action == "Passcode" and data ~= nil then
-					local digits = tostring(data):gsub("%D", "")
-					if digits ~= "" then
-						RecordedPasscode = digits
-						PasscodeFromRemote = true
-						updatePasscodeDisplay()
-					end
-				elseif action == "Notify" and type(data) == "string" then
-					if data:find("^Next") then
-						NextKeyName = data:match("%s+(%a+)")
-					elseif data:find(" lit the ", 1, true) then
-						local code = data:match("^Pelita%s+[\128-\255]+%s+(%S+)")
-						if code then
-							LitLamps[code] = true
-						end
-					end
-				end
-			end)
-		end)
-	end
+    local puzzleShared = remotes:FindFirstChild("PuzzleShared")
+    local puzzleRemote = puzzleShared and puzzleShared:FindFirstChild("PuzzleRemote")
+    if puzzleRemote and puzzleRemote:IsA("RemoteEvent") then
+        puzzleRemote.OnClientEvent:Connect(function(action, data)
+            pcall(function()
+                if action == "Passcode" and data ~= nil then
+                    local digits = tostring(data):gsub("%D", "")
+                    if digits ~= "" then
+                        RecordedPasscode = digits
+                        PasscodeFromRemote = true
+                        updatePasscodeDisplay()
+                    end
+                elseif action == "Notify" and type(data) == "string" then
+                    if data:find("^Next") then
+                        NextKeyName = data:match("%s+(%a+)")
+                    elseif data:find(" lit the ", 1, true) then
+                        local code = data:match("^Pelita%s+[\128-\255]+%s+(%S+)")
+                        if code then
+                            LitLamps[code] = true
+                        end
+                    end
+                end
+            end)
+        end)
+    end
 
-	local secretShared = remotes:FindFirstChild("SecretShared")
-	local secretRemote = secretShared and secretShared:FindFirstChild("SecretRemote")
-	if secretRemote and secretRemote:IsA("RemoteEvent") then
-		secretRemote.OnClientEvent:Connect(function(action, data)
-			pcall(function()
-				if action == "Held" and data then
-					local digits = tostring(data):gsub("%D", "")
-					if digits ~= "" then
-						RecordedPasscode = digits
-						PasscodeFromRemote = true
-						updatePasscodeDisplay()
-					end
-				end
-			end)
-		end)
-	end
+    local secretShared = remotes:FindFirstChild("SecretShared")
+    local secretRemote = secretShared and secretShared:FindFirstChild("SecretRemote")
+    if secretRemote and secretRemote:IsA("RemoteEvent") then
+        secretRemote.OnClientEvent:Connect(function(action, data)
+            pcall(function()
+                if action == "Held" and data then
+                    local digits = tostring(data):gsub("%D", "")
+                    if digits ~= "" then
+                        RecordedPasscode = digits
+                        PasscodeFromRemote = true
+                        updatePasscodeDisplay()
+                    end
+                end
+            end)
+        end)
+    end
 end)
 
 task.spawn(function()
-	while Running do
-		local used = {}
+    while Running do
+        local used = {}
 
-		if State.EspKey then
-			for _, prompt in ipairs(Tracked.Keys) do
-				if prompt and prompt.Parent then
-					local position = getPosition(prompt)
-					if position then
-						local name = getDisplayName(prompt, "Key")
-						local color, colorName = getKeyColor(prompt)
-						if not colorName then
-							colorName = name:match("^(%a+)")
-						end
-						local label = name .. " [" .. getDistance(position) .. "m]"
-						if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
-							label = label .. " - NEXT"
-							color = Color3.fromRGB(255, 40, 120)
-						end
-						used[prompt] = true
-						updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
-					end
-				end
-			end
-		end
+        if State.EspKey then
+            for _, prompt in ipairs(Tracked.Keys) do
+                if prompt and prompt.Parent then
+                    local position = getPosition(prompt)
+                    if position then
+                        local name = getDisplayName(prompt, "Key")
+                        local color, colorName = getKeyColor(prompt)
+                        if not colorName then
+                            colorName = name:match("^(%a+)")
+                        end
+                        local label = name .. " [" .. getDistance(position) .. "m]"
+                        if NextKeyName and colorName and colorName:lower() == NextKeyName:lower() then
+                            label = label .. " - NEXT"
+                            color = Color3.fromRGB(255, 40, 120)
+                        end
+                        used[prompt] = true
+                        updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
+                    end
+                end
+            end
+        end
 
-		if State.EspNote and Tracked.Note and Tracked.Note.Parent then
-			local prompt = Tracked.Note
-			local position = getPosition(prompt)
-			if position then
-				local passCode = RecordedPasscode or findPasscode()
-				local noteLabel = passCode
-					and ("Passcode Note [" .. tostring(passCode) .. "] [" .. getDistance(position) .. "m]")
-					or ("Passcode Note [" .. getDistance(position) .. "m]")
-				used.Note = true
-				updateEsp(
-					"Note",
-					prompt,
-					prompt:FindFirstAncestorOfClass("Model"),
-					noteLabel,
-					Color3.fromRGB(255, 40, 160)
-				)
-			end
-		end
+        if State.EspNote and Tracked.Note and Tracked.Note.Parent then
+            local prompt = Tracked.Note
+            local position = getPosition(prompt)
+            if position then
+                local passCode = RecordedPasscode or findPasscode()
+                local noteLabel = passCode
+                    and ("Passcode Note [" .. tostring(passCode) .. "] [" .. getDistance(position) .. "m]")
+                    or ("Passcode Note [" .. getDistance(position) .. "m]")
+                used.Note = true
+                updateEsp(
+                    "Note",
+                    prompt,
+                    prompt:FindFirstAncestorOfClass("Model"),
+                    noteLabel,
+                    Color3.fromRGB(255, 40, 160)
+                )
+            end
+        end
 
-		if State.EspKeypad and Tracked.Keypad and Tracked.Keypad.Parent then
-			local prompt = Tracked.Keypad
-			local position = getPosition(prompt)
-			if position then
-				used.Keypad = true
-				updateEsp(
-					"Keypad",
-					prompt,
-					prompt:FindFirstAncestorOfClass("Model"),
-					"Keypad [" .. getDistance(position) .. "m]",
-					Color3.fromRGB(255, 235, 70)
-				)
-			end
-		end
+        if State.EspKeypad and Tracked.Keypad and Tracked.Keypad.Parent then
+            local prompt = Tracked.Keypad
+            local position = getPosition(prompt)
+            if position then
+                used.Keypad = true
+                updateEsp(
+                    "Keypad",
+                    prompt,
+                    prompt:FindFirstAncestorOfClass("Model"),
+                    "Keypad [" .. getDistance(position) .. "m]",
+                    Color3.fromRGB(255, 235, 70)
+                )
+            end
+        end
 
-		if State.EspPadlock then
-			for _, prompt in ipairs(Tracked.Locks) do
-				if prompt and prompt.Parent then
-					local position = getPosition(prompt)
-					if position then
-						used[prompt] = true
-						updateEsp(
-							prompt,
-							prompt,
-							prompt:FindFirstAncestorOfClass("Model"),
-							getDisplayName(prompt, "Padlock") .. " [" .. getDistance(position) .. "m]",
-							getPadlockColor(prompt)
-						)
-					end
-				end
-			end
-		end
+        if State.EspPadlock then
+            for _, prompt in ipairs(Tracked.Locks) do
+                if prompt and prompt.Parent then
+                    local position = getPosition(prompt)
+                    if position then
+                        used[prompt] = true
+                        updateEsp(
+                            prompt,
+                            prompt,
+                            prompt:FindFirstAncestorOfClass("Model"),
+                            getDisplayName(prompt, "Padlock") .. " [" .. getDistance(position) .. "m]",
+                            getPadlockColor(prompt)
+                        )
+                    end
+                end
+            end
+        end
 
-		if State.EspFlipFlop then
-			local list = {}
-			for _, item in ipairs(Tracked.FlipFlops) do
-				if item.Part and item.Part.Parent then
-					local position = getPosition(item.Part)
-					if position then
-						table.insert(list, {
-							Part = item.Part,
-							Model = item.Model,
-							Distance = getDistance(position)
-						})
-					end
-				end
-			end
-			table.sort(list, function(a, b)
-				return a.Distance < b.Distance
-			end)
-			for index = 1, math.min(3, #list) do
-				local item = list[index]
-				used[item.Part] = true
-				updateEsp(
-					item.Part,
-					item.Part,
-					item.Model,
-					"Flip Flop [" .. item.Distance .. "m]",
-					Color3.fromRGB(100, 220, 255)
-				)
-			end
-		end
+        if State.EspFlipFlop then
+            local list = {}
+            for _, item in ipairs(Tracked.FlipFlops) do
+                if item.Part and item.Part.Parent then
+                    local position = getPosition(item.Part)
+                    if position then
+                        table.insert(list, {
+                            Part = item.Part,
+                            Model = item.Model,
+                            Distance = getDistance(position)
+                        })
+                    end
+                end
+            end
+            table.sort(list, function(a, b)
+                return a.Distance < b.Distance
+            end)
+            for index = 1, math.min(3, #list) do
+                local item = list[index]
+                used[item.Part] = true
+                updateEsp(
+                    item.Part,
+                    item.Part,
+                    item.Model,
+                    "Flip Flop [" .. item.Distance .. "m]",
+                    Color3.fromRGB(100, 220, 255)
+                )
+            end
+        end
 
-		if State.EspWardNear then
-			local nearest
-			local nearestDistance
-			for _, item in ipairs(Tracked.Wardrobes) do
-				if item.Part and item.Part.Parent then
-					local position = getPosition(item.Part)
-					if position then
-						local distance = getDistance(position)
-						if not nearestDistance or distance < nearestDistance then
-							nearest = item
-							nearestDistance = distance
-						end
-					end
-				end
-			end
-			if nearest then
-				used.WardrobeNearest = true
-				updateEsp(
-					"WardrobeNearest",
-					nearest.Part,
-					nearest.Model,
-					"Nearest Wardrobe [" .. nearestDistance .. "m]",
-					Color3.fromRGB(60, 255, 60)
-				)
-			end
-		end
+        if State.EspWardNear then
+            local nearest
+            local nearestDistance
+            for _, item in ipairs(Tracked.Wardrobes) do
+                if item.Part and item.Part.Parent then
+                    local position = getPosition(item.Part)
+                    if position then
+                        local distance = getDistance(position)
+                        if not nearestDistance or distance < nearestDistance then
+                            nearest = item
+                            nearestDistance = distance
+                        end
+                    end
+                end
+            end
+            if nearest then
+                used.WardrobeNearest = true
+                updateEsp(
+                    "WardrobeNearest",
+                    nearest.Part,
+                    nearest.Model,
+                    "Nearest Wardrobe [" .. nearestDistance .. "m]",
+                    Color3.fromRGB(60, 255, 60)
+                )
+            end
+        end
 
-		if State.EspLamp then
-			for _, prompt in ipairs(Tracked.Lamps) do
-				if prompt and prompt.Parent then
-					local position = getPosition(prompt)
-					if position then
-						local name = getDisplayName(prompt, "Lamp")
-						local label = name .. " [" .. getDistance(position) .. "m]"
-						local color = Color3.fromRGB(255, 235, 70)
-						local lit = false
-						for code in pairs(LitLamps) do
-							if name:find(code, 1, true) then
-								lit = true
-								break
-							end
-						end
-						if lit then
-							label = label .. " - LIT"
-							color = Color3.fromRGB(60, 255, 60)
-						end
-						used[prompt] = true
-						updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
-					end
-				end
-			end
+        if State.EspLamp then
+            for _, prompt in ipairs(Tracked.Lamps) do
+                if prompt and prompt.Parent then
+                    local position = getPosition(prompt)
+                    if position then
+                        local name = getDisplayName(prompt, "Lamp")
+                        local label = name .. " [" .. getDistance(position) .. "m]"
+                        local color = Color3.fromRGB(255, 235, 70)
+                        local lit = false
+                        for code in pairs(LitLamps) do
+                            if name:find(code, 1, true) then
+                                lit = true
+                                break
+                            end
+                        end
+                        if lit then
+                            label = label .. " - LIT"
+                            color = Color3.fromRGB(60, 255, 60)
+                        end
+                        used[prompt] = true
+                        updateEsp(prompt, prompt, prompt:FindFirstAncestorOfClass("Model"), label, color)
+                    end
+                end
+            end
 
-			if Tracked.MusicBox and Tracked.MusicBox.Parent then
-				local object = Tracked.MusicBox
-				local position = getPosition(object)
-				if position then
-					used.MusicBox = true
-					updateEsp(
-						"MusicBox",
-						object,
-						object:FindFirstAncestorOfClass("Model"),
-						"Music Box [" .. getDistance(position) .. "m]",
-						Color3.fromRGB(255, 255, 255)
-					)
-				end
-			end
+            if Tracked.MusicBox and Tracked.MusicBox.Parent then
+                local object = Tracked.MusicBox
+                local position = getPosition(object)
+                if position then
+                    used.MusicBox = true
+                    updateEsp(
+                        "MusicBox",
+                        object,
+                        object:FindFirstAncestorOfClass("Model"),
+                        "Music Box [" .. getDistance(position) .. "m]",
+                        Color3.fromRGB(255, 255, 255)
+                    )
+                end
+            end
 
-			if Tracked.Photo and Tracked.Photo.Parent then
-				local object = Tracked.Photo
-				local position = getPosition(object)
-				if position then
-					used.Photo = true
-					updateEsp(
-						"Photo",
-						object,
-						object:FindFirstAncestorOfClass("Model"),
-						"Old Photo [" .. getDistance(position) .. "m]",
-						Color3.fromRGB(255, 190, 120)
-					)
-				end
-			end
-		end
+            if Tracked.Photo and Tracked.Photo.Parent then
+                local object = Tracked.Photo
+                local position = getPosition(object)
+                if position then
+                    used.Photo = true
+                    updateEsp(
+                        "Photo",
+                        object,
+                        object:FindFirstAncestorOfClass("Model"),
+                        "Old Photo [" .. getDistance(position) .. "m]",
+                        Color3.fromRGB(255, 190, 120)
+                    )
+                end
+            end
+        end
 
-		if State.EspOpah then
-			local opah = Workspace:FindFirstChild("Opah")
-			local root = opah and (
-				opah:FindFirstChild("HumanoidRootPart")
-				or opah:FindFirstChildWhichIsA("BasePart", true)
-			)
-			if root then
-				used.Opah = true
-				updateEsp(
-					"Opah",
-					root,
-					opah,
-					"OPAH [" .. getDistance(root.Position) .. "m]",
-					Color3.fromRGB(255, 40, 40)
-				)
-			end
-		end
+        if State.EspOpah then
+            local opah = Workspace:FindFirstChild("Opah")
+            local root = opah and (
+                opah:FindFirstChild("HumanoidRootPart")
+                or opah:FindFirstChildWhichIsA("BasePart", true)
+            )
+            if root then
+                used.Opah = true
+                updateEsp(
+                    "Opah",
+                    root,
+                    opah,
+                    "OPAH [" .. getDistance(root.Position) .. "m]",
+                    Color3.fromRGB(255, 40, 40)
+                )
+            end
+        end
 
-		if State.EspPlayer then
-			for _, player in ipairs(Players:GetPlayers()) do
-				if player ~= LocalPlayer then
-					local character = player.Character
-					local root = character and character:FindFirstChild("HumanoidRootPart")
-					if root then
-						used[player] = true
-						updateEsp(
-							player,
-							root,
-							character,
-							player.Name .. " [" .. getDistance(root.Position) .. "m]",
-							Color3.fromRGB(70, 255, 90)
-						)
-					end
-				end
-			end
-		end
+        if State.EspPlayer then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer then
+                    local character = player.Character
+                    local root = character and character:FindFirstChild("HumanoidRootPart")
+                    if root then
+                        used[player] = true
+                        updateEsp(
+                            player,
+                            root,
+                            character,
+                            player.Name .. " [" .. getDistance(root.Position) .. "m]",
+                            Color3.fromRGB(70, 255, 90)
+                        )
+                    end
+                end
+            end
+        end
 
-		for id in pairs(ActiveEsp) do
-			if not used[id] then
-				removeEsp(id)
-			end
-		end
+        for id in pairs(ActiveEsp) do
+            if not used[id] then
+                removeEsp(id)
+            end
+        end
 
-		task.wait(math.clamp(tonumber(State.UpdateDelay) or 0.5, 0.1, 5))
-	end
+        task.wait(math.clamp(tonumber(State.UpdateDelay) or 0.5, 0.1, 5))
+    end
 end)
 
 local function addEspToggle(title, stateKey)
-	EspSection:AddToggle({
-		Title = title,
-		Default = State[stateKey],
-		Callback = function(value)
-			State[stateKey] = value
-			saveConfig()
-		end
-	})
+    EspSection:AddToggle({
+        Title = title,
+        Default = State[stateKey],
+        Callback = function(value)
+            State[stateKey] = value
+            saveConfig()
+        end
+    })
 end
 
 addEspToggle("ESP Key", "EspKey")
@@ -1068,8 +1085,8 @@ addEspToggle("ESP Opah", "EspOpah")
 addEspToggle("ESP Player", "EspPlayer")
 
 local PlayerTab = Window:AddTab({
-	Name = "Player",
-	Icon = "rbxassetid://10747373176"
+    Name = "Player",
+    Icon = "rbxassetid://10747373176"
 })
 
 local PlayerSection = PlayerTab:AddSection("Player", true)
@@ -1078,1075 +1095,1108 @@ local SprintConfig
 local SprintOriginalDrain
 
 local function getSprintConfig()
-	if SprintConfig then
-		return SprintConfig
-	end
-	pcall(function()
-		local system = ReplicatedStorage:WaitForChild("SprintSystem", 5)
-		local module = system and system:FindFirstChild("SprintConfig")
-		if module and module:IsA("ModuleScript") then
-			SprintConfig = require(module)
-		end
-	end)
-	return SprintConfig
+    if SprintConfig then
+        return SprintConfig
+    end
+    pcall(function()
+        local system = ReplicatedStorage:WaitForChild("SprintSystem", 5)
+        local module = system and system:FindFirstChild("SprintConfig")
+        if module and module:IsA("ModuleScript") then
+            SprintConfig = require(module)
+        end
+    end)
+    return SprintConfig
 end
 
 local function applySprint(enabled)
-	local config = getSprintConfig()
-	if type(config) ~= "table" or config.DrainPerSecond == nil then
-		return
-	end
-	if SprintOriginalDrain == nil then
-		SprintOriginalDrain = config.DrainPerSecond
-	end
-	pcall(function()
-		config.DrainPerSecond = enabled and 0 or SprintOriginalDrain
-	end)
+    local config = getSprintConfig()
+    if type(config) ~= "table" or config.DrainPerSecond == nil then
+        return
+    end
+    if SprintOriginalDrain == nil then
+        SprintOriginalDrain = config.DrainPerSecond
+    end
+    pcall(function()
+        config.DrainPerSecond = enabled and 0 or SprintOriginalDrain
+    end)
 end
 
 task.spawn(function()
-	applySprint(State.InfiniteSprint)
+    applySprint(State.InfiniteSprint)
 end)
 
 local function getHum()
-	local c = LocalPlayer.Character
-	local h = c and c:FindFirstChildOfClass("Humanoid")
-	if h and h.Health > 0 then
-		return h
-	end
-	return nil
+    local c = LocalPlayer.Character
+    local h = c and c:FindFirstChildOfClass("Humanoid")
+    if h and h.Health > 0 then
+        return h
+    end
+    return nil
 end
 
 PlayerSection:AddToggle({
-	Title = "Infinite Sprint",
-	Default = State.InfiniteSprint or false,
-	Callback = function(value)
-		State.InfiniteSprint = value
-		saveConfig()
-		applySprint(value)
-	end
+    Title = "Infinite Sprint",
+    Default = State.InfiniteSprint or false,
+    Callback = function(value)
+        State.InfiniteSprint = value
+        saveConfig()
+        applySprint(value)
+    end
 })
 
 PlayerSection:AddToggle({
-	Title = "Double Jump",
-	Default = State.DoubleJump or false,
-	Callback = function(value)
-		State.DoubleJump = value
-		saveConfig()
-	end
+    Title = "Double Jump",
+    Default = State.DoubleJump or false,
+    Callback = function(value)
+        State.DoubleJump = value
+        saveConfig()
+    end
 })
 
 UserInputService.JumpRequest:Connect(function()
-	if not State.DoubleJump then return end
-	local hum = getHum()
-	if hum then
-		hum:ChangeState(Enum.HumanoidStateType.Jumping)
-	end
+    if not State.DoubleJump then return end
+    local hum = getHum()
+    if hum then
+        hum:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
 end)
 
 PlayerSection:AddToggle({
-	Title = "Noclip",
-	Default = State.Noclip or false,
-	Callback = function(value)
-		State.Noclip = value
-		saveConfig()
-	end
+    Title = "Noclip",
+    Default = State.Noclip or false,
+    Callback = function(value)
+        State.Noclip = value
+        saveConfig()
+    end
 })
 
 RunService.Stepped:Connect(function()
-	if State.Noclip then
-		local char = LocalPlayer.Character
-		if char then
-			for _, part in ipairs(char:GetDescendants()) do
-				if part:IsA("BasePart") and part.CanCollide then
-					part.CanCollide = false
-				end
-			end
-		end
-	end
+    if State.Noclip then
+        local char = LocalPlayer.Character
+        if char then
+            for _, part in ipairs(char:GetDescendants()) do
+                if part:IsA("BasePart") and part.CanCollide then
+                    part.CanCollide = false
+                end
+            end
+        end
+    end
 end)
 
 local KKG = {
-	farm = nil,
-	mode = nil,
-	moveId = 0,
-	moveSpeed = 160,
-	moveStep = 0.05,
+    farm = nil,
+    mode = nil,
+    moveId = 0,
+    moveSpeed = 160,
+    moveStep = 0.05,
 }
 
 local AutoToggleRefs = {}
 local isSyncingToggles = false
 
 local function setAutoToggleVisual(mode, enabled)
-	local toggle = AutoToggleRefs[mode]
-	if not toggle then return end
-	isSyncingToggles = true
-	pcall(function()
-		if type(toggle.Set) == "function" then
-			toggle:Set(enabled)
-		elseif type(toggle.SetValue) == "function" then
-			toggle:SetValue(enabled)
-		end
-	end)
-	task.defer(function()
-		isSyncingToggles = false
-	end)
+    local toggle = AutoToggleRefs[mode]
+    if not toggle then return end
+    isSyncingToggles = true
+    pcall(function()
+        if type(toggle.Set) == "function" then
+            toggle:Set(enabled)
+        elseif type(toggle.SetValue) == "function" then
+            toggle:SetValue(enabled)
+        end
+    end)
+    task.defer(function()
+        isSyncingToggles = false
+    end)
 end
 
 local function syncAutoToggles(activeMode)
-	for mode in pairs(AutoToggleRefs) do
-		setAutoToggleVisual(mode, mode == activeMode)
-	end
+    for mode in pairs(AutoToggleRefs) do
+        setAutoToggleVisual(mode, mode == activeMode)
+    end
 end
 
 local function normalizeColor(val)
-	if not val then return nil end
-	local s = tostring(val):lower():gsub("%s+", "")
-	return s ~= "" and s or nil
+    if not val then return nil end
+    local s = tostring(val):lower():gsub("%s+", "")
+    return s ~= "" and s or nil
 end
 
 local function fRoot()
-	local character = LocalPlayer.Character
-	return character and character:FindFirstChild("HumanoidRootPart")
+    local character = LocalPlayer.Character
+    return character and character:FindFirstChild("HumanoidRootPart")
 end
 
 local function fPosOf(inst)
-	if not inst then return nil end
-	if typeof(inst) == "Vector3" then return inst end
-	if inst:IsA("ProximityPrompt") then
-		return getPosition(inst)
-	end
-	if inst:IsA("BasePart") then return inst.Position end
-	if inst:IsA("Attachment") then return inst.WorldPosition end
-	if inst:IsA("Model") then
-		if inst.PrimaryPart then return inst.PrimaryPart.Position end
-		local ok, pivot = pcall(function() return inst:GetPivot() end)
-		if ok and pivot then return pivot.Position end
-	end
-	local part = inst:FindFirstChildWhichIsA("BasePart", true)
-	return part and part.Position
+    if not inst then return nil end
+    if typeof(inst) == "Vector3" then return inst end
+    if inst:IsA("ProximityPrompt") then
+        return getPosition(inst)
+    end
+    if inst:IsA("BasePart") then return inst.Position end
+    if inst:IsA("Attachment") then return inst.WorldPosition end
+    if inst:IsA("Model") then
+        if inst.PrimaryPart then return inst.PrimaryPart.Position end
+        local ok, pivot = pcall(function() return inst:GetPivot() end)
+        if ok and pivot then return pivot.Position end
+    end
+    local part = inst:FindFirstChildWhichIsA("BasePart", true)
+    return part and part.Position
 end
 
 local function findPromptNear(target)
-	if not target then return nil end
-	if target:IsA("ProximityPrompt") then return target end
-	local direct = target:FindFirstChildWhichIsA("ProximityPrompt", true)
-	if direct then return direct end
-	local model = target:IsA("Model") and target or target:FindFirstAncestorOfClass("Model")
-	if model then
-		return model:FindFirstChildWhichIsA("ProximityPrompt", true)
-	end
-	return nil
+    if not target then return nil end
+    if target:IsA("ProximityPrompt") then return target end
+    local direct = target:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if direct then return direct end
+    local model = target:IsA("Model") and target or target:FindFirstAncestorOfClass("Model")
+    if model then
+        return model:FindFirstChildWhichIsA("ProximityPrompt", true)
+    end
+    return nil
 end
 
 local function fMoveTo(targetPos, reachDist)
-	if typeof(targetPos) ~= "Vector3" then return false end
-	KKG.moveId = KKG.moveId + 1
-	local id = KKG.moveId
-	local root = fRoot()
-	if not root then return false end
+    if typeof(targetPos) ~= "Vector3" then return false end
+    KKG.moveId = KKG.moveId + 1
+    local id = KKG.moveId
+    local root = fRoot()
+    if not root then return false end
 
-	local dist = (targetPos - root.Position).Magnitude
-	local limit = math.max(dist / math.max(KKG.moveSpeed, 1) * 2.5 + 4, 5)
-	local t0 = os.clock()
+    local dist = (targetPos - root.Position).Magnitude
+    local limit = math.max(dist / math.max(KKG.moveSpeed, 1) * 2.5 + 4, 5)
+    local t0 = os.clock()
 
-	while KKG.farm and KKG.moveId == id and (os.clock() - t0) < limit do
-		root = fRoot()
-		if not root then return false end
-		local diff = targetPos - root.Position
-		local mag = diff.Magnitude
-		if mag <= (reachDist or 1.35) then
-			root.AssemblyLinearVelocity = Vector3.zero
-			return true
-		end
-		local dt = math.min(RunService.Heartbeat:Wait(), KKG.moveStep)
-		root.AssemblyLinearVelocity = Vector3.zero
-		local stepDist = math.min(mag, KKG.moveSpeed * dt)
-		root.CFrame = CFrame.new(root.Position + diff.Unit * stepDist) * (root.CFrame - root.CFrame.Position)
-	end
-	return false
+    while KKG.farm and KKG.moveId == id and (os.clock() - t0) < limit do
+        root = fRoot()
+        if not root then return false end
+        local diff = targetPos - root.Position
+        local mag = diff.Magnitude
+        if mag <= (reachDist or 1.35) then
+            root.AssemblyLinearVelocity = Vector3.zero
+            return true
+        end
+        local dt = math.min(RunService.Heartbeat:Wait(), KKG.moveStep)
+        root.AssemblyLinearVelocity = Vector3.zero
+        local stepDist = math.min(mag, KKG.moveSpeed * dt)
+        root.CFrame = CFrame.new(root.Position + diff.Unit * stepDist) * (root.CFrame - root.CFrame.Position)
+    end
+    return false
 end
 
 local function fFirePrompt(prompt)
-	if not prompt or not prompt.Parent then return false end
-	pcall(function()
-		prompt.Enabled = true
-		prompt.HoldDuration = 0
-		prompt.RequiresLineOfSight = false
-		if prompt.MaxActivationDistance < 30 then
-			prompt.MaxActivationDistance = 30
-		end
-	end)
+    if not prompt or not prompt.Parent then return false end
+    pcall(function()
+        prompt.Enabled = true
+        prompt.HoldDuration = 0
+        prompt.RequiresLineOfSight = false
+        if prompt.MaxActivationDistance < 30 then
+            prompt.MaxActivationDistance = 30
+        end
+    end)
 
-	local fired = false
-	pcall(function()
-		if type(fireproximityprompt) == "function" then
-			fireproximityprompt(prompt)
-			fired = true
-		end
-	end)
-	return fired
+    local fired = false
+    pcall(function()
+        if type(fireproximityprompt) == "function" then
+            fireproximityprompt(prompt)
+            fired = true
+        end
+    end)
+    return fired
 end
 
 local player = LocalPlayer
 
 local function getHrp()
-	return fRoot()
+    return fRoot()
 end
 
-local CLICK_DETECTOR_RADIUS = 2
+-- ClickDetector hanya akan dipanggil jika jarak HRP ke pusat BasePart <= 1.5 stud.
+-- Jarak dihitung ulang tepat sebelum fireclickdetector dijalankan.
+local CLICK_DETECTOR_RADIUS = 1.5
 
 local function isKeyName(name)
-	return tostring(name or ""):lower():find("key", 1, true) ~= nil
+    return tostring(name or ""):lower():find("key", 1, true) ~= nil
 end
 
 local function nearby(radius)
-	local result = { prompts = {}, clicks = {} }
-	local hrp = getHrp()
-	if not hrp then return result end
+    local result = { prompts = {}, clicks = {} }
+    local hrp = getHrp()
+    if not hrp then return result end
 
-	local promptRadius = math.max(tonumber(radius) or 12, 0)
-	for _, inst in ipairs(Workspace:GetDescendants()) do
-		if inst:IsA("ProximityPrompt") or inst:IsA("ClickDetector") then
-			local part = inst.Parent
-			if part and not part:IsA("BasePart") then
-				part = inst:FindFirstAncestorWhichIsA("BasePart")
-			end
+    local promptRadius = math.max(tonumber(radius) or 12, 0)
+    for _, inst in ipairs(Workspace:GetDescendants()) do
+        if inst:IsA("ProximityPrompt") or inst:IsA("ClickDetector") then
+            local part = inst.Parent
+            if part and not part:IsA("BasePart") then
+                part = inst:FindFirstAncestorWhichIsA("BasePart")
+            end
 
-			if part then
-				local distance = (part.Position - hrp.Position).Magnitude
-				if inst:IsA("ProximityPrompt") and distance <= promptRadius then
-					table.insert(result.prompts, { inst = inst })
-				elseif inst:IsA("ClickDetector") and distance <= CLICK_DETECTOR_RADIUS then
-					table.insert(result.clicks, { inst = inst })
-				end
-			end
-		end
-	end
+            if part then
+                local distance = (part.Position - hrp.Position).Magnitude
+                if inst:IsA("ProximityPrompt") and distance <= promptRadius then
+                    table.insert(result.prompts, { inst = inst })
+                elseif inst:IsA("ClickDetector") and distance <= CLICK_DETECTOR_RADIUS then
+                    table.insert(result.clicks, { inst = inst, part = part })
+                end
+            end
+        end
+    end
 
-	return result
+    return result
 end
 
 local function firePrompt(pp)
-	if not pp or not pp.Parent then return end
-	pcall(function() pp.HoldDuration = 0 end)
-	pcall(function() pp.RequiresLineOfSight = false end)
-	pcall(function() pp.MaxActivationDistance = math.max(pp.MaxActivationDistance, 30) end)
-	if fireproximityprompt then
-		pcall(fireproximityprompt, pp)
-	else
-		pcall(function()
-			pp:InputHoldBegin()
-			task.wait(0.1)
-			pp:InputHoldEnd()
-		end)
-	end
+    if not pp or not pp.Parent then return end
+    pcall(function() pp.HoldDuration = 0 end)
+    pcall(function() pp.RequiresLineOfSight = false end)
+    pcall(function() pp.MaxActivationDistance = math.max(pp.MaxActivationDistance, 30) end)
+    if fireproximityprompt then
+        pcall(fireproximityprompt, pp)
+    else
+        pcall(function()
+            pp:InputHoldBegin()
+            task.wait(0.1)
+            pp:InputHoldEnd()
+        end)
+    end
 end
 
 local function fireNearby(radius)
-	local r = nearby(radius)
-	local n = 0
-	for _, e in ipairs(r.prompts) do
-		if e.inst and e.inst.Parent and e.inst.Enabled then
-			firePrompt(e.inst)
-			n = n + 1
-		end
-	end
-	if fireclickdetector then
-		for _, e in ipairs(r.clicks) do
-			if e.inst and e.inst.Parent then
-				pcall(fireclickdetector, e.inst)
-				n = n + 1
-			end
-		end
-	end
-	return n
+    local r = nearby(radius)
+    local n = 0
+    for _, e in ipairs(r.prompts) do
+        if e.inst and e.inst.Parent and e.inst.Enabled then
+            firePrompt(e.inst)
+            n = n + 1
+        end
+    end
+    if fireclickdetector then
+        for _, e in ipairs(r.clicks) do
+            local hrp = getHrp()
+            local part = e.part
+            local detector = e.inst
+            if detector and detector.Parent and part and part.Parent and hrp then
+                local currentDistance = (part.Position - hrp.Position).Magnitude
+                if currentDistance <= CLICK_DETECTOR_RADIUS then
+                    local ok = pcall(fireclickdetector, detector)
+                    if ok then
+                        n = n + 1
+                    end
+                end
+            end
+        end
+    end
+    return n
 end
 
 local function keyToolCount()
-	local n = 0
-	local bp = player:FindFirstChildOfClass("Backpack")
-	local c = player.Character
-	if bp then
-		for _, t in ipairs(bp:GetChildren()) do
-			if t:IsA("Tool") and isKeyName(t.Name:lower()) then n = n + 1 end
-		end
-	end
-	if c then
-		for _, t in ipairs(c:GetChildren()) do
-			if t:IsA("Tool") and isKeyName(t.Name:lower()) then n = n + 1 end
-		end
-	end
-	return n
+    local n = 0
+    local bp = player:FindFirstChildOfClass("Backpack")
+    local c = player.Character
+    if bp then
+        for _, t in ipairs(bp:GetChildren()) do
+            if t:IsA("Tool") and isKeyName(t.Name:lower()) then n = n + 1 end
+        end
+    end
+    if c then
+        for _, t in ipairs(c:GetChildren()) do
+            if t:IsA("Tool") and isKeyName(t.Name:lower()) then n = n + 1 end
+        end
+    end
+    return n
 end
 
 local function useKeyTools()
-	local bp = player:FindFirstChildOfClass("Backpack")
-	local hum = getHum()
-	if not bp or not hum then return end
-	for _, t in ipairs(bp:GetChildren()) do
-		if t:IsA("Tool") and isKeyName(t.Name:lower()) then
-			pcall(function() hum:EquipTool(t) end)
-			task.wait(0.15)
-			pcall(function() t:Activate() end)
-			task.wait(0.15)
-		end
-	end
+    local bp = player:FindFirstChildOfClass("Backpack")
+    local hum = getHum()
+    if not bp or not hum then return end
+    for _, t in ipairs(bp:GetChildren()) do
+        if t:IsA("Tool") and isKeyName(t.Name:lower()) then
+            pcall(function() hum:EquipTool(t) end)
+            task.wait(0.15)
+            pcall(function() t:Activate() end)
+            task.wait(0.15)
+        end
+    end
 end
 
 local function trigger(obj, part, radius)
-	local hrp = getHrp()
-	if not obj then return end
+    local hrp = getHrp()
+    if not obj then return end
 
-	local pp = obj:IsA("ProximityPrompt") and obj or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
-	if pp then firePrompt(pp) end
+    local pp = obj:IsA("ProximityPrompt") and obj or obj:FindFirstChildWhichIsA("ProximityPrompt", true)
+    if pp then firePrompt(pp) end
 
-	if firetouchinterest and hrp and part then
-		pcall(function()
-			firetouchinterest(hrp, part, 0)
-			task.wait(0.05)
-			firetouchinterest(hrp, part, 1)
-		end)
-	end
+    if firetouchinterest and hrp and part then
+        pcall(function()
+            firetouchinterest(hrp, part, 0)
+            task.wait(0.05)
+            firetouchinterest(hrp, part, 1)
+        end)
+    end
 
-	fireNearby(radius)
+    fireNearby(radius)
 end
 
 local function getKeyTouchPart(target, prompt)
-	if target and target:IsA("BasePart") then
-		return target
-	end
-	if target and target:IsA("Model") then
-		return target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart", true)
-	end
-	if prompt then
-		if prompt.Parent and prompt.Parent:IsA("BasePart") then
-			return prompt.Parent
-		end
-		return prompt:FindFirstAncestorWhichIsA("BasePart")
-	end
-	return nil
+    if target and target:IsA("BasePart") then
+        return target
+    end
+    if target and target:IsA("Model") then
+        return target.PrimaryPart or target:FindFirstChildWhichIsA("BasePart", true)
+    end
+    if prompt then
+        if prompt.Parent and prompt.Parent:IsA("BasePart") then
+            return prompt.Parent
+        end
+        return prompt:FindFirstAncestorWhichIsA("BasePart")
+    end
+    return nil
 end
 
 local function waitUntilCondition(checkFn, timeout, jobKey)
-	local deadline = os.clock() + (timeout or 2)
-	while KKG.farm == jobKey and os.clock() < deadline do
-		if checkFn() then
-			return true
-		end
-		task.wait(0.15)
-	end
-	return checkFn()
+    local deadline = os.clock() + (timeout or 2)
+    while KKG.farm == jobKey and os.clock() < deadline do
+        if checkFn() then
+            return true
+        end
+        task.wait(0.15)
+    end
+    return checkFn()
 end
 
 local function fVisit(target, waitTime, checkFn, jobKey)
-	local pos = fPosOf(target)
-	if not pos then return false end
-	local prompt = findPromptNear(target)
-	if not fMoveTo(pos + Vector3.new(0, 1.5, 0), 1.6) then return false end
+    local pos = fPosOf(target)
+    if not pos then return false end
+    local prompt = findPromptNear(target)
+    if not fMoveTo(pos + Vector3.new(0, 1.5, 0), 1.6) then return false end
 
-	if prompt then
-		for _ = 1, 3 do
-			if jobKey and KKG.farm ~= jobKey then return false end
-			if checkFn and checkFn() then break end
-			fFirePrompt(prompt)
-			task.wait(0.25)
-		end
-	end
+    if prompt then
+        for _ = 1, 3 do
+            if jobKey and KKG.farm ~= jobKey then return false end
+            if checkFn and checkFn() then break end
+            fFirePrompt(prompt)
+            task.wait(0.25)
+        end
+    end
 
-	if checkFn and jobKey then
-		waitUntilCondition(checkFn, waitTime or 1.2, jobKey)
-	else
-		task.wait(waitTime or 0.7)
-	end
-	return true
+    if checkFn and jobKey then
+        waitUntilCondition(checkFn, waitTime or 1.2, jobKey)
+    else
+        task.wait(waitTime or 0.7)
+    end
+    return true
 end
 
 local function fGetPasscodeDigits()
-	local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
-	local note = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
-	local paper = note and note:FindFirstChild("Paper")
-	local writing = paper and paper:FindFirstChild("Writing")
-	local codeLabel = writing and writing:FindFirstChild("Code")
-	if codeLabel and codeLabel.Text then
-		local d = tostring(codeLabel.Text):gsub("%D", "")
-		if d ~= "" then return d end
-	end
-	if RecordedPasscode then
-		local d = tostring(RecordedPasscode):gsub("%D", "")
-		if d ~= "" then return d end
-	end
-	local scanned = findPasscode()
-	if scanned then
-		local d = tostring(scanned):gsub("%D", "")
-		if d ~= "" then return d end
-	end
-	return nil
+    local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+    local note = puzzleItems and puzzleItems:FindFirstChild("PasscodeNote")
+    local paper = note and note:FindFirstChild("Paper")
+    local writing = paper and paper:FindFirstChild("Writing")
+    local codeLabel = writing and writing:FindFirstChild("Code")
+    if codeLabel and codeLabel.Text then
+        local d = tostring(codeLabel.Text):gsub("%D", "")
+        if d ~= "" then return d end
+    end
+    if RecordedPasscode then
+        local d = tostring(RecordedPasscode):gsub("%D", "")
+        if d ~= "" then return d end
+    end
+    local scanned = findPasscode()
+    if scanned then
+        local d = tostring(scanned):gsub("%D", "")
+        if d ~= "" then return d end
+    end
+    return nil
 end
 
 local function fScanPuzzleData()
-	local data = { keys = {}, locks = {} }
-	local frontDoor = Workspace:FindFirstChild("FrontDoor")
-	local locks = frontDoor and frontDoor:FindFirstChild("PuzzleLocks")
-	if locks then
-		for _, lock in ipairs(locks:GetChildren()) do
-			local color = normalizeColor(lock:GetAttribute("KeyColor"))
-				or normalizeColor(findKeyColorName(lock.Name))
-			local prompt = findPromptNear(lock)
-			if color and prompt then
-				data.locks[color] = prompt
-			end
-		end
-	end
+    local data = { keys = {}, locks = {} }
+    local frontDoor = Workspace:FindFirstChild("FrontDoor")
+    local locks = frontDoor and frontDoor:FindFirstChild("PuzzleLocks")
+    if locks then
+        for _, lock in ipairs(locks:GetChildren()) do
+            local color = normalizeColor(lock:GetAttribute("KeyColor"))
+                or normalizeColor(findKeyColorName(lock.Name))
+            local prompt = findPromptNear(lock)
+            if color and prompt then
+                data.locks[color] = prompt
+            end
+        end
+    end
 
-	local seenKeys = {}
-	local items = Workspace:FindFirstChild("PuzzleItems")
-	if items then
-		for _, item in ipairs(items:GetChildren()) do
-			local itemType = tostring(item:GetAttribute("ItemType") or "")
-			local attrColor = normalizeColor(item:GetAttribute("KeyColor"))
-			if itemType:lower() == "key" or attrColor or item.Name:lower():find("key", 1, true) then
-				seenKeys[item] = true
-				table.insert(data.keys, {
-					target = item,
-					color = attrColor or normalizeColor(findKeyColorName(item.Name)),
-					prompt = findPromptNear(item)
-				})
-			end
-		end
-	end
+    local seenKeys = {}
+    local items = Workspace:FindFirstChild("PuzzleItems")
+    if items then
+        for _, item in ipairs(items:GetChildren()) do
+            local itemType = tostring(item:GetAttribute("ItemType") or "")
+            local attrColor = normalizeColor(item:GetAttribute("KeyColor"))
+            if itemType:lower() == "key" or attrColor or item.Name:lower():find("key", 1, true) then
+                seenKeys[item] = true
+                table.insert(data.keys, {
+                    target = item,
+                    color = attrColor or normalizeColor(findKeyColorName(item.Name)),
+                    prompt = findPromptNear(item)
+                })
+            end
+        end
+    end
 
-	for _, prompt in ipairs(Tracked.Keys) do
-		if prompt and prompt.Parent then
-			local model = prompt:FindFirstAncestorOfClass("Model") or prompt.Parent
-			if not seenKeys[model] and not seenKeys[prompt] then
-				seenKeys[prompt] = true
-				local disp = getDisplayName(prompt, model.Name)
-				table.insert(data.keys, {
-					target = model,
-					color = normalizeColor(model:GetAttribute("KeyColor"))
-						or normalizeColor(findKeyColorName(disp))
-						or normalizeColor(findKeyColorName(prompt.ObjectText))
-						or normalizeColor(findKeyColorName(prompt.ActionText)),
-					prompt = prompt
-				})
-			end
-		end
-	end
+    for _, prompt in ipairs(Tracked.Keys) do
+        if prompt and prompt.Parent then
+            local model = prompt:FindFirstAncestorOfClass("Model") or prompt.Parent
+            if not seenKeys[model] and not seenKeys[prompt] then
+                seenKeys[prompt] = true
+                local disp = getDisplayName(prompt, model.Name)
+                table.insert(data.keys, {
+                    target = model,
+                    color = normalizeColor(model:GetAttribute("KeyColor"))
+                        or normalizeColor(findKeyColorName(disp))
+                        or normalizeColor(findKeyColorName(prompt.ObjectText))
+                        or normalizeColor(findKeyColorName(prompt.ActionText)),
+                    prompt = prompt
+                })
+            end
+        end
+    end
 
-	return data
+    return data
 end
 
 local function fGetLocksRemaining()
-	local frontDoor = Workspace:FindFirstChild("FrontDoor")
-	local val = frontDoor and frontDoor:GetAttribute("LocksRemaining")
-	return tonumber(val) or 0
+    local frontDoor = Workspace:FindFirstChild("FrontDoor")
+    local val = frontDoor and frontDoor:GetAttribute("LocksRemaining")
+    return tonumber(val) or 0
 end
 
 local function countInventoryTools()
-	local total = 0
-	for _, container in ipairs({ LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character }) do
-		if container then
-			for _, child in ipairs(container:GetChildren()) do
-				if child:IsA("Tool") then
-					total = total + 1
-				end
-			end
-		end
-	end
-	return total
+    local total = 0
+    for _, container in ipairs({ LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character }) do
+        if container then
+            for _, child in ipairs(container:GetChildren()) do
+                if child:IsA("Tool") then
+                    total = total + 1
+                end
+            end
+        end
+    end
+    return total
 end
 
 local function hasKeyInInventory(color)
-	local held = normalizeColor(LocalPlayer:GetAttribute("HeldKeyColor"))
-	if color and held == color then
-		return true
-	end
-	if not color and held then
-		return true
-	end
+    local held = normalizeColor(LocalPlayer:GetAttribute("HeldKeyColor"))
+    if color and held == color then
+        return true
+    end
+    if not color and held then
+        return true
+    end
 
-	for _, container in ipairs({ LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character }) do
-		if container then
-			for _, child in ipairs(container:GetChildren()) do
-				if child:IsA("Tool") or child:IsA("Model") then
-					local toolColor = normalizeColor(child:GetAttribute("KeyColor"))
-						or normalizeColor(findKeyColorName(child.Name))
-					if color and toolColor == color then
-						return true
-					elseif not color and child.Name:lower():find("key", 1, true) then
-						return true
-					end
-				end
-			end
-		end
-	end
-	return false
+    for _, container in ipairs({ LocalPlayer:FindFirstChild("Backpack"), LocalPlayer.Character }) do
+        if container then
+            for _, child in ipairs(container:GetChildren()) do
+                if child:IsA("Tool") or child:IsA("Model") then
+                    local toolColor = normalizeColor(child:GetAttribute("KeyColor"))
+                        or normalizeColor(findKeyColorName(child.Name))
+                    if color and toolColor == color then
+                        return true
+                    elseif not color and child.Name:lower():find("key", 1, true) then
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
 end
 
 local function findSubmitPasscodeRemote()
-	local puzzleShared = ReplicatedStorage:FindFirstChild("PuzzleShared")
-	local remotes = puzzleShared and puzzleShared:FindFirstChild("Remotes")
-	local submit = remotes and (remotes:FindFirstChild("SubmitPasscode") or remotes:WaitForChild("SubmitPasscode", 3))
-	if submit and submit:IsA("RemoteFunction") then
-		return submit
-	end
-	for _, desc in ipairs(ReplicatedStorage:GetDescendants()) do
-		if desc:IsA("RemoteFunction") and desc.Name:lower():find("passcode", 1, true) then
-			return desc
-		end
-	end
-	return nil
+    local puzzleShared = ReplicatedStorage:FindFirstChild("PuzzleShared")
+    local remotes = puzzleShared and puzzleShared:FindFirstChild("Remotes")
+    local submit = remotes and (remotes:FindFirstChild("SubmitPasscode") or remotes:WaitForChild("SubmitPasscode", 3))
+    if submit and submit:IsA("RemoteFunction") then
+        return submit
+    end
+    for _, desc in ipairs(ReplicatedStorage:GetDescendants()) do
+        if desc:IsA("RemoteFunction") and desc.Name:lower():find("passcode", 1, true) then
+            return desc
+        end
+    end
+    return nil
 end
 
+--==============================================================--
+-- FIX: TETAP DI LOKASI KUNCI SAMPAI INVENTORY TERKONFIRMASI      --
+-- Maksimal 1 detik untuk setiap percobaan pengambilan kunci.    --
+--==============================================================--
 local function collectKeyEntry(entry, jobKey)
-	if KKG.farm ~= jobKey then return false end
-	local prompt = entry.prompt or findPromptNear(entry.target)
-	if not prompt or not prompt.Parent then return false end
+    if KKG.farm ~= jobKey then
+        return false
+    end
 
-	local initialKeys = keyToolCount()
-	local keyPos = fPosOf(prompt) or fPosOf(entry.target:FindFirstChild("Root") or entry.target)
-	if not keyPos then return false end
+    local target = entry and entry.target
+    local prompt = (entry and entry.prompt) or findPromptNear(target)
+    if not target or not prompt or not prompt.Parent then
+        return false
+    end
 
-	if not fMoveTo(keyPos + Vector3.new(0, 1.0, 0), 1.4) then
-		return false
-	end
+    local color = entry.color
+    local initialKeyCount = keyToolCount()
 
-	local color = entry.color
-	local keyPart = getKeyTouchPart(entry.target, prompt)
-	for _ = 1, 6 do
-		if KKG.farm ~= jobKey then return false end
+    local keyPos = fPosOf(prompt) or fPosOf(target)
+    if not keyPos then
+        return false
+    end
 
-		local currentPos = fPosOf(prompt) or keyPos
-		if currentPos then
-			fMoveTo(currentPos + Vector3.new(0, 1.0, 0), 1.2)
-		end
+    -- Bergerak ke kunci satu kali; jangan mulai menuju gembok sebelum pickup dikonfirmasi.
+    if not fMoveTo(keyPos + Vector3.new(0, 1.0, 0), 1.4) then
+        return false
+    end
 
-		trigger(entry.target, keyPart, 12)
-		task.wait(0.3)
+    local keyPart = getKeyTouchPart(target, prompt)
 
-		if hasKeyInInventory(color)
-			or keyToolCount() > initialKeys
-			or not prompt.Parent
-			or not prompt.Enabled then
-			return true
-		end
-	end
+    local function isCollected()
+        return hasKeyInInventory(color) or keyToolCount() > initialKeyCount
+    end
 
-	return hasKeyInInventory(color)
-		or keyToolCount() > initialKeys
-		or not prompt.Parent
-		or not prompt.Enabled
+    -- Cek terlebih dahulu untuk menghindari interaksi ulang jika kunci sudah masuk.
+    if isCollected() then
+        return true
+    end
+
+    -- Beberapa kali mencoba; setiap percobaan menunggu sampai inventory terdeteksi
+    -- atau tepat 1 detik berlalu. Karakter tetap berada di area kunci selama menunggu.
+    for attempt = 1, 6 do
+        if KKG.farm ~= jobKey then
+            return false
+        end
+
+        if isCollected() then
+            return true
+        end
+
+        if not prompt.Parent then
+            -- Prompt menghilang belum tentu inventory sudah tersinkron; tetap tunggu 1 detik.
+            local disappearanceDeadline = os.clock() + 1
+            while KKG.farm == jobKey and os.clock() < disappearanceDeadline do
+                if isCollected() then
+                    return true
+                end
+                task.wait(0.1)
+            end
+            return isCollected()
+        end
+
+        -- Tetap di posisi pengambilan; hanya koreksi kecil bila karakter terdorong.
+        local currentRoot = fRoot()
+        local currentPromptPos = fPosOf(prompt)
+        if currentRoot and currentPromptPos and (currentRoot.Position - (currentPromptPos + Vector3.new(0, 1.0, 0))).Magnitude > 3 then
+            if not fMoveTo(currentPromptPos + Vector3.new(0, 1.0, 0), 1.4) then
+                return false
+            end
+        end
+
+        trigger(target, keyPart, 12)
+
+        local pickupDeadline = os.clock() + 1
+        while KKG.farm == jobKey and os.clock() < pickupDeadline do
+            if isCollected() then
+                return true
+            end
+            task.wait(0.1)
+        end
+
+        if KKG.farm ~= jobKey then
+            return false
+        end
+
+        -- Pemeriksaan setelah batas tunggu untuk menangkap update inventory yang terlambat.
+        if isCollected() then
+            return true
+        end
+
+        -- Jika objek kunci sudah hilang tetapi belum masuk inventory, jangan menganggap sukses.
+        if not prompt.Parent then
+            return false
+        end
+    end
+
+    return isCollected()
 end
 
 local function fAutoEndingJob(jobKey)
-	if Workspace:GetAttribute("IntroPhase") ~= "Done" then
-		local t0 = os.clock()
-		repeat
-			task.wait(0.25)
-		until KKG.farm ~= jobKey or Workspace:GetAttribute("IntroPhase") == "Done" or (os.clock() - t0) > 120
-	end
-	if KKG.farm ~= jobKey then return end
+    if Workspace:GetAttribute("IntroPhase") ~= "Done" then
+        local t0 = os.clock()
+        repeat
+            task.wait(0.25)
+        until KKG.farm ~= jobKey or Workspace:GetAttribute("IntroPhase") == "Done" or (os.clock() - t0) > 120
+    end
+    if KKG.farm ~= jobKey then return end
 
-	local data = fScanPuzzleData()
-	local unlocked = {}
+    local data = fScanPuzzleData()
+    local unlocked = {}
 
-	for _, entry in ipairs(data.keys) do
-		if KKG.farm ~= jobKey then return end
-		local color = entry.color
-		if color and unlocked[color] then
-			continue
-		end
+    for _, entry in ipairs(data.keys) do
+        if KKG.farm ~= jobKey then return end
+        local color = entry.color
+        if color and unlocked[color] then
+            continue
+        end
 
-		local pickedUp = collectKeyEntry(entry, jobKey)
-		if KKG.farm ~= jobKey then return end
+        local pickedUp = collectKeyEntry(entry, jobKey)
+        if KKG.farm ~= jobKey then return end
 
-		if pickedUp and color then
-			local currentData = fScanPuzzleData()
-			local lockPrompt = data.locks[color] or currentData.locks[color]
-			local lockPos = lockPrompt and fPosOf(lockPrompt)
-			if lockPrompt and lockPos then
-				local targetLockPos = lockPos + Vector3.new(0, 1, -2.5)
-				fMoveTo(targetLockPos, 1.7)
-				local prevRem = fGetLocksRemaining()
-				for _ = 1, 4 do
-					if KKG.farm ~= jobKey then return end
-					fFirePrompt(lockPrompt)
-					task.wait(0.3)
-					if fGetLocksRemaining() < prevRem then
-						break
-					end
-					fMoveTo(targetLockPos, 1.4)
-				end
-				unlocked[color] = true
-			end
-		end
-	end
+        if pickedUp and color then
+            local currentData = fScanPuzzleData()
+            local lockPrompt = data.locks[color] or currentData.locks[color]
+            local lockPos = lockPrompt and fPosOf(lockPrompt)
+            if lockPrompt and lockPos then
+                local targetLockPos = lockPos + Vector3.new(0, 1, -2.5)
+                fMoveTo(targetLockPos, 1.7)
+                local prevRem = fGetLocksRemaining()
+                for _ = 1, 4 do
+                    if KKG.farm ~= jobKey then return end
+                    fFirePrompt(lockPrompt)
+                    task.wait(0.3)
+                    if fGetLocksRemaining() < prevRem then
+                        break
+                    end
+                    fMoveTo(targetLockPos, 1.4)
+                end
+                unlocked[color] = true
+            end
+        end
+    end
 
-	if fGetLocksRemaining() > 0 then
-		local t0 = os.clock()
-		repeat
-			task.wait(0.25)
-		until KKG.farm ~= jobKey or fGetLocksRemaining() <= 0 or (os.clock() - t0) > 25
-	end
+    if fGetLocksRemaining() > 0 then
+        local t0 = os.clock()
+        repeat
+            task.wait(0.25)
+        until KKG.farm ~= jobKey or fGetLocksRemaining() <= 0 or (os.clock() - t0) > 25
+    end
 
-	if KKG.farm == jobKey then
-		local digits = fGetPasscodeDigits()
-		if digits and digits ~= "" then
-			local frontDoor = Workspace:FindFirstChild("FrontDoor")
-			local keypad = frontDoor and frontDoor:FindFirstChild("Keypad")
-			local plate = keypad and keypad:FindFirstChild("Plate")
-			local platePos = fPosOf(plate) or fPosOf(keypad)
-			if platePos then
-				fMoveTo(platePos + Vector3.new(0, 1, -2.5), 1.7)
-				local padPrompt = findPromptNear(keypad)
-				if padPrompt then
-					fFirePrompt(padPrompt)
-					task.wait(0.2)
-				end
-			end
+    if KKG.farm == jobKey then
+        local digits = fGetPasscodeDigits()
+        if digits and digits ~= "" then
+            local frontDoor = Workspace:FindFirstChild("FrontDoor")
+            local keypad = frontDoor and frontDoor:FindFirstChild("Keypad")
+            local plate = keypad and keypad:FindFirstChild("Plate")
+            local platePos = fPosOf(plate) or fPosOf(keypad)
+            if platePos then
+                fMoveTo(platePos + Vector3.new(0, 1, -2.5), 1.7)
+                local padPrompt = findPromptNear(keypad)
+                if padPrompt then
+                    fFirePrompt(padPrompt)
+                    task.wait(0.2)
+                end
+            end
 
-			local submit = findSubmitPasscodeRemote()
-			if submit then
-				pcall(function()
-					submit:InvokeServer(digits)
-				end)
-			end
+            local submit = findSubmitPasscodeRemote()
+            if submit then
+                pcall(function()
+                    submit:InvokeServer(digits)
+                end)
+            end
 
-			task.wait(1.5)
-			local cutscenes = Workspace:FindFirstChild("Cutscenes")
-			local markers = cutscenes and cutscenes:FindFirstChild("Markers")
-			local bikePos = fPosOf(markers and markers:FindFirstChild("BikePark"))
-			if bikePos then
-				fMoveTo(bikePos + Vector3.new(0, 3, 0), 2)
-			end
-		end
-	end
+            task.wait(1.5)
+            local cutscenes = Workspace:FindFirstChild("Cutscenes")
+            local markers = cutscenes and cutscenes:FindFirstChild("Markers")
+            local bikePos = fPosOf(markers and markers:FindFirstChild("BikePark"))
+            if bikePos then
+                fMoveTo(bikePos + Vector3.new(0, 3, 0), 2)
+            end
+        end
+    end
 end
 
 local function runAutoPlayMusic(token)
-	local secretEnding = Workspace:FindFirstChild("SecretEnding") or Workspace:WaitForChild("SecretEnding", 8)
-	if not secretEnding then return end
+    local secretEnding = Workspace:FindFirstChild("SecretEnding") or Workspace:WaitForChild("SecretEnding", 8)
+    if not secretEnding then return end
 
-	local kotakMuzik = secretEnding:FindFirstChild("KotakMuzik")
-	if not kotakMuzik then return end
+    local kotakMuzik = secretEnding:FindFirstChild("KotakMuzik")
+    if not kotakMuzik then return end
 
-	local boxPrompt = findPromptNear(kotakMuzik:FindFirstChild("Box") or kotakMuzik)
-	local keys = {}
-	local keyPrompts = {}
+    local boxPrompt = findPromptNear(kotakMuzik:FindFirstChild("Box") or kotakMuzik)
+    local keys = {}
+    local keyPrompts = {}
 
-	for i = 1, 4 do
-		local keyPart = kotakMuzik:FindFirstChild("Key_" .. i)
-		if keyPart then
-			keys[i] = keyPart
-			keyPrompts[i] = findPromptNear(keyPart)
-		end
-	end
+    for i = 1, 4 do
+        local keyPart = kotakMuzik:FindFirstChild("Key_" .. i)
+        if keyPart then
+            keys[i] = keyPart
+            keyPrompts[i] = findPromptNear(keyPart)
+        end
+    end
 
-	local melodyLength = 5
-	local noteGap = 0.9
-	pcall(function()
-		local secretShared = ReplicatedStorage:FindFirstChild("SecretShared")
-		local cfgModule = secretShared and secretShared:FindFirstChild("SecretConfig")
-		if cfgModule and cfgModule:IsA("ModuleScript") then
-			local cfg = require(cfgModule)
-			melodyLength = tonumber(cfg.MelodyLength) or melodyLength
-			noteGap = (tonumber(cfg.NoteGap) or 0.8) + 0.1
-		end
-	end)
+    local melodyLength = 5
+    local noteGap = 0.9
+    pcall(function()
+        local secretShared = ReplicatedStorage:FindFirstChild("SecretShared")
+        local cfgModule = secretShared and secretShared:FindFirstChild("SecretConfig")
+        if cfgModule and cfgModule:IsA("ModuleScript") then
+            local cfg = require(cfgModule)
+            melodyLength = tonumber(cfg.MelodyLength) or melodyLength
+            noteGap = (tonumber(cfg.NoteGap) or 0.8) + 0.1
+        end
+    end)
 
-	local function isKeyLit(index)
-		local part = keys[index]
-		return part and part.Material == Enum.Material.Neon or false
-	end
+    local function isKeyLit(index)
+        local part = keys[index]
+        return part and part.Material == Enum.Material.Neon or false
+    end
 
-	local function areAllKeysLit()
-		for i = 1, 4 do
-			if not isKeyLit(i) then return false end
-		end
-		return true
-	end
+    local function areAllKeysLit()
+        for i = 1, 4 do
+            if not isKeyLit(i) then return false end
+        end
+        return true
+    end
 
-	local function areAllKeysStopped()
-		for i = 1, 4 do
-			if isKeyLit(i) then return false end
-		end
-		return true
-	end
+    local function areAllKeysStopped()
+        for i = 1, 4 do
+            if isKeyLit(i) then return false end
+        end
+        return true
+    end
 
-	local function waitUntil(checkFn, timeout)
-		local deadline = os.clock() + (timeout or 2)
-		while KKG.farm == token and os.clock() < deadline do
-			if checkFn() then return true end
-			task.wait(0.05)
-		end
-		return checkFn()
-	end
+    local function waitUntil(checkFn, timeout)
+        local deadline = os.clock() + (timeout or 2)
+        while KKG.farm == token and os.clock() < deadline do
+            if checkFn() then return true end
+            task.wait(0.05)
+        end
+        return checkFn()
+    end
 
-	local attempts = 0
-	while KKG.farm == token and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2) and attempts < 12 do
-		attempts = attempts + 1
+    local attempts = 0
+    while KKG.farm == token and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2) and attempts < 12 do
+        attempts = attempts + 1
 
-		local recorded = {}
-		local lastNoteTime = os.clock()
-		local connections = {}
+        local recorded = {}
+        local lastNoteTime = os.clock()
+        local connections = {}
 
-		for i = 1, 4 do
-			local part = keys[i]
-			if part then
-				table.insert(connections, part:GetPropertyChangedSignal("Material"):Connect(function()
-					if not isKeyLit(i) then return end
-					task.delay(0.1, function()
-						if isKeyLit(i) and not areAllKeysLit() then
-							lastNoteTime = os.clock()
-							table.insert(recorded, i)
-						end
-					end)
-				end))
-			end
-		end
+        for i = 1, 4 do
+            local part = keys[i]
+            if part then
+                table.insert(connections, part:GetPropertyChangedSignal("Material"):Connect(function()
+                    if not isKeyLit(i) then return end
+                    task.delay(0.1, function()
+                        if isKeyLit(i) and not areAllKeysLit() then
+                            lastNoteTime = os.clock()
+                            table.insert(recorded, i)
+                        end
+                    end)
+                end))
+            end
+        end
 
-		local lastListenTime = -10
-		local listenDeadline = os.clock() + 25
+        local lastListenTime = -10
+        local listenDeadline = os.clock() + 25
 
-		while KKG.farm == token and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2)
-			and #recorded < melodyLength and os.clock() < listenDeadline do
+        while KKG.farm == token and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2)
+            and #recorded < melodyLength and os.clock() < listenDeadline do
 
-			if #recorded > 0 and (os.clock() - lastNoteTime) > 2.5 then
-				table.clear(recorded)
-				lastListenTime = -10
-			end
+            if #recorded > 0 and (os.clock() - lastNoteTime) > 2.5 then
+                table.clear(recorded)
+                lastListenTime = -10
+            end
 
-			if #recorded == 0 and (os.clock() - lastListenTime) > 3 then
-				local boxPos = fPosOf(boxPrompt or kotakMuzik:FindFirstChild("Box") or kotakMuzik)
-				if boxPos and boxPrompt then
-					fMoveTo(boxPos + Vector3.new(0, 2.5, 0), 1.6)
-					fFirePrompt(boxPrompt)
-					lastListenTime = os.clock()
-				end
-			end
+            if #recorded == 0 and (os.clock() - lastListenTime) > 3 then
+                local boxPos = fPosOf(boxPrompt or kotakMuzik:FindFirstChild("Box") or kotakMuzik)
+                if boxPos and boxPrompt then
+                    fMoveTo(boxPos + Vector3.new(0, 2.5, 0), 1.6)
+                    fFirePrompt(boxPrompt)
+                    lastListenTime = os.clock()
+                end
+            end
 
-			task.wait(0.05)
-		end
+            task.wait(0.05)
+        end
 
-		for _, conn in ipairs(connections) do
-			conn:Disconnect()
-		end
+        for _, conn in ipairs(connections) do
+            conn:Disconnect()
+        end
 
-		if #recorded >= melodyLength and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2) then
-			waitUntil(areAllKeysStopped, 2)
-			task.wait(0.3)
+        if #recorded >= melodyLength and (Workspace:GetAttribute("SecretStage") == 2 or tonumber(Workspace:GetAttribute("SecretStage")) == 2) then
+            waitUntil(areAllKeysStopped, 2)
+            task.wait(0.3)
 
-			local function pressKeyUntilPlayed(keyIndex)
-				local prompt = keyPrompts[keyIndex]
-				local pos = fPosOf(prompt or keys[keyIndex])
-				if not prompt or not pos then return "hilang" end
+            local function pressKeyUntilPlayed(keyIndex)
+                local prompt = keyPrompts[keyIndex]
+                local pos = fPosOf(prompt or keys[keyIndex])
+                if not prompt or not pos then return "hilang" end
 
-				local root = fRoot()
-				if root and (root.Position - pos).Magnitude > 6 then
-					fMoveTo(pos + Vector3.new(0, 2, 0), 1.5)
-				end
+                local root = fRoot()
+                if root and (root.Position - pos).Magnitude > 6 then
+                    fMoveTo(pos + Vector3.new(0, 2, 0), 1.5)
+                end
 
-				for _ = 1, 3 do
-					fFirePrompt(prompt)
-					local t0 = os.clock()
-					while (os.clock() - t0) < 0.6 do
-						if isKeyLit(keyIndex) then
-							task.wait(0.08)
-							return areAllKeysLit() and "salah" or "ok"
-						end
-						task.wait(0.02)
-					end
-				end
+                for _ = 1, 3 do
+                    fFirePrompt(prompt)
+                    local t0 = os.clock()
+                    while (os.clock() - t0) < 0.6 do
+                        if isKeyLit(keyIndex) then
+                            task.wait(0.08)
+                            return areAllKeysLit() and "salah" or "ok"
+                        end
+                        task.wait(0.02)
+                    end
+                end
 
-				return "hilang"
-			end
+                return "hilang"
+            end
 
-			local failed = false
-			for _, noteIndex in ipairs(recorded) do
-				if KKG.farm ~= token or (Workspace:GetAttribute("SecretStage") ~= 2 and tonumber(Workspace:GetAttribute("SecretStage")) ~= 2) then
-					failed = true
-					break
-				end
+            local failed = false
+            for _, noteIndex in ipairs(recorded) do
+                if KKG.farm ~= token or (Workspace:GetAttribute("SecretStage") ~= 2 and tonumber(Workspace:GetAttribute("SecretStage")) ~= 2) then
+                    failed = true
+                    break
+                end
 
-				local status = pressKeyUntilPlayed(noteIndex)
-				if status ~= "ok" then
-					failed = true
-					break
-				end
+                local status = pressKeyUntilPlayed(noteIndex)
+                if status ~= "ok" then
+                    failed = true
+                    break
+                end
 
-				task.wait(noteGap)
-			end
+                task.wait(noteGap)
+            end
 
-			if not failed then
-				waitUntil(function()
-					return (Workspace:GetAttribute("SecretStage") ~= 2 and tonumber(Workspace:GetAttribute("SecretStage")) ~= 2)
-				end, 3)
-			end
+            if not failed then
+                waitUntil(function()
+                    return (Workspace:GetAttribute("SecretStage") ~= 2 and tonumber(Workspace:GetAttribute("SecretStage")) ~= 2)
+                end, 3)
+            end
 
-			waitUntil(areAllKeysStopped, 3)
-		end
-	end
+            waitUntil(areAllKeysStopped, 3)
+        end
+    end
 end
 
 local function fAutoSecretJob(jobKey)
-	local function active()
-		return KKG.farm == jobKey
-	end
+    local function active()
+        return KKG.farm == jobKey
+    end
 
-	local function getSecretRoot()
-		return Workspace:FindFirstChild("SecretEnding")
-	end
+    local function getSecretRoot()
+        return Workspace:FindFirstChild("SecretEnding")
+    end
 
-	local function stage()
-		local s = getSecretRoot()
-		local val = Workspace:GetAttribute("SecretStage")
-		if val == nil and s then
-			val = s:GetAttribute("SecretStage")
-		end
-		return tonumber(val) or 0
-	end
+    local function stage()
+        local s = getSecretRoot()
+        local val = Workspace:GetAttribute("SecretStage")
+        if val == nil and s then
+            val = s:GetAttribute("SecretStage")
+        end
+        return tonumber(val) or 0
+    end
 
-	local function getOrderString()
-		local s = getSecretRoot()
-		local order = Workspace:GetAttribute("SecretOrderIds")
-		if (not order or tostring(order) == "") and s then
-			order = s:GetAttribute("SecretOrderIds")
-		end
-		return tostring(order or "")
-	end
+    local function getOrderString()
+        local s = getSecretRoot()
+        local order = Workspace:GetAttribute("SecretOrderIds")
+        if (not order or tostring(order) == "") and s then
+            order = s:GetAttribute("SecretOrderIds")
+        end
+        return tostring(order or "")
+    end
 
-	local secret = getSecretRoot()
-	if not secret then
-		secret = Workspace:WaitForChild("SecretEnding", 8)
-		if not secret or not active() then return end
-	end
+    local secret = getSecretRoot()
+    if not secret then
+        secret = Workspace:WaitForChild("SecretEnding", 8)
+        if not secret or not active() then return end
+    end
 
-	local visitedPelita = {}
-	local tStart = os.clock()
+    local visitedPelita = {}
+    local tStart = os.clock()
 
-	while active() and (os.clock() - tStart) < 150 do
-		secret = getSecretRoot()
-		if not secret then break end
+    while active() and (os.clock() - tStart) < 150 do
+        secret = getSecretRoot()
+        if not secret then break end
 
-		local curStage = stage()
+        local curStage = stage()
 
-		if curStage < 1 then
-			local photoClue = secret:FindFirstChild("PhotoClue")
-			local spot = (photoClue and photoClue:FindFirstChild("Spot")) or photoClue
-			if spot then
-				fVisit(spot, 1.0, function()
-					return stage() >= 1
-				end, jobKey)
-			else
-				task.wait(0.25)
-			end
+        if curStage < 1 then
+            local photoClue = secret:FindFirstChild("PhotoClue")
+            local spot = (photoClue and photoClue:FindFirstChild("Spot")) or photoClue
+            if spot then
+                fVisit(spot, 1.0, function()
+                    return stage() >= 1
+                end, jobKey)
+            else
+                task.wait(0.25)
+            end
 
-		elseif curStage == 1 then
-			local byKey = {}
-			local pelitaFolder = secret:FindFirstChild("Pelita")
-			if pelitaFolder then
-				for _, pelita in ipairs(pelitaFolder:GetChildren()) do
-					local sign = pelita:FindFirstChild("SymbolSign")
-					local nameLabel = sign and sign:FindFirstChild("SymbolName")
-					if nameLabel and nameLabel.Text then
-						local rawClean = cleanText(nameLabel.Text):lower()
-						local digits = rawClean:gsub("%D", "")
-						if rawClean ~= "" then
-							byKey[rawClean] = pelita
-						end
-						if digits ~= "" then
-							byKey[digits] = pelita
-						end
-					end
-				end
-			end
+        elseif curStage == 1 then
+            local byKey = {}
+            local pelitaFolder = secret:FindFirstChild("Pelita")
+            if pelitaFolder then
+                for _, pelita in ipairs(pelitaFolder:GetChildren()) do
+                    local sign = pelita:FindFirstChild("SymbolSign")
+                    local nameLabel = sign and sign:FindFirstChild("SymbolName")
+                    if nameLabel and nameLabel.Text then
+                        local rawClean = cleanText(nameLabel.Text):lower()
+                        local digits = rawClean:gsub("%D", "")
+                        if rawClean ~= "" then
+                            byKey[rawClean] = pelita
+                        end
+                        if digits ~= "" then
+                            byKey[digits] = pelita
+                        end
+                    end
+                end
+            end
 
-			local orderStr = getOrderString()
-			local didAny = false
-			for rawToken in string.gmatch(orderStr, "%S+") do
-				if not active() or stage() ~= 1 then break end
-				local tokenLower = cleanText(rawToken):lower()
-				local tokenDigits = tokenLower:gsub("%D", "")
-				local pelitaObj = byKey[tokenLower] or (tokenDigits ~= "" and byKey[tokenDigits]) or nil
+            local orderStr = getOrderString()
+            local didAny = false
+            for rawToken in string.gmatch(orderStr, "%S+") do
+                if not active() or stage() ~= 1 then break end
+                local tokenLower = cleanText(rawToken):lower()
+                local tokenDigits = tokenLower:gsub("%D", "")
+                local pelitaObj = byKey[tokenLower] or (tokenDigits ~= "" and byKey[tokenDigits]) or nil
 
-				if pelitaObj and not visitedPelita[pelitaObj] then
-					didAny = true
-					visitedPelita[pelitaObj] = true
-					fVisit(pelitaObj, 0.7, nil, jobKey)
-				end
-			end
+                if pelitaObj and not visitedPelita[pelitaObj] then
+                    didAny = true
+                    visitedPelita[pelitaObj] = true
+                    fVisit(pelitaObj, 0.7, nil, jobKey)
+                end
+            end
 
-			if not didAny then
-				task.wait(0.25)
-			end
+            if not didAny then
+                task.wait(0.25)
+            end
 
-		elseif curStage == 2 then
-			runAutoPlayMusic(jobKey)
-			task.wait(0.5)
+        elseif curStage == 2 then
+            runAutoPlayMusic(jobKey)
+            task.wait(0.5)
 
-		elseif curStage == 3 then
-			local pos = fPosOf(secret:FindFirstChild("RitualCircle"))
-			if pos then
-				fMoveTo(pos + Vector3.new(0, 2.5, 0), 1.6)
-				task.wait(0.2)
-			else
-				task.wait(0.25)
-			end
+        elseif curStage == 3 then
+            local pos = fPosOf(secret:FindFirstChild("RitualCircle"))
+            if pos then
+                fMoveTo(pos + Vector3.new(0, 2.5, 0), 1.6)
+                task.wait(0.2)
+            else
+                task.wait(0.25)
+            end
 
-		else
-			break
-		end
-	end
+        else
+            break
+        end
+    end
 end
 
 local function fTriggerRun(mode)
-	KKG.moveId = KKG.moveId + 1
-	KKG.farm = nil
-	KKG.mode = nil
+    KKG.moveId = KKG.moveId + 1
+    KKG.farm = nil
+    KKG.mode = nil
 
-	local key = {}
-	KKG.farm = key
-	KKG.mode = mode
-	syncAutoToggles(mode)
+    local key = {}
+    KKG.farm = key
+    KKG.mode = mode
+    syncAutoToggles(mode)
 
-	task.spawn(function()
-		local prevNoclip = State.Noclip
-		State.Noclip = true
+    task.spawn(function()
+        local prevNoclip = State.Noclip
+        State.Noclip = true
 
-		local ok, err = pcall(function()
-			if mode == "ending" then
-				fAutoEndingJob(key)
-			elseif mode == "secret" then
-				fAutoSecretJob(key)
-			end
-		end)
+        local ok, err = pcall(function()
+            if mode == "ending" then
+                fAutoEndingJob(key)
+            elseif mode == "secret" then
+                fAutoSecretJob(key)
+            end
+        end)
 
-		if not ok then
-			warn("[AutoFarm Error]: " .. tostring(err))
-		end
+        if not ok then
+            warn("[AutoFarm Error]: " .. tostring(err))
+        end
 
-		State.Noclip = prevNoclip
-		if KKG.farm == key then
-			KKG.farm = nil
-			KKG.mode = nil
-			syncAutoToggles(nil)
-		end
-	end)
+        State.Noclip = prevNoclip
+        if KKG.farm == key then
+            KKG.farm = nil
+            KKG.mode = nil
+            syncAutoToggles(nil)
+        end
+    end)
 end
 
 local AutoTab = Window:AddTab({
-	Name = "Auto",
-	Icon = "rbxassetid://10709782230"
+    Name = "Auto",
+    Icon = "rbxassetid://10709782230"
 })
 
-local AutoSection = AutoTab:AddSection("Auto Farm", true)
+local AutoSection = AutoTab:AddSection("Auto", true)
 
 AutoSection:AddParagraph({
-	Title = "Catatan",
-	Content = "Jika kunci gagal di ambil, nyalakan ulang tombol nya"
+    Title = "Catatan",
+    Content = "Jika kunci gagal di ambil, nyalakan ulang tombol nya"
 })
 
 AutoSection:AddParagraph({
-	Title = "Note",
-	Content = "If the key fails to be retrieved, restart the button"
+    Title = "Note",
+    Content = "If the key fails to be retrieved, restart the button"
 })
 
 AutoToggleRefs.ending = AutoSection:AddToggle({
-	Title = "Auto Ending (Kunci + Kode Pintu)",
-	Default = false,
-	Callback = function(value)
-		if isSyncingToggles then return end
-		if value then
-			fTriggerRun("ending")
-		elseif KKG.mode == "ending" then
-			KKG.moveId = KKG.moveId + 1
-			KKG.farm = nil
-			KKG.mode = nil
-			syncAutoToggles(nil)
-		end
-	end
+    Title = "Auto Ending",
+    Default = false,
+    Callback = function(value)
+        if isSyncingToggles then return end
+        if value then
+            fTriggerRun("ending")
+        elseif KKG.mode == "ending" then
+            KKG.moveId = KKG.moveId + 1
+            KKG.farm = nil
+            KKG.mode = nil
+            syncAutoToggles(nil)
+        end
+    end
 })
 
 AutoToggleRefs.secret = AutoSection:AddToggle({
-	Title = "Auto Secret Ending",
-	Default = false,
-	Callback = function(value)
-		if isSyncingToggles then return end
-		if value then
-			fTriggerRun("secret")
-		elseif KKG.mode == "secret" then
-			KKG.moveId = KKG.moveId + 1
-			KKG.farm = nil
-			KKG.mode = nil
-			syncAutoToggles(nil)
-		end
-	end
+    Title = "Auto Secret Ending",
+    Default = false,
+    Callback = function(value)
+        if isSyncingToggles then return end
+        if value then
+            fTriggerRun("secret")
+        elseif KKG.mode == "secret" then
+            KKG.moveId = KKG.moveId + 1
+            KKG.farm = nil
+            KKG.mode = nil
+            syncAutoToggles(nil)
+        end
+    end
 })
 
 local SettingsTab = Window:AddTab({
-	Name = "Settings",
-	Icon = "rbxassetid://10734950309"
+    Name = "Settings",
+    Icon = "rbxassetid://10734950309"
 })
 
 local SettingsSection = SettingsTab:AddSection("Settings", true)
 
 SettingsSection:AddToggle({
-	Title = "Auto Skip Cutscene",
-	Default = true,
-	Callback = function(value)
-		State.AutoSkip = value
-		saveConfig()
-	end
+    Title = "Auto Skip Cutscene",
+    Default = true,
+    Callback = function(value)
+        State.AutoSkip = value
+        saveConfig()
+    end
 })
 
 SettingsSection:AddToggle({
-	Title = "Fullbright",
-	Default = State.Fullbright,
-	Callback = function(value)
-		setFullbright(value)
-		saveConfig()
-	end
-})
-
-local ConfigTab = Window:AddTab({
-	Name = "Config",
-	Icon = "rbxassetid://10723356830"
-})
-
-local ConfigSection = ConfigTab:AddSection("Config", true)
-
-ConfigSection:AddButton({
-	Title = "Save Config",
-	Callback = function()
-		saveConfig()
-	end
-})
-
-ConfigSection:AddButton({
-	Title = "Reset Config",
-	Callback = function()
-		State.EspKey = false
-		State.EspKeypad = false
-		State.EspNote = false
-		State.EspPadlock = false
-		State.EspFlipFlop = false
-		State.EspWardNear = false
-		State.EspLamp = false
-		State.EspOpah = false
-		State.EspPlayer = false
-		State.InfiniteSprint = false
-		State.DoubleJump = false
-		State.Noclip = false
-		State.UpdateDelay = 0.5
-		State.AutoSkip = true
-		setFullbright(false)
-		saveConfig()
-	end
+    Title = "Fullbright",
+    Default = State.Fullbright,
+    Callback = function(value)
+        setFullbright(value)
+        saveConfig()
+    end
 })
 
 Window:Build()
 
 LocalPlayer.CharacterRemoving:Connect(function()
-	clearEsp()
+    clearEsp()
 end)
