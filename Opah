@@ -1311,7 +1311,7 @@ local function getHrp()
     return fRoot()
 end
 
-local CLICK_DETECTOR_RADIUS = 1
+local CLICK_DETECTOR_RADIUS = 1.5
 
 local function isKeyName(name)
     return tostring(name or ""):lower():find("key", 1, true) ~= nil
@@ -1336,14 +1336,18 @@ local function clampClickDetectorDistance(detector)
 end
 
 local function isClickDetectorInRange(detector, part)
-    if not detector or not detector.Parent or not part or not part.Parent then
+    if not detector or not detector:IsA("ClickDetector") or not detector.Parent then
+        return false
+    end
+    if not part or not part:IsA("BasePart") or not part.Parent then
         return false
     end
     local hrp = getHrp()
-    if not hrp then
+    if not hrp or not hrp.Parent then
         return false
     end
-    return (part.Position - hrp.Position).Magnitude <= CLICK_DETECTOR_RADIUS
+    local distance = (part.Position - hrp.Position).Magnitude
+    return distance <= CLICK_DETECTOR_RADIUS
 end
 
 for _, descendant in ipairs(Workspace:GetDescendants()) do
@@ -1414,13 +1418,15 @@ local function fireNearby(radius)
         for _, e in ipairs(r.clicks) do
             local detector = e.inst
             local part = e.part
-            if isClickDetectorInRange(detector, part) then
-                local ok = pcall(function()
-                    fireclickdetector(detector)
-                end)
-                if ok then
-                    n = n + 1
+            local ok, fired = pcall(function()
+                if not isClickDetectorInRange(detector, part) then
+                    return false
                 end
+                fireclickdetector(detector)
+                return true
+            end)
+            if ok and fired then
+                n = n + 1
             end
         end
     end
