@@ -1256,32 +1256,34 @@ local function findPromptNear(target)
     return nil
 end
 
-local function fMoveTo(targetPos, reachDist)
+local AUTO_TELEPORT_DELAY = 0.2
+
+local function fTeleportTo(targetPos, reachDist)
     if typeof(targetPos) ~= "Vector3" then return false end
+
+    local jobKey = KKG.farm
+    if not jobKey then return false end
+
     KKG.moveId = KKG.moveId + 1
-    local id = KKG.moveId
+    local moveId = KKG.moveId
+
     local root = fRoot()
-    if not root then return false end
-
-    local dist = (targetPos - root.Position).Magnitude
-    local limit = math.max(dist / math.max(KKG.moveSpeed, 1) * 2.5 + 4, 5)
-    local t0 = os.clock()
-
-    while KKG.farm and KKG.moveId == id and (os.clock() - t0) < limit do
-        root = fRoot()
-        if not root then return false end
-        local diff = targetPos - root.Position
-        local mag = diff.Magnitude
-        if mag <= (reachDist or 1.35) then
-            root.AssemblyLinearVelocity = Vector3.zero
-            return true
-        end
-        local dt = math.min(RunService.Heartbeat:Wait(), KKG.moveStep)
-        root.AssemblyLinearVelocity = Vector3.zero
-        local stepDist = math.min(mag, KKG.moveSpeed * dt)
-        root.CFrame = CFrame.new(root.Position + diff.Unit * stepDist) * (root.CFrame - root.CFrame.Position)
+    if not root or KKG.farm ~= jobKey then
+        return false
     end
-    return false
+
+    local rotation = root.CFrame - root.Position
+
+    pcall(function()
+        root.AssemblyLinearVelocity = Vector3.zero
+        root.AssemblyAngularVelocity = Vector3.zero
+        root.CFrame = CFrame.new(targetPos) * rotation
+    end)
+
+    task.wait(AUTO_TELEPORT_DELAY)
+
+    root = fRoot()
+    return root ~= nil and KKG.farm == jobKey and KKG.moveId == moveId
 end
 
 local function fFirePrompt(prompt)
@@ -1513,7 +1515,7 @@ local function fVisit(target, waitTime, checkFn, jobKey)
     local pos = fPosOf(target)
     if not pos then return false end
     local prompt = findPromptNear(target)
-    if not fMoveTo(pos + Vector3.new(0, 1.5, 0), 1.6) then return false end
+    if not fTeleportTo(pos + Vector3.new(0, 1.5, 0), 1.6) then return false end
 
     if prompt then
         for _ = 1, 3 do
@@ -1689,7 +1691,7 @@ local function collectKeyEntry(entry, jobKey)
         return false
     end
 
-    if not fMoveTo(keyPos + Vector3.new(0, 1.0, 0), 1.4) then
+    if not fTeleportTo(keyPos + Vector3.new(0, 1.0, 0), 1.4) then
         return false
     end
 
@@ -1727,7 +1729,7 @@ local function collectKeyEntry(entry, jobKey)
         local currentPromptPos = fPosOf(prompt)
         if currentRoot and currentPromptPos
             and (currentRoot.Position - (currentPromptPos + Vector3.new(0, 1.0, 0))).Magnitude > 3 then
-            if not fMoveTo(currentPromptPos + Vector3.new(0, 1.0, 0), 1.4) then
+            if not fTeleportTo(currentPromptPos + Vector3.new(0, 1.0, 0), 1.4) then
                 return false
             end
         end
@@ -1786,7 +1788,7 @@ local function fAutoEndingJob(jobKey)
             local lockPos = lockPrompt and fPosOf(lockPrompt)
             if lockPrompt and lockPos then
                 local targetLockPos = lockPos + Vector3.new(0, 1, -2.5)
-                fMoveTo(targetLockPos, 1.7)
+                fTeleportTo(targetLockPos, 1.7)
                 local prevRem = fGetLocksRemaining()
                 for _ = 1, 4 do
                     if KKG.farm ~= jobKey then return end
@@ -1795,7 +1797,7 @@ local function fAutoEndingJob(jobKey)
                     if fGetLocksRemaining() < prevRem then
                         break
                     end
-                    fMoveTo(targetLockPos, 1.4)
+                    fTeleportTo(targetLockPos, 1.4)
                 end
                 unlocked[color] = true
             end
@@ -1817,7 +1819,7 @@ local function fAutoEndingJob(jobKey)
             local plate = keypad and keypad:FindFirstChild("Plate")
             local platePos = fPosOf(plate) or fPosOf(keypad)
             if platePos then
-                fMoveTo(platePos + Vector3.new(0, 1, -2.5), 1.7)
+                fTeleportTo(platePos + Vector3.new(0, 1, -2.5), 1.7)
                 local padPrompt = findPromptNear(keypad)
                 if padPrompt then
                     fFirePrompt(padPrompt)
@@ -1837,7 +1839,7 @@ local function fAutoEndingJob(jobKey)
             local markers = cutscenes and cutscenes:FindFirstChild("Markers")
             local bikePos = fPosOf(markers and markers:FindFirstChild("BikePark"))
             if bikePos then
-                fMoveTo(bikePos + Vector3.new(0, 3, 0), 2)
+                fTeleportTo(bikePos + Vector3.new(0, 3, 0), 2)
             end
         end
     end
@@ -1939,7 +1941,7 @@ local function runAutoPlayMusic(token)
             if #recorded == 0 and (os.clock() - lastListenTime) > 3 then
                 local boxPos = fPosOf(boxPrompt or kotakMuzik:FindFirstChild("Box") or kotakMuzik)
                 if boxPos and boxPrompt then
-                    fMoveTo(boxPos + Vector3.new(0, 2.5, 0), 1.6)
+                    fTeleportTo(boxPos + Vector3.new(0, 2.5, 0), 1.6)
                     fFirePrompt(boxPrompt)
                     lastListenTime = os.clock()
                 end
@@ -1963,7 +1965,7 @@ local function runAutoPlayMusic(token)
 
                 local root = fRoot()
                 if root and (root.Position - pos).Magnitude > 6 then
-                    fMoveTo(pos + Vector3.new(0, 2, 0), 1.5)
+                    fTeleportTo(pos + Vector3.new(0, 2, 0), 1.5)
                 end
 
                 for _ = 1, 3 do
@@ -2107,7 +2109,7 @@ local function fAutoSecretJob(jobKey)
         elseif curStage == 3 then
             local pos = fPosOf(secret:FindFirstChild("RitualCircle"))
             if pos then
-                fMoveTo(pos + Vector3.new(0, 2.5, 0), 1.6)
+                fTeleportTo(pos + Vector3.new(0, 2.5, 0), 1.6)
                 task.wait(0.2)
             else
                 task.wait(0.25)
