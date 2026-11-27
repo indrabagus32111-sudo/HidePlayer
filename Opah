@@ -2222,6 +2222,11 @@ AutoSection:AddToggle({
     Callback = function(value)
         State.AutoStart = value
         saveConfig()
+        if value and not AutoStartTriggered and not KKG.farm then
+            AutoStartReadySince = nil
+        elseif not value then
+            AutoStartReadySince = nil
+        end
     end
 })
 
@@ -2253,42 +2258,51 @@ SettingsSection:AddToggle({
 Window:Build()
 
 local AutoStartReadySince = nil
-local AUTO_START_CHECK_INTERVAL = 0.3
-local AUTO_START_STABLE_TIME = 1
+local AUTO_START_CHECK_INTERVAL = 0.25
+local AUTO_START_STABLE_TIME = 0.8
+
+local function isAutoStartReady()
+    local character = LocalPlayer.Character
+    local root = character and character:FindFirstChild("HumanoidRootPart")
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    local frontDoor = Workspace:FindFirstChild("FrontDoor")
+    local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+    local introPhase = Workspace:GetAttribute("IntroPhase")
+    local hasKeysOrLocks = (frontDoor and frontDoor:FindFirstChild("PuzzleLocks") ~= nil) or (puzzleItems ~= nil)
+
+    return root ~= nil
+        and root.Parent ~= nil
+        and humanoid ~= nil
+        and humanoid.Health > 0
+        and frontDoor ~= nil
+        and puzzleItems ~= nil
+        and hasKeysOrLocks
+        and (introPhase == "Done" or introPhase == nil)
+end
 
 task.spawn(function()
+    local startWaitDeadline = os.clock() + 45
     while Running do
         task.wait(AUTO_START_CHECK_INTERVAL)
 
         if not State.AutoStart or AutoStartTriggered or KKG.farm then
             AutoStartReadySince = nil
-        else
-            local character = LocalPlayer.Character
-            local root = fRoot()
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            local frontDoor = Workspace:FindFirstChild("FrontDoor")
-            local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
-            local introDone = Workspace:GetAttribute("IntroPhase") == "Done"
-
-            local ready = root
-                and root.Parent
-                and humanoid
-                and humanoid.Health > 0
-                and frontDoor
-                and puzzleItems
-                and introDone
-
-            if ready then
-                AutoStartReadySince = AutoStartReadySince or os.clock()
-                if os.clock() - AutoStartReadySince >= AUTO_START_STABLE_TIME
-                    and not AutoStartTriggered
-                    and not KKG.farm then
-                    fTriggerRun("ending")
-                    AutoStartReadySince = nil
-                end
-            else
+        elseif isAutoStartReady() then
+            AutoStartReadySince = AutoStartReadySince or os.clock()
+            if (os.clock() - AutoStartReadySince >= AUTO_START_STABLE_TIME) or (os.clock() >= startWaitDeadline) then
+                AutoStartTriggered = true
                 AutoStartReadySince = nil
+                pcall(function()
+                    if AutoToggleRefs.ending and type(AutoToggleRefs.ending.Set) == "function" then
+                        AutoToggleRefs.ending:Set(true)
+                    elseif AutoToggleRefs.ending and type(AutoToggleRefs.ending.SetValue) == "function" then
+                        AutoToggleRefs.ending:SetValue(true)
+                    end
+                end)
+                fTriggerRun("ending")
             end
+        else
+            AutoStartReadySince = nil
         end
     end
 end)
