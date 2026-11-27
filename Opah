@@ -2215,18 +2215,47 @@ AutoSection:AddToggle({
     end
 })
 
+local function getIntroPhase()
+    local phase = Workspace:GetAttribute("IntroPhase")
+    if phase == nil then
+        local frontDoor = Workspace:FindFirstChild("FrontDoor")
+        local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+        if frontDoor and puzzleItems and getRoot() then
+            return "Done"
+        end
+    end
+    return tostring(phase or "")
+end
+
+local function isMatchReadyForAutoStart()
+    local root = fRoot()
+    local hum = root and root.Parent and root.Parent:FindFirstChildOfClass("Humanoid")
+    if not root or not hum or hum.Health <= 0 then
+        return false
+    end
+    if not Workspace:FindFirstChild("FrontDoor") or not Workspace:FindFirstChild("PuzzleItems") then
+        return false
+    end
+    local phase = getIntroPhase()
+    if phase == "Done" then
+        return true
+    end
+    local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
+    if puzzleItems and #puzzleItems:GetChildren() > 0 then
+        return true
+    end
+    return false
+end
+
 task.spawn(function()
     while Running do
         task.wait(0.3)
-        if State.AutoStart
-            and not AutoStartTriggered
-            and not KKG.farm
-            and fRoot()
-            and Workspace:FindFirstChild("FrontDoor")
-            and Workspace:FindFirstChild("PuzzleItems")
-            and Workspace:GetAttribute("IntroPhase") == "Done" then
-            AutoStartTriggered = true
-            fTriggerRun("ending")
+        if State.AutoStart and not AutoStartTriggered and not KKG.farm then
+            if isMatchReadyForAutoStart() then
+                AutoStartTriggered = true
+                local targetMode = Workspace:FindFirstChild("SecretEnding") and "secret" or "ending"
+                fTriggerRun(targetMode)
+            end
         end
     end
 end)
