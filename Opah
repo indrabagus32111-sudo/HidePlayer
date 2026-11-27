@@ -1193,7 +1193,6 @@ local KKG = {
 }
 
 local AutoStartTriggered = false
-local AutoStartReadySince = nil
 
 local AutoToggleRefs = {}
 local isSyncingToggles = false
@@ -2216,6 +2215,22 @@ AutoSection:AddToggle({
     end
 })
 
+task.spawn(function()
+    while Running do
+        task.wait(0.3)
+        if State.AutoStart
+            and not AutoStartTriggered
+            and not KKG.farm
+            and fRoot()
+            and Workspace:FindFirstChild("FrontDoor")
+            and Workspace:FindFirstChild("PuzzleItems")
+            and Workspace:GetAttribute("IntroPhase") == "Done" then
+            AutoStartTriggered = true
+            fTriggerRun("ending")
+        end
+    end
+end)
+
 local SettingsTab = Window:AddTab({
     Name = "Settings",
     Icon = "rbxassetid://10734950309"
@@ -2242,64 +2257,6 @@ SettingsSection:AddToggle({
 })
 
 Window:Build()
-
-local function isAutoStartReady()
-    local character = LocalPlayer.Character
-    if not character or not character.Parent then
-        return false
-    end
-
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    local root = character:FindFirstChild("HumanoidRootPart")
-    if not humanoid or humanoid.Health <= 0 or not root or not root:IsA("BasePart") or not root.Parent then
-        return false
-    end
-
-    if Workspace:GetAttribute("IntroPhase") ~= "Done" then
-        return false
-    end
-
-    local frontDoor = Workspace:FindFirstChild("FrontDoor")
-    local puzzleItems = Workspace:FindFirstChild("PuzzleItems")
-    if not frontDoor or not puzzleItems then
-        return false
-    end
-
-    return true
-end
-
-task.spawn(function()
-    while Running do
-        task.wait(0.3)
-
-        if not State.AutoStart or AutoStartTriggered then
-            AutoStartReadySince = nil
-        elseif KKG.farm then
-            AutoStartReadySince = nil
-        else
-            local readyOk, ready = pcall(isAutoStartReady)
-            if readyOk and ready then
-                AutoStartReadySince = AutoStartReadySince or os.clock()
-
-                if os.clock() - AutoStartReadySince >= 1 then
-                    local startOk, startErr = pcall(function()
-                        if State.AutoStart and not AutoStartTriggered and not KKG.farm and isAutoStartReady() then
-                            fTriggerRun("ending")
-                            AutoStartTriggered = true
-                        end
-                    end)
-
-                    if not startOk then
-                        AutoStartReadySince = nil
-                        warn("[Auto Start Error]: " .. tostring(startErr))
-                    end
-                end
-            else
-                AutoStartReadySince = nil
-            end
-        end
-    end
-end)
 
 LocalPlayer.CharacterRemoving:Connect(function()
     clearEsp()
